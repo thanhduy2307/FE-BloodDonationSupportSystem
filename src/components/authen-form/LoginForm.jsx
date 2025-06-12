@@ -1,89 +1,102 @@
-import React from "react";
-import { Button, Checkbox, Form, Input } from "antd";
-import "./login.css";
-import { toast } from "react-toastify";
-import api from "../../configs/axios";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { login } from "../../redux/features/userSlice";
+import React from 'react';
+import { Form, Input, Button, Checkbox } from 'antd';
+import { User, Lock } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
-function LoginForm() {
+
+import { Link } from 'react-router-dom';
+import { login } from '../../redux/features/userSlice';
+import api from '../../configs/axios';
+
+const LoginForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const onFinish = async (values) => {
-    console.log("Success:", values);
     try {
-      // values: thông tin người dùng nhập
-      const response = await api.post("login", values);
-
-      // lưu thông tin đăng nhập của ng dùng vào 1 chỗ nào đó mà bất kì đâu cũng có thể sử dụng
-      // cái đó dc gọi redux == sesstion bên môn prj
-
-      // dispatch: gửi action đến redux store
-      // action: là 1 object có type và payload
+      const response = await api.post('login', values);
       dispatch(login(response.data.data));
       localStorage.setItem("token", response.data.data.token);
-
-      const user = response.data.data;
-      if (user.role === "ADMIN") {
-        navigate("/dashboard");
-      } else if (user.role === "USER") {
-        navigate("/");
-      }
-      
+      navigate('/');
     } catch (e) {
       console.log(e);
-      // show ra màn hình cho người dùng biết lỗi
-      toast.error(e.response.data);
+      toast.error(e?.response?.data || "Đã xảy ra lỗi khi đăng nhập");
     }
   };
+
   const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
+    console.log('Failed:', errorInfo);
   };
 
   return (
-    <div className="login-form">
-      <h1>Login</h1>
-      <Form
-        name="basic"
-        layout="vertical"
-        labelCol={{ span: 24 }}
-        // wrapperCol={{ span: 16 }}
-        initialValues={{ remember: true }}
-        onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
-        autoComplete="off"
-      >
-        <Form.Item
-          label="Username"
-          name="username"
-          rules={[{ required: true, message: "Please input your username!" }]}
+    <div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl">
+        <div className="text-center">
+          <Link to="/" className="flex items-center justify-center mb-6">
+            <User className="text-red-600 mr-2" size={32} />
+            <span className="text-2xl font-bold text-red-600">HeartDrop</span>
+          </Link>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Đăng nhập</h2>
+          <p className="text-gray-600">
+            Chào mừng bạn trở lại với cộng đồng hiến máu nhân đạo
+          </p>
+        </div>
+
+        <Form
+          name="login"
+          layout="vertical"
+          initialValues={{ remember: true }}
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
         >
-          <Input />
-        </Form.Item>
+          <Form.Item
+            label="Tên đăng nhập"
+            name="username"
+            rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
+          >
+            <Input
+              prefix={<User className="text-gray-400 mr-2" size={16} />}
+              placeholder="Tên đăng nhập"
+            />
+          </Form.Item>
 
-        <Form.Item
-          label="Password"
-          name="password"
-          rules={[{ required: true, message: "Please input your password!" }]}
-        >
-          <Input.Password />
-        </Form.Item>
+          <Form.Item
+            label="Mật khẩu"
+            name="password"
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+          >
+            <Input.Password
+              prefix={<Lock className="text-gray-400 mr-2" size={16} />}
+              placeholder="Mật khẩu của bạn"
+            />
+          </Form.Item>
 
-        <Form.Item name="remember" valuePropName="checked" label={null}>
-          <Checkbox>Remember me</Checkbox>
-        </Form.Item>
+          <Form.Item name="remember" valuePropName="checked" className="mb-4">
+            <Checkbox>Ghi nhớ đăng nhập</Checkbox>
+          </Form.Item>
 
-        <Form.Item label={null}>
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
-        </Form.Item>
-      </Form>
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="w-full rounded-full bg-red-600 hover:bg-red-700 transition transform hover:scale-105"
+            >
+              Đăng nhập
+            </Button>
+          </Form.Item>
+
+          <div className="text-center text-sm text-gray-600">
+            Chưa có tài khoản?{' '}
+            <Link to="/register" className="font-medium text-red-600 hover:text-red-500">
+              Đăng ký ngay
+            </Link>
+          </div>
+        </Form>
+      </div>
     </div>
   );
-}
-/*******  e13bf13f-099f-463c-ae63-6c0288d5afe7  *******/
+};
 
 export default LoginForm;
