@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Checkbox, Form, Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
+import { Droplet } from 'lucide-react';
 import api from '../../configs/axios';
 
 import './register.css';
@@ -30,7 +30,7 @@ const RegisterForm = () => {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl">
         <div className="text-center">
           <div className="flex items-center justify-center mb-6">
-            <Drop className="text-red-600 mr-2" size={32} />
+            <Droplet className="text-red-600 mr-2" size={32} />
             <span className="text-2xl font-bold text-red-600">HeartDrop</span>
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Đăng ký tài khoản</h2>
