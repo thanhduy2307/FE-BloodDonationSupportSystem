@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Checkbox, Form, Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Crop as Drop } from 'lucide-react';
+
 import api from '../../configs/axios';
 
 import './register.css';
