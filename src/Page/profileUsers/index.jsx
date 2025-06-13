@@ -3,6 +3,16 @@ import { User, Mail, Phone, MapPin, Camera, Save, X, Check } from 'lucide-react'
 
 function UserProfile() {
   const [profile, setProfile] = useState({
+    profileId: 1,
+    userId: 101,
+    dateOfBirth: '',
+    gender: '',
+    address: '',
+    bloodGroup: '',
+    lastDonationDate: '',
+    lastReceivedDate: '',
+    avatar: '', // <- thêm avatar
+    // Các trường bổ sung hiển thị
     firstName: 'John',
     lastName: 'Doe',
     email: 'john.doe@example.com',
@@ -19,15 +29,29 @@ function UserProfile() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProfile(prev => ({
+    setProfile((prev) => ({
       ...prev,
       [name]: value
     }));
   };
 
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfile((prev) => ({
+          ...prev,
+          avatar: reader.result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setIsSaving(false);
     setIsEditing(false);
     setSavedMessage(true);
@@ -57,12 +81,28 @@ function UserProfile() {
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-12 text-white relative">
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="relative group">
-                <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <User className="h-16 w-16 text-white/80" />
-                </div>
-                <button className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <Camera className="h-8 w-8 text-white" />
-                </button>
+                {profile.avatar ? (
+                  <img
+                    src={profile.avatar}
+                    alt="Avatar"
+                    className="w-32 h-32 object-cover rounded-full border-4 border-white shadow"
+                  />
+                ) : (
+                  <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                    <User className="h-16 w-16 text-white/80" />
+                  </div>
+                )}
+                {isEditing && (
+                  <label className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer">
+                    <Camera className="h-8 w-8 text-white" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarChange}
+                    />
+                  </label>
+                )}
               </div>
               <div className="text-center md:text-left">
                 <h2 className="text-2xl font-bold mb-1">
@@ -107,92 +147,30 @@ function UserProfile() {
             </div>
 
             <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">First Name</label>
-                <input
-                  type="text"
-                  name="firstName"
-                  value={profile.firstName}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors duration-200"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Last Name</label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={profile.lastName}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors duration-200"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  <Mail className="h-4 w-4 inline mr-2" />
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={profile.email}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors duration-200"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  <Phone className="h-4 w-4 inline mr-2" />
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={profile.phone}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors duration-200"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Job Title</label>
-                <input
-                  type="text"
-                  name="jobTitle"
-                  value={profile.jobTitle}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors duration-200"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Company</label>
-                <input
-                  type="text"
-                  name="company"
-                  value={profile.company}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors duration-200"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  <MapPin className="h-4 w-4 inline mr-2" />
-                  Location
-                </label>
-                <input
-                  type="text"
-                  name="location"
-                  value={profile.location}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors duration-200"
-                />
-              </div>
+              {[
+                { label: 'First Name', name: 'firstName' },
+                { label: 'Last Name', name: 'lastName' },
+                { label: 'Email Address', name: 'email', icon: Mail },
+                { label: 'Phone Number', name: 'phone', icon: Phone },
+                { label: 'Job Title', name: 'jobTitle' },
+                { label: 'Company', name: 'company' },
+                { label: 'Location', name: 'location', icon: MapPin },
+              ].map(({ label, name, icon: Icon }) => (
+                <div key={name} className={name === 'location' ? 'md:col-span-2' : ''}>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    {Icon && <Icon className="h-4 w-4 inline mr-2" />}
+                    {label}
+                  </label>
+                  <input
+                    type="text"
+                    name={name}
+                    value={profile[name]}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors duration-200"
+                  />
+                </div>
+              ))}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 mb-2">Bio</label>
                 <textarea
