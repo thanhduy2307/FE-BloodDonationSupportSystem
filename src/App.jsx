@@ -15,6 +15,7 @@ import HomePage from "./Page/home";
 import Header from "./components/home-template/Header";
 import { Footer } from "antd/es/layout/layout";
 import RegisterForm from "./Page/register-form-blood";
+import UserProfile from "./Page/profileUsers";
 
 function App() {
   const router = createBrowserRouter([
@@ -64,6 +65,10 @@ function App() {
         },
       ],
     },
+      {
+    path: "profile", 
+    element: <UserProfile/>
+  },
   ]);
 
   return (
