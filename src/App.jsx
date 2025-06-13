@@ -1,8 +1,6 @@
 import React from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 
-
-
 import Dashboard from "./components/dashboard";
 import { Provider } from "react-redux";
 import { persistor, store } from "./redux/store";
@@ -16,6 +14,7 @@ import Header from "./components/home-template/Header";
 import { Footer } from "antd/es/layout/layout";
 import RegisterForm from "./Page/register-form-blood";
 import UserProfile from "./Page/profileUsers";
+import Blogs from "./Page/blogs";
 
 function App() {
   const router = createBrowserRouter([
@@ -23,9 +22,9 @@ function App() {
       path: "",
       element: (
         <>
-        <Header />
+          <Header />
           <Outlet />
-          <Footer/>
+          <Footer />
         </>
       ),
       children: [
@@ -37,9 +36,10 @@ function App() {
           path: "about",
           element: <div>about</div>,
         },
+        
         {
-          path: "registerForm",
-          element: <RegisterForm/>,
+          path: "blogs",
+          element: <Blogs />,
         },
       ],
     },
@@ -65,10 +65,14 @@ function App() {
         },
       ],
     },
-      {
-    path: "profile", 
-    element: <UserProfile/>
-  },
+    {
+      path: "profile",
+      element: <UserProfile />,
+    },
+    {
+          path: "registerForm",
+          element: <RegisterForm />,
+        },
   ]);
 
   return (

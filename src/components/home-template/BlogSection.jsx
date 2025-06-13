@@ -88,7 +88,7 @@ const BlogSection = () => {
 
         <div className="text-center mt-12">
           <Link 
-            to="#" 
+            to="/blogs" 
             className="inline-flex items-center justify-center border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white rounded-full px-6 py-2 font-medium transition"
           >
             Xem tất cả bài viết

@@ -14,6 +14,12 @@ const BloodDonationForm = () => {
   return (
    <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-200 flex items-center justify-center px-4 pt-24">
   <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-2xl">
+    <button
+      onClick={() => navigate("/")}
+      className="absolute top-6 left-6 bg-white text-red-600 font-semibold px-4 py-2 rounded shadow hover:bg-red-100 transition"
+    >
+      ← Về trang chủ
+    </button>
     <h2 className="text-3xl font-bold text-red-600 text-center mb-6">
           Phiếu đăng ký hiến máu
         </h2>
