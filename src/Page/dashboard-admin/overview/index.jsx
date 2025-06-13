@@ -24,7 +24,7 @@ const OverviewPage = () => {
     const fetchStats = async () => {
       try {
         const [userRes, eventRes, requestRes] = await Promise.all([
-          api.get ("/api/users/count"),
+          api.get("/api/users/count"),
           api.get("/api/events/count"),
           api.get("/api/requests/count"),
         ]);
@@ -40,7 +40,7 @@ const OverviewPage = () => {
 
     fetchStats();
   }, []);
-  const userSelect= useSelector((state) => state.user);
+  const userSelect = useSelector((state) => state.user);
 
   const chartData = [
     { name: "Tháng 1", donate: 120 },
@@ -71,10 +71,9 @@ const OverviewPage = () => {
 
   return (
     <div className="p-8 min-h-screen bg-gradient-to-br from-white to-red-50">
-
       <p className="text-center text-xl sm:text-2xl font-semibold text-gray-600 mb-10">
-  Tổng quan hoạt động hiến máu
-</p>
+        Tổng quan hoạt động hiến máu
+      </p>
 
       {/* Thống kê nhanh */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
