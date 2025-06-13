@@ -12,6 +12,8 @@ import RegisterPage from "./Page/register";
 import OverviewPage from "./Page/dashboard-admin/overview";
 import ManageUser from "./Page/dashboard-admin/member";
 import HomePage from "./Page/home";
+import Header from "./components/home-template/Header";
+import { Footer } from "antd/es/layout/layout";
 
 function App() {
   const router = createBrowserRouter([
@@ -19,7 +21,9 @@ function App() {
       path: "",
       element: (
         <>
+        <Header />
           <Outlet />
+          <Footer/>
         </>
       ),
       children: [

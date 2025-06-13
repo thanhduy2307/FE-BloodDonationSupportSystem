@@ -21,7 +21,13 @@ const LoginForm = () => {
       const response = await api.post('login', values);
       dispatch(login(response.data.data));
       localStorage.setItem("token", response.data.data.token);
-      navigate('/');
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      const user = response.data.data;
+      if (user.role === "ADMIN") {
+        navigate("/dashboard");
+      } else if (user.role === "USER") {
+        navigate("/");
+      }
     } catch (e) {
       console.log(e);
       toast.error(e?.response?.data || "Đã xảy ra lỗi khi đăng nhập");

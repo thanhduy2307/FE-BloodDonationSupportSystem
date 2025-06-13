@@ -6,16 +6,17 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const [user, setUser] = useState(null);
+
+useEffect(() => {
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  setUser(storedUser);
+}, [location]);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 50);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -43,29 +44,29 @@ const Header = () => {
           <a href="#events" className="text-gray-800 hover:text-red-600 font-medium transition">
             Sự kiện
           </a>
-            <a href="#blog" className="text-gray-800 hover:text-red-600 font-medium transition py-2">
-        Blog
-      </a>
+          <a href="#blog" className="text-gray-800 hover:text-red-600 font-medium transition py-2">
+            Blog
+          </a>
           <a href="#testimonials" className="text-gray-800 hover:text-red-600 font-medium transition">
             Câu chuyện
           </a>
           <a href="#faq" className="text-gray-800 hover:text-red-600 font-medium transition">
             Hỏi đáp
           </a>
-          <div className="flex items-center space-x-4">
-            <Link 
-              to="/login" 
-              className="text-red-600 hover:text-red-700 font-medium transition"
-            >
-              Đăng nhập
-            </Link>
-            <Link 
-              to="/register" 
-              className="text-white bg-red-600 hover:bg-red-700 py-2 px-6 rounded-full font-medium transition transform hover:scale-105"
-            >
-              Đăng ký
-            </Link>
-          </div>
+
+          {!user && ( // 👈 Kiểm tra nếu chưa đăng nhập mới hiển thị
+            <div className="flex items-center space-x-4">
+              <Link to="/login" className="text-red-600 hover:text-red-700 font-medium transition">
+                Đăng nhập
+              </Link>
+              <Link
+                to="/register"
+                className="text-white bg-red-600 hover:bg-red-700 py-2 px-6 rounded-full font-medium transition transform hover:scale-105"
+              >
+                Đăng ký
+              </Link>
+            </div>
+          )}
         </nav>
 
         {/* Mobile menu button */}
@@ -96,18 +97,20 @@ const Header = () => {
             <a href="#faq" className="text-gray-800 hover:text-red-600 font-medium transition py-2">
               Hỏi đáp
             </a>
-            <Link 
-              to="/login" 
-              className="text-red-600 hover:text-red-700 font-medium transition py-2"
-            >
-              Đăng nhập
-            </Link>
-            <Link 
-              to="/register" 
-              className="text-white bg-red-600 hover:bg-red-700 py-2 px-6 rounded-full font-medium transition text-center"
-            >
-              Đăng ký
-            </Link>
+
+            {!user && ( // 👈 Mobile cũng kiểm tra nếu chưa login
+              <>
+                <Link to="/login" className="text-red-600 hover:text-red-700 font-medium transition py-2">
+                  Đăng nhập
+                </Link>
+                <Link
+                  to="/register"
+                  className="text-white bg-red-600 hover:bg-red-700 py-2 px-6 rounded-full font-medium transition text-center"
+                >
+                  Đăng ký
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
