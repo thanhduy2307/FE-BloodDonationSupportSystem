@@ -1,6 +1,16 @@
-import React from "react";
-
+import React, { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 const BloodDonationForm = () => {
+ const user = useSelector((state) => state.user);
+  const navigate = useNavigate();
+    useEffect(() => {
+    if (!user) {
+      navigate("/login"); 
+    }
+  }, [user, navigate]);
+
+  if (!user) return null;
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-200 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-2xl">
