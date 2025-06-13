@@ -14,6 +14,7 @@ import ManageUser from "./Page/dashboard-admin/member";
 import HomePage from "./Page/home";
 import Header from "./components/home-template/Header";
 import { Footer } from "antd/es/layout/layout";
+import RegisterForm from "./Page/register-form-blood";
 
 function App() {
   const router = createBrowserRouter([
@@ -34,6 +35,10 @@ function App() {
         {
           path: "about",
           element: <div>about</div>,
+        },
+        {
+          path: "registerForm",
+          element: <RegisterForm/>,
         },
       ],
     },

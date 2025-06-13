@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heart, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Hero = () => {
   return (
@@ -29,14 +30,13 @@ const Hero = () => {
               Hiến máu nhân đạo là nghĩa cử cao đẹp, góp phần cứu giúp những người bệnh cần truyền máu, mang lại sự sống và niềm hy vọng cho cộng đồng.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <a
-                href="#register"
+              <Link to={ "/registerForm" }
                 aria-label="Đăng ký hiến máu"
                 className="bg-red-600 hover:bg-red-700 text-white text-lg font-semibold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105 flex items-center justify-center"
               >
                 Đăng ký hiến máu
                 <ArrowRight className="ml-2" size={20} />
-              </a>
+              </Link>
               <a
                 href="#about"
                 aria-label="Tìm hiểu thêm"
