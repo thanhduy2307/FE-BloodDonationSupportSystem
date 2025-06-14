@@ -15,6 +15,7 @@ import { Footer } from "antd/es/layout/layout";
 import RegisterForm from "./Page/register-form-blood";
 import UserProfile from "./Page/profileUsers";
 import Blogs from "./Page/blogs";
+import EventPage from "./Page/events";
 
 function App() {
   const router = createBrowserRouter([
@@ -32,14 +33,14 @@ function App() {
           path: "/",
           element: <HomePage />,
         },
-        {
-          path: "about",
-          element: <div>about</div>,
-        },
 
         {
           path: "blogs",
           element: <Blogs />,
+        },
+        {
+          path: "events",
+          element:<EventPage/>,
         },
       ],
     },

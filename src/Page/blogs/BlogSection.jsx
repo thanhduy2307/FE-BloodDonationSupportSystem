@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, User, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import api from '../../configs/axios';
 
 const BlogSection = () => {
   const [blogPosts, setBlogPosts] = useState([]);
 
   useEffect(() => {
-    api.get('blogs') // Đổi URL này theo API BE của bạn
+    api.get('blogs')
       .then((res) => {
         setBlogPosts(res.data);
       })
@@ -28,45 +29,25 @@ const BlogSection = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {blogPosts.map((post) => (
-            <article key={post.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition">
-              <div className="relative h-48 overflow-hidden">
+            <article key={post.blogId} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition">
+              {post.image && (
                 <img 
                   src={post.image} 
-                  alt={post.title}
-                  className="w-full h-full object-cover transform hover:scale-105 transition duration-500"
+                  alt={post.title} 
+                  className="w-full h-48 object-cover"
                 />
-                <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm">
-                  {post.category}
-                </div>
-              </div>
+              )}
               <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2 hover:text-red-600 transition">
-                  <a href={post.url} target="_blank" rel="noopener noreferrer">
-                    {post.title}
-                  </a>
+                <h3 className="text-xl font-bold text-gray-900 mb-4 hover:text-red-600 transition">
+                  {post.title}
                 </h3>
-                <p className="text-gray-600 mb-4">{post.excerpt}</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <User className="w-4 h-4 mr-2" />
-                    <span>{post.author}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    <span>{post.date}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="px-6 pb-6">
-                <a 
-                  href={post.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
+                <Link 
+                  to={`/blogs/${post.blogId}`} 
                   className="text-red-600 hover:text-red-700 font-medium flex items-center"
                 >
                   Đọc thêm
                   <ArrowRight className="ml-2 w-4 h-4" />
-                </a>
+                </Link>
               </div>
             </article>
           ))}
