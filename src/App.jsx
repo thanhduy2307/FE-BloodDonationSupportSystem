@@ -36,7 +36,7 @@ function App() {
           path: "about",
           element: <div>about</div>,
         },
-        
+
         {
           path: "blogs",
           element: <Blogs />,
@@ -70,9 +70,9 @@ function App() {
       element: <UserProfile />,
     },
     {
-          path: "registerForm",
-          element: <RegisterForm />,
-        },
+      path: "registerForm",
+      element: <RegisterForm />,
+    },
   ]);
 
   return (

@@ -1,13 +1,12 @@
-import React from 'react';
-import Header from '../../components/home-template/Header';
-import Hero from '../../components/home-template/Hero';
-import AboutSection from '../../components/home-template/AboutSection';
-import BlogSection from '../../components/home-template/BlogSection';
-import EventsSection from '../../components/home-template/EventsSection';
-import TestimonialsSection from '../../components/home-template/TestimonialsSection';
-import FAQSection from '../../components/home-template/FAQSection';
-import Footer from '../../components/home-template/Footer';
-
+import React from "react";
+import Header from "../../components/home-template/Header";
+import Hero from "../../components/home-template/Hero";
+import AboutSection from "../../components/home-template/AboutSection";
+import BlogSection from "../blogs/BlogSection";
+import EventsSection from "../../components/home-template/EventsSection";
+import TestimonialsSection from "../../components/home-template/TestimonialsSection";
+import FAQSection from "../../components/home-template/FAQSection";
+import Footer from "../../components/home-template/Footer";
 
 const HomePage = () => {
   return (
@@ -15,10 +14,10 @@ const HomePage = () => {
       <Header />
       <Hero />
       <AboutSection />
-      <BlogSection/>
-      <EventsSection />
+      {/* <BlogSection/> */}
+      {/* <EventsSection /> */}
       <TestimonialsSection />
-      <BlogSection />
+      {/* <BlogSection /> */}
       <FAQSection />
       <Footer />
     </div>

@@ -8,11 +8,11 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const toggleDropdown = () => setShowDropdown(!showDropdown);
   const location = useLocation();
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -20,9 +20,23 @@ const Header = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
   const handleLogout = () => {
     dispatch(logout());
     setShowDropdown(false);
+  };
+
+  const handleNavigateScroll = (sectionId) => {
+    if (location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        const el = document.getElementById(sectionId);
+        el?.scrollIntoView({ behavior: "smooth" });
+      }, 100); // chờ để đảm bảo DOM đã load xong
+    } else {
+      const el = document.getElementById(sectionId);
+      el?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
@@ -45,41 +59,41 @@ const Header = () => {
           >
             Trang chủ
           </Link>
-          <a
-            href="#about"
+          <button
+            onClick={() => handleNavigateScroll("about")}
             className="text-gray-800 hover:text-red-600 font-medium transition"
           >
             Về chúng tôi
-          </a>
-          <a
-            href="#events"
+          </button>
+          <Link
+            to="/events"
             className="text-gray-800 hover:text-red-600 font-medium transition"
           >
             Sự kiện
-          </a>
-          <a
-            href="#blog"
-            className="text-gray-800 hover:text-red-600 font-medium transition py-2"
+          </Link>
+          <Link
+            to="/blogs"
+            className="text-gray-800 hover:text-red-600 font-medium transition"
           >
             Blog
-          </a>
-          <a
-            href="#testimonials"
+          </Link>
+          <button
+            onClick={() => handleNavigateScroll("testimonials")}
             className="text-gray-800 hover:text-red-600 font-medium transition"
           >
             Câu chuyện
-          </a>
-          <a
-            href="#faq"
+          </button>
+          <button
+            onClick={() => handleNavigateScroll("faq")}
             className="text-gray-800 hover:text-red-600 font-medium transition"
           >
             Hỏi đáp
-          </a>
+          </button>
 
           {user ? (
             <div className="relative">
               <button
-                onClick={toggleDropdown}
+                onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center space-x-2 focus:outline-none"
               >
                 <img
@@ -101,7 +115,7 @@ const Header = () => {
                   <button
                     onClick={() => {
                       navigate("/profile");
-                      setShowDropdown(false); 
+                      setShowDropdown(false);
                     }}
                     className="block w-full text-left px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 transition-colors"
                   >
@@ -153,30 +167,47 @@ const Header = () => {
             >
               Trang chủ
             </Link>
-            <a
-              href="#about"
+            <button
+              onClick={() => {
+                setIsMenuOpen(false);
+                handleNavigateScroll("about");
+              }}
               className="text-gray-800 hover:text-red-600 font-medium transition py-2"
             >
               Về chúng tôi
-            </a>
-            <a
-              href="#events"
+            </button>
+            <Link
+              to="/events"
               className="text-gray-800 hover:text-red-600 font-medium transition py-2"
+              onClick={() => setIsMenuOpen(false)}
             >
               Sự kiện
-            </a>
-            <a
-              href="#testimonials"
+            </Link>
+            <Link
+              to="/blogs"
+              className="text-gray-800 hover:text-red-600 font-medium transition py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Blog
+            </Link>
+            <button
+              onClick={() => {
+                setIsMenuOpen(false);
+                handleNavigateScroll("testimonials");
+              }}
               className="text-gray-800 hover:text-red-600 font-medium transition py-2"
             >
               Câu chuyện
-            </a>
-            <a
-              href="#faq"
+            </button>
+            <button
+              onClick={() => {
+                setIsMenuOpen(false);
+                handleNavigateScroll("faq");
+              }}
               className="text-gray-800 hover:text-red-600 font-medium transition py-2"
             >
               Hỏi đáp
-            </a>
+            </button>
           </div>
         </div>
       )}
