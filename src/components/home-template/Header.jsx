@@ -122,6 +122,15 @@ const Header = () => {
                     Trang cá nhân
                   </button>
                   <button
+                    onClick={() => {
+                      navigate("/feedback");
+                      setShowDropdown(false)
+                    }}
+                     className="block w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-red-100 transition-colors"
+                    >
+                      FeedBack
+                  </button>
+                  <button
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-100 transition-colors"
                   >
