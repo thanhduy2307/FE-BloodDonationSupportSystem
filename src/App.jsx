@@ -16,7 +16,7 @@ import RegisterForm from "./Page/register-form-blood";
 import UserProfile from "./Page/profileUsers";
 import Blogs from "./Page/blogs";
 import EventPage from "./Page/events";
-import FeedbackForm from "./Page/feedback";
+import Feedback from "./Page/feedback";
 
 function App() {
   const router = createBrowserRouter([
@@ -77,7 +77,7 @@ function App() {
     },
      {
       path: "feedback",
-      element: <FeedbackForm />,
+      element: <Feedback />,
     },
   ]);
 
