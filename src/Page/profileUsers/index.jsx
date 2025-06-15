@@ -1,230 +1,210 @@
 import React, { useState, useEffect } from "react";
 import {
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Camera,
-  Save,
-  X,
-  Check,
-} from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
+  Card,
+  Typography,
+  Avatar,
+  Row,
+  Col,
+  Divider,
+  Tag,
+  Button,
+  Modal,
+  Form,
+  Input,
+  DatePicker,
+  Select,
+} from "antd";
+import {
+  UserOutlined,
+  MailOutlined,
+  IdcardOutlined,
+  HomeOutlined,
+  HeartOutlined,
+  EditOutlined,
+} from "@ant-design/icons";
+import dayjs from "dayjs";
+import api from "../../configs/axios";
+import { toast } from "react-toastify";
 
-function UserProfile() {
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [savedMessage, setSavedMessage] = useState(false);
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
+const { Title, Text } = Typography;
+const { Option } = Select;
 
-  const [profile, setProfile] = useState(user || {});
+const InfoItem = ({ label, value, icon }) => (
+  <Row style={{ marginBottom: 16 }} align="middle">
+    <Col span={2}>{icon}</Col>
+    <Col span={22}>
+      <Text strong>{label}:</Text> <Text>{value || "Chưa có"}</Text>
+    </Col>
+  </Row>
+);
 
+const ProfilePage = () => {
+  const [user, setUser] = useState(null);
+  const [form] = Form.useForm();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  // Load user profile từ API
   useEffect(() => {
-    if (user) {
-      setProfile(user);
-    }
-  }, [user]);
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get("profile");
+        setUser(response.data);
+      } catch (error) {
+        console.error("Lỗi khi lấy thông tin người dùng:", error);
+        toast.error("Không thể tải hồ sơ!");
+      }
+    };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setProfile((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    fetchProfile();
+  }, []);
+
+  const showModal = () => {
+    if (!user) return;
+    form.setFieldsValue({
+      email: user.email,
+      gender: user.profile?.gender,
+      dateOfBirth: user.profile?.dateOfBirth ? dayjs(user.profile.dateOfBirth) : null,
+      bloodGroup: user.profile?.bloodGroup,
+    });
+    setIsModalVisible(true);
   };
 
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfile((prev) => ({
-          ...prev,
-          avatar: reader.result,
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleUpdate = () => {
+    form.validateFields().then(async (values) => {
+      try {
+        const payload = {
+          ...values,
+          dateOfBirth: values.dateOfBirth?.format("YYYY-MM-DD"),
+        };
+
+        const res = await api.put("profile", payload);
+        setUser(res.data);
+        toast.success("Cập nhật hồ sơ thành công!");
+        setIsModalVisible(false);
+        form.resetFields();
+      } catch (error) {
+        console.error("Lỗi khi cập nhật:", error);
+        toast.error("Cập nhật thất bại!");
+      }
+    });
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsSaving(false);
-    setIsEditing(false);
-    setSavedMessage(true);
-    setTimeout(() => setSavedMessage(false), 3000);
-  };
+  if (!user) return null;
 
-  const handleCancel = () => {
-    setIsEditing(false);
-  };
+  const profile = user.profile || {};
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">
-            Profile Settings
-          </h1>
-          <p className="text-slate-600">
-            Manage your account information and preferences
-          </p>
-        </div>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(to right, #f0f2f5, #e0e7ff)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "40px 20px",
+      }}
+    >
+      <Card
+        style={{
+          width: "100%",
+          maxWidth: "1000px",
+          borderRadius: "16px",
+          boxShadow: "0 12px 30px rgba(0,0,0,0.1)",
+          backgroundColor: "#fff",
+          position: "relative",
+        }}
+        bodyStyle={{ padding: "40px" }}
+      >
+        <Button
+          icon={<EditOutlined />}
+          type="primary"
+          style={{
+            position: "absolute",
+            top: 20,
+            right: 20,
+            borderRadius: "999px",
+            padding: "0 16px",
+          }}
+          onClick={showModal}
+        >
+          Chỉnh sửa hồ sơ
+        </Button>
 
-        {savedMessage && (
-          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-            <Check className="h-5 w-5 text-green-600" />
-            <span className="text-green-800 font-medium">
-              Profile updated successfully!
-            </span>
-          </div>
-        )}
-
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-12 text-white relative">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="relative group">
-                {profile.avatar ? (
-                  <img
-                    src={profile.avatar}
-                    alt="Avatar"
-                    className="w-32 h-32 object-cover rounded-full border-4 border-white shadow"
-                  />
-                ) : (
-                  <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                    <User className="h-16 w-16 text-white/80" />
-                  </div>
-                )}
-                {isEditing && (
-                  <label className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer">
-                    <Camera className="h-8 w-8 text-white" />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleAvatarChange}
-                    />
-                  </label>
-                )}
-              </div>
-              <div className="text-center md:text-left">
-                <h2 className="text-2xl font-bold mb-1">
-                  {profile.firstName} {profile.lastName}
-                </h2>
-                <p className="text-blue-100 mb-2">{profile.jobTitle}</p>
-                <p className="text-blue-200 text-sm">{profile.company}</p>
-              </div>
+        <Row gutter={24} align="middle">
+          <Col xs={24} md={6} style={{ textAlign: "center", marginBottom: 20 }}>
+            <Avatar size={120} icon={<UserOutlined />} />
+            <div style={{ marginTop: 10 }}>
+              <Tag color="blue">{user.role}</Tag>
             </div>
-          </div>
+          </Col>
 
-          <div className="p-8">
-            <div className="flex justify-between items-center mb-8">
-              <h3 className="text-xl font-semibold text-slate-800">
-                Personal Information
-              </h3>
-              {!isEditing ? (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
-                >
-                  <User className="h-4 w-4" />
-                  Edit Profile
-                </button>
-              ) : (
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleCancel}
-                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
-                  >
-                    <X className="h-4 w-4" />
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
-                  >
-                    <Save className="h-4 w-4" />
-                    {isSaving ? "Saving..." : "Save Changes"}
-                  </button>
-                </div>
-              )}
-            </div>
+          <Col xs={24} md={18}>
+            <Title level={3} style={{ marginBottom: 0 }}>
+              {user.fullName}
+            </Title>
+            <Text type="secondary" style={{ fontSize: "16px" }}>
+              @{user.username}
+            </Text>
 
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                { label: "First Name", name: "firstName" },
-                { label: "Last Name", name: "lastName" },
-                { label: "Email Address", name: "email", icon: Mail },
-                { label: "Phone Number", name: "phone", icon: Phone },
-                { label: "Job Title", name: "jobTitle" },
-                { label: "Company", name: "company" },
-                { label: "Location", name: "location", icon: MapPin },
-              ].map(({ label, name, icon: Icon }) => (
-                <div
-                  key={name}
-                  className={name === "location" ? "md:col-span-2" : ""}
-                >
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    {Icon && <Icon className="h-4 w-4 inline mr-2" />}
-                    {label}
-                  </label>
-                  <input
-                    type="text"
-                    name={name}
-                    value={profile[name] || ""}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors duration-200"
-                  />
-                </div>
-              ))}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Bio
-                </label>
-                <textarea
-                  name="bio"
-                  value={profile.bio || ""}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  rows={4}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors duration-200 resize-none"
-                />
-              </div>
-            </form>
-          </div>
-        </div>
+            <Divider style={{ margin: "24px 0" }} />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h4 className="font-semibold text-slate-800 mb-3">
-              Account Security
-            </h4>
-            <p className="text-slate-600 text-sm mb-4">
-              Manage your password and security settings
-            </p>
-            <button className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200">
-              Change Password →
-            </button>
-          </div>
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h4 className="font-semibold text-slate-800 mb-3">
-              Notification Preferences
-            </h4>
-            <p className="text-slate-600 text-sm mb-4">
-              Control how you receive updates
-            </p>
-            <button className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200">
-              Manage Notifications →
-            </button>
-          </div>
-        </div>
-      </div>
+            <InfoItem label="Email" value={user.email} icon={<MailOutlined />} />
+            <InfoItem label="Giới tính" value={profile.gender} icon={<IdcardOutlined />} />
+            <InfoItem label="Ngày sinh" value={profile.dateOfBirth} icon={<IdcardOutlined />} />
+            <InfoItem label="Địa chỉ" value={profile.address} icon={<HomeOutlined />} />
+            <InfoItem label="Nhóm máu" value={profile.bloodGroup} icon={<HeartOutlined />} />
+            <InfoItem label="Hiến máu gần nhất" value={profile.lastDonationDate} icon={<HeartOutlined />} />
+            <InfoItem label="Nhận máu gần nhất" value={profile.lastReceivedDate} icon={<HeartOutlined />} />
+          </Col>
+        </Row>
+      </Card>
+
+      {/* Modal Chỉnh sửa */}
+      <Modal
+        title="Chỉnh sửa hồ sơ"
+        open={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        onOk={handleUpdate}
+        okText="Lưu"
+        cancelText="Hủy"
+      >
+        <Form layout="vertical" form={form}>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[{ required: true, type: "email", message: "Email không hợp lệ" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item label="Giới tính" name="gender">
+            <Select>
+              <Option value="Nam">Nam</Option>
+              <Option value="Nữ">Nữ</Option>
+              <Option value="Khác">Khác</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item label="Ngày sinh" name="dateOfBirth">
+            <DatePicker style={{ width: "100%" }} />
+          </Form.Item>
+
+          <Form.Item label="Nhóm máu" name="bloodGroup">
+            <Select>
+              <Option value="A+">A+</Option>
+              <Option value="A-">A-</Option>
+              <Option value="B+">B+</Option>
+              <Option value="B-">B-</Option>
+              <Option value="O+">O+</Option>
+              <Option value="O-">O-</Option>
+              <Option value="AB+">AB+</Option>
+              <Option value="AB-">AB-</Option>
+            </Select>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
-}
+};
 
-export default UserProfile;
+export default ProfilePage;

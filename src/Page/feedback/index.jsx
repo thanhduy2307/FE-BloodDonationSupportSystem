@@ -13,24 +13,24 @@ const FeedbackForm = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
-  const handleSubmit = async (values) => {
-    const payload = {
-      createdBy: user?.name,
-      feedbackType: values.feedbackType,
-      content: values.content,
-      reportDate: new Date().toISOString().split("T")[0],
-    };
+    const handleSubmit = async (values) => {
+      const payload = {
+        createdBy: user?.id,
+        feedbackType: values.feedbackType,
+        content: values.content,
+        reportDate: new Date().toISOString().split("T")[0],
+      };
 
-    try {
-      await api.post("feedback", payload);
-      toast.success("Gửi phản hồi thành công!");
-      form.resetFields();
-      navigate("/feedback");
-    } catch (error) {
-      console.error(error);
-      toast.error("Đã có lỗi xảy ra khi gửi phản hồi.");
-    }
-  };
+      try {
+        await api.post("feedback", payload);
+        toast.success("Gửi phản hồi thành công!");
+        form.resetFields();
+        navigate("/feedback");
+      } catch (error) {
+        console.error(error);
+        toast.error("Đã có lỗi xảy ra khi gửi phản hồi.");
+      }
+    };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 relative px-4">
