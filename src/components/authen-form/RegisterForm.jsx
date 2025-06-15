@@ -17,7 +17,7 @@ const RegisterForm = () => {
       navigate('/login');
     } catch (e) {
       console.log(e);
-      toast.error(e?.response?.data || 'Có lỗi xảy ra');
+      toast.error(e?.response?.data );
     }
   };
 
