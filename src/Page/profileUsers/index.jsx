@@ -1,37 +1,36 @@
-import React, { useState } from 'react';
-import { User, Mail, Phone, MapPin, Camera, Save, X, Check } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Camera,
+  Save,
+  X,
+  Check,
+} from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
 
 function UserProfile() {
-  const [profile, setProfile] = useState({
-    profileId: 1,
-    userId: 101,
-    dateOfBirth: '',
-    gender: '',
-    address: '',
-    bloodGroup: '',
-    lastDonationDate: '',
-    lastReceivedDate: '',
-    avatar: '', // <- thêm avatar
-    // Các trường bổ sung hiển thị
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
-    location: 'San Francisco, CA',
-    bio: 'Passionate software developer with 5+ years of experience in building scalable web applications.',
-    jobTitle: 'Senior Frontend Developer',
-    company: 'Tech Innovations Inc.'
-  });
-
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState(false);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+
+  const [profile, setProfile] = useState(user || {});
+
+  useEffect(() => {
+    if (user) {
+      setProfile(user);
+    }
+  }, [user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProfile((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -42,7 +41,7 @@ function UserProfile() {
       reader.onloadend = () => {
         setProfile((prev) => ({
           ...prev,
-          avatar: reader.result
+          avatar: reader.result,
         }));
       };
       reader.readAsDataURL(file);
@@ -66,14 +65,20 @@ function UserProfile() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">Profile Settings</h1>
-          <p className="text-slate-600">Manage your account information and preferences</p>
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">
+            Profile Settings
+          </h1>
+          <p className="text-slate-600">
+            Manage your account information and preferences
+          </p>
         </div>
 
         {savedMessage && (
           <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
             <Check className="h-5 w-5 text-green-600" />
-            <span className="text-green-800 font-medium">Profile updated successfully!</span>
+            <span className="text-green-800 font-medium">
+              Profile updated successfully!
+            </span>
           </div>
         )}
 
@@ -116,7 +121,9 @@ function UserProfile() {
 
           <div className="p-8">
             <div className="flex justify-between items-center mb-8">
-              <h3 className="text-xl font-semibold text-slate-800">Personal Information</h3>
+              <h3 className="text-xl font-semibold text-slate-800">
+                Personal Information
+              </h3>
               {!isEditing ? (
                 <button
                   onClick={() => setIsEditing(true)}
@@ -140,7 +147,7 @@ function UserProfile() {
                     className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
                   >
                     <Save className="h-4 w-4" />
-                    {isSaving ? 'Saving...' : 'Save Changes'}
+                    {isSaving ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
               )}
@@ -148,15 +155,18 @@ function UserProfile() {
 
             <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[
-                { label: 'First Name', name: 'firstName' },
-                { label: 'Last Name', name: 'lastName' },
-                { label: 'Email Address', name: 'email', icon: Mail },
-                { label: 'Phone Number', name: 'phone', icon: Phone },
-                { label: 'Job Title', name: 'jobTitle' },
-                { label: 'Company', name: 'company' },
-                { label: 'Location', name: 'location', icon: MapPin },
+                { label: "First Name", name: "firstName" },
+                { label: "Last Name", name: "lastName" },
+                { label: "Email Address", name: "email", icon: Mail },
+                { label: "Phone Number", name: "phone", icon: Phone },
+                { label: "Job Title", name: "jobTitle" },
+                { label: "Company", name: "company" },
+                { label: "Location", name: "location", icon: MapPin },
               ].map(({ label, name, icon: Icon }) => (
-                <div key={name} className={name === 'location' ? 'md:col-span-2' : ''}>
+                <div
+                  key={name}
+                  className={name === "location" ? "md:col-span-2" : ""}
+                >
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     {Icon && <Icon className="h-4 w-4 inline mr-2" />}
                     {label}
@@ -164,7 +174,7 @@ function UserProfile() {
                   <input
                     type="text"
                     name={name}
-                    value={profile[name]}
+                    value={profile[name] || ""}
                     onChange={handleInputChange}
                     disabled={!isEditing}
                     className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors duration-200"
@@ -172,10 +182,12 @@ function UserProfile() {
                 </div>
               ))}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-2">Bio</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Bio
+                </label>
                 <textarea
                   name="bio"
-                  value={profile.bio}
+                  value={profile.bio || ""}
                   onChange={handleInputChange}
                   disabled={!isEditing}
                   rows={4}
@@ -188,15 +200,23 @@ function UserProfile() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
           <div className="bg-white rounded-xl shadow-md p-6">
-            <h4 className="font-semibold text-slate-800 mb-3">Account Security</h4>
-            <p className="text-slate-600 text-sm mb-4">Manage your password and security settings</p>
+            <h4 className="font-semibold text-slate-800 mb-3">
+              Account Security
+            </h4>
+            <p className="text-slate-600 text-sm mb-4">
+              Manage your password and security settings
+            </p>
             <button className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200">
               Change Password →
             </button>
           </div>
           <div className="bg-white rounded-xl shadow-md p-6">
-            <h4 className="font-semibold text-slate-800 mb-3">Notification Preferences</h4>
-            <p className="text-slate-600 text-sm mb-4">Control how you receive updates</p>
+            <h4 className="font-semibold text-slate-800 mb-3">
+              Notification Preferences
+            </h4>
+            <p className="text-slate-600 text-sm mb-4">
+              Control how you receive updates
+            </p>
             <button className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200">
               Manage Notifications →
             </button>
