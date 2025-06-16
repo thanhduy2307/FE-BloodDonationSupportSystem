@@ -18,6 +18,8 @@ import Blogs from "./Page/blogs";
 import EventPage from "./Page/events";
 import Feedback from "./Page/feedback";
 import RequestForm from "./Page/register-form-request-blood";
+import ManageFeedback from "./Page/dashboard-admin/feedback";
+
 
 function App() {
   const router = createBrowserRouter([
@@ -65,6 +67,10 @@ function App() {
         {
           path: "user",
           element: <ManageUser />,
+        },
+        {
+          path: "feedback",
+          element: <ManageFeedback />,
         },
       ],
     },

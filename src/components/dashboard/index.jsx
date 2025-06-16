@@ -24,8 +24,9 @@ function getItem(label, key, icon, children) {
 
 const items = [
   getItem("Overview", "overview", <PieChartOutlined />),
-  getItem("Product", "product", <DesktopOutlined />),
   getItem("User", "user", <UserOutlined />),
+  getItem("Feedback", "feedback", <DesktopOutlined />),
+  getItem("Request", "request", < Dashboard />),
 ];
 
 const Dashboard = () => {
