@@ -29,21 +29,27 @@ const Hero = () => {
             <p className="text-lg md:text-xl text-gray-700 mb-8 max-w-xl leading-relaxed">
               Hiến máu nhân đạo là nghĩa cử cao đẹp, góp phần cứu giúp những người bệnh cần truyền máu, mang lại sự sống và niềm hy vọng cho cộng đồng.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link to={ "/registerForm" }
-                aria-label="Đăng ký hiến máu"
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4">
+              <Link
+                to="/registerForm"
                 className="bg-red-600 hover:bg-red-700 text-white text-lg font-semibold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105 flex items-center justify-center"
               >
                 Đăng ký hiến máu
                 <ArrowRight className="ml-2" size={20} />
               </Link>
-              <a
-                href="#about"
-                aria-label="Tìm hiểu thêm"
-                className="border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white text-lg font-semibold py-3 px-8 rounded-full transition transform hover:scale-105 flex items-center justify-center"
+              <Link
+                to="/about"
+                className="bg-white border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white text-lg font-semibold py-3 px-8 rounded-full transition transform hover:scale-105 flex items-center justify-center"
               >
                 Tìm hiểu thêm
-              </a>
+              </Link>
+              <Link
+                to="/requestForm"
+                className="bg-white border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white text-lg font-semibold py-3 px-8 rounded-full transition transform hover:scale-105 flex items-center justify-center"
+              >
+                Đăng kí nhận máu 
+                <ArrowRight className="ml-2" size={20} />
+              </Link>
             </div>
           </div>
 

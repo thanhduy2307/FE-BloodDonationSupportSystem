@@ -17,6 +17,7 @@ import UserProfile from "./Page/profileUsers";
 import Blogs from "./Page/blogs";
 import EventPage from "./Page/events";
 import Feedback from "./Page/feedback";
+import RequestForm from "./Page/register-form-request-blood";
 
 function App() {
   const router = createBrowserRouter([
@@ -78,6 +79,10 @@ function App() {
      {
       path: "feedback",
       element: <Feedback />,
+    },
+    {
+      path: "requestForm",
+      element: <RequestForm/>,
     },
   ]);
 
