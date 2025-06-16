@@ -49,5 +49,4 @@ function ManageFeedback() {
     </div>
   );
 }
-
 export default ManageFeedback;
