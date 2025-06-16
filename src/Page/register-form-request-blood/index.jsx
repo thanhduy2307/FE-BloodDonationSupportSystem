@@ -20,7 +20,6 @@ const RequestForm = () => {
         userId: user.id,
         bloodGroup: values.bloodGroup,
         quantity: values.quantity,
-        status: "Pending",
         requestDate: values.requestDate.format("YYYY-MM-DD"),
       };
 
@@ -72,7 +71,7 @@ const RequestForm = () => {
 
           <Form.Item
             name="quantity"
-            label="Số lượng (đơn vị)"
+            label="Số lượng (đơn vị) – 1 đơn vị ~ 250ml"
             rules={[{ required: true, message: "Vui lòng nhập số lượng máu cần" }]}
           >
             <InputNumber min={1} className="w-full" />
