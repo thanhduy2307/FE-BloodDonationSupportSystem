@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../../configs/axios";
 
-function ManageFeedback() {
+function ManageUser() {
   const [datas, setDatas] = useState([]);
 
   const fetchUser = async () => {
@@ -19,7 +19,17 @@ function ManageFeedback() {
   useEffect(() => {
     fetchUser();
   }, []);
-
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    try {
+      await api.delete(`profiles/${id}`);
+      toast.success("User deleted successfully");
+      fetchUser(); 
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete user");
+    }
+  };
   const columns = [
     {
       title: "ID",
@@ -41,6 +51,28 @@ function ManageFeedback() {
       dataIndex: "PhoneNumber",
       key: "PhoneNumber",
     },
+    {
+      title: "Role",
+      dataIndex: "role",
+      key: "role",
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => (
+        <button
+          onClick={() => handleDelete(record.id)}
+          style={{
+            color: "red",
+            border: "none",
+            background: "transparent",
+            cursor: "pointer",
+          }}
+        >
+          Delete
+        </button>
+      ),
+    },
   ];
 
   return (
@@ -49,4 +81,4 @@ function ManageFeedback() {
     </div>
   );
 }
-export default ManageFeedback;
+export default ManageUser;
