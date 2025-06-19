@@ -26,6 +26,7 @@ const items = [
   getItem("User", "member-staff", <UserOutlined />),
   getItem("Feedback", "feedback-staff", <DesktopOutlined />),
   getItem("Request", "request", < DesktopOutlined />),
+  getItem("donationEvent", "donation-event", < DesktopOutlined />),
 ];
 
 const DashboardStaff = () => {

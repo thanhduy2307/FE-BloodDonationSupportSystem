@@ -21,6 +21,7 @@ import Dashboard from "./components/dashboard";
 import DashboardStaff from "./components/dashboard/dashboardstaff";
 import StaffFeedback from "./Page/dashboard-staff/feedback";
 import StaffMember from "./Page/dashboard-staff/member";
+import CreateBloodEvent from "./Page/dashboard-staff/donationEvent";
 
 
 function App() {
@@ -87,6 +88,10 @@ function App() {
         {
           path: "member-staff",
           element: <StaffMember />,
+        },
+         {
+          path: "donation-event",
+          element: <CreateBloodEvent />,
         },
       ],
     },
