@@ -19,6 +19,8 @@ import RequestForm from "./Page/register-form-request-blood";
 import ManageFeedback from "./Page/dashboard-admin/feedback";
 import Dashboard from "./components/dashboard";
 import DashboardStaff from "./components/dashboard/dashboardstaff";
+import StaffFeedback from "./Page/dashboard-staff/feedback";
+import StaffMember from "./Page/dashboard-staff/member";
 
 
 function App() {
@@ -78,14 +80,13 @@ function App() {
       path: "/dashboard-staff",
       element: <DashboardStaff/>,
       children: [
-  
         {
-          path: "user",
-          element: <ManageUser />,
+          path: "feedback-staff",
+          element: <StaffFeedback />,
         },
         {
-          path: "feedback",
-          element: <ManageFeedback />,
+          path: "member-staff",
+          element: <StaffMember />,
         },
       ],
     },

@@ -18,13 +18,13 @@ function getItem(label, key, icon, children) {
     key,
     icon,
     children,
-    label: <Link to={`/dashboard/${key}`}> {label} </Link>,
+    label: <Link to={`/dashboard-staff/${key}`}> {label} </Link>,
   };
 }
 
 const items = [
-  getItem("User", "user", <UserOutlined />),
-  getItem("Feedback", "feedback", <DesktopOutlined />),
+  getItem("User", "member-staff", <UserOutlined />),
+  getItem("Feedback", "feedback-staff", <DesktopOutlined />),
   getItem("Request", "request", < DesktopOutlined />),
 ];
 
