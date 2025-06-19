@@ -2,7 +2,7 @@ import { Table } from "antd";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../../configs/axios";
-
+import { Select } from "antd";
 function ManageUser() {
   const [datas, setDatas] = useState([]);
 
@@ -30,6 +30,16 @@ function ManageUser() {
       toast.error("Failed to delete user");
     }
   };
+  const handleChangeRole = async (id, newRole) => {
+  try {
+    await api.put(`profiles/${id}/role`, { role: newRole });
+    toast.success("Role updated successfully");
+    fetchUser(); 
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to update role");
+  }
+};
   const columns = [
     {
       title: "ID",
@@ -55,6 +65,17 @@ function ManageUser() {
       title: "Role",
       dataIndex: "role",
       key: "role",
+      render: (_, record) => (
+    <Select
+      value={record.role}
+      onChange={(value) => handleChangeRole(record.id, value)}
+      style={{ width: 120 }}
+    >
+      <Select.Option value="user">User</Select.Option>
+      <Select.Option value="staff">Staff</Select.Option>
+      <Select.Option value="admin">Admin</Select.Option>
+    </Select>
+  ),
     },
     {
       title: "Action",
