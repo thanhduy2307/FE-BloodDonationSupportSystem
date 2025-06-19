@@ -21,7 +21,8 @@ import Dashboard from "./components/dashboard";
 import DashboardStaff from "./components/dashboard/dashboardstaff";
 import StaffFeedback from "./Page/dashboard-staff/feedback";
 import StaffMember from "./Page/dashboard-staff/member";
-import BloodDonationList from "./Page/dashboard-admin/request-blood";
+import BloodDonationList from "./Page/dashboard-admin/blood-donor";
+import StaffRequest from "./Page/dashboard-staff/request-blood";
 
 
 function App() {
@@ -76,7 +77,7 @@ function App() {
           element: <ManageFeedback />,
         },
         {
-          path: "requestBlood",
+          path: "bloodDonor",
           element: <BloodDonationList />,
         },
       ],
@@ -92,6 +93,10 @@ function App() {
         {
           path: "member-staff",
           element: <StaffMember />,
+        },
+        {
+          path: "request-staff",
+          element: <StaffRequest />,
         },
       ],
     },
