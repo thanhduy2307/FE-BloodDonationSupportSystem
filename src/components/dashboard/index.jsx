@@ -26,7 +26,7 @@ const items = [
   getItem("Overview", "overview", <PieChartOutlined />),
   getItem("User", "user", <UserOutlined />),
   getItem("Feedback", "feedback", <DesktopOutlined />),
-  getItem("Request", "request", < Dashboard />),
+  getItem("Request", "request", < DesktopOutlined />),
 ];
 
 const Dashboard = () => {

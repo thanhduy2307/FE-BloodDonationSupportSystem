@@ -1,7 +1,5 @@
 import React from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
-
-import Dashboard from "./components/dashboard";
 import { Provider } from "react-redux";
 import { persistor, store } from "./redux/store";
 import { PersistGate } from "redux-persist/integration/react";
@@ -19,6 +17,7 @@ import EventPage from "./Page/events";
 import Feedback from "./Page/feedback";
 import RequestForm from "./Page/register-form-request-blood";
 import ManageFeedback from "./Page/dashboard-admin/feedback";
+import Dashboard from "./components/dashboard";
 
 
 function App() {
