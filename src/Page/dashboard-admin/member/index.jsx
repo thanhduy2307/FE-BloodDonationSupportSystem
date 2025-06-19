@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../../configs/axios";
 
-function ManageFeedback() {
+function ManageUser() {
   const [datas, setDatas] = useState([]);
 
   const fetchUser = async () => {
@@ -41,6 +41,11 @@ function ManageFeedback() {
       dataIndex: "PhoneNumber",
       key: "PhoneNumber",
     },
+    {
+      title: "Role",
+      dataIndex: "PhoneNumber",
+      key: "PhoneNumber",
+    },
   ];
 
   return (
@@ -49,4 +54,4 @@ function ManageFeedback() {
     </div>
   );
 }
-export default ManageFeedback;
+export default ManageUser;
