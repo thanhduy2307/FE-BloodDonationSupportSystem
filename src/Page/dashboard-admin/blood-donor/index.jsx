@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Table } from "antd";
-import api from '../../../configs/axios';
+import api from "../../../configs/axios";
 
-const StaffRequest = () => {
+const BloodDonationList = () => {
   const [donors, setDonors] = useState([]);
 
   const fetchData = async () => {
@@ -44,4 +44,4 @@ const StaffRequest = () => {
   );
 };
 
-export default StaffRequest;
+export default BloodDonationList;

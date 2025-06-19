@@ -28,7 +28,7 @@ const LoginForm = () => {
       } else if (user.role === "USER") {
         navigate("/");
       }else if (user.role === "STAFF") {
-        navigate("/dashboard-staff");
+        navigate("/dashboard-staff/user");
       }
 
     } catch (e) {
