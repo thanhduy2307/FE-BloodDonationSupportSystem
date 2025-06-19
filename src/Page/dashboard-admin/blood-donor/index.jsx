@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Table } from "antd";
 import api from "../../../configs/axios";
+import { toast } from "react-toastify";
 
 const BloodDonationList = () => {
   const [donors, setDonors] = useState([]);
@@ -11,6 +12,7 @@ const BloodDonationList = () => {
       setDonors(response.data);
     } catch (error) {
       console.error("Failed to fetch donor list", error);
+      toast.error("Failed to fetch blood donation list. Please try again later.");
     }
   };
 
