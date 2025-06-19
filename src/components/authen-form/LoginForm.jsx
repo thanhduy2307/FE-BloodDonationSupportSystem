@@ -27,7 +27,10 @@ const LoginForm = () => {
         navigate("/dashboard/overview");
       } else if (user.role === "USER") {
         navigate("/");
+      }else if (user.role === "STAFF") {
+        navigate("/dashboard-staff");
       }
+
     } catch (e) {
       console.log(e);
       toast.error(e?.response?.data || "Đã xảy ra lỗi khi đăng nhập");

@@ -18,6 +18,7 @@ import Feedback from "./Page/feedback";
 import RequestForm from "./Page/register-form-request-blood";
 import ManageFeedback from "./Page/dashboard-admin/feedback";
 import Dashboard from "./components/dashboard";
+import DashboardStaff from "./components/dashboard/dashboardstaff";
 
 
 function App() {
@@ -74,6 +75,21 @@ function App() {
       ],
     },
     {
+      path: "/dashboard-staff",
+      element: <DashboardStaff/>,
+      children: [
+  
+        {
+          path: "user",
+          element: <ManageUser />,
+        },
+        {
+          path: "feedback",
+          element: <ManageFeedback />,
+        },
+      ],
+    },
+    {
       path: "profile",
       element: <UserProfile />,
     },
@@ -89,6 +105,7 @@ function App() {
       path: "requestForm",
       element: <RequestForm/>,
     },
+    
   ]);
 
   return (
