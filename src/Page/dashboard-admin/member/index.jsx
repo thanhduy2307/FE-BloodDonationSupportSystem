@@ -19,7 +19,17 @@ function ManageUser() {
   useEffect(() => {
     fetchUser();
   }, []);
-
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    try {
+      await api.delete(`profiles/${id}`);
+      toast.success("User deleted successfully");
+      fetchUser(); 
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete user");
+    }
+  };
   const columns = [
     {
       title: "ID",
@@ -43,8 +53,25 @@ function ManageUser() {
     },
     {
       title: "Role",
-      dataIndex: "PhoneNumber",
-      key: "PhoneNumber",
+      dataIndex: "role",
+      key: "role",
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => (
+        <button
+          onClick={() => handleDelete(record.id)}
+          style={{
+            color: "red",
+            border: "none",
+            background: "transparent",
+            cursor: "pointer",
+          }}
+        >
+          Delete
+        </button>
+      ),
     },
   ];
 
