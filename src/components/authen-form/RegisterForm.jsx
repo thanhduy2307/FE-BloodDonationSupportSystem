@@ -11,7 +11,7 @@ const RegisterForm = () => {
 
   const onFinish = async (values) => {
     try {
-      await api.post('register', values);
+      await api.post('Auth/register', values);
       toast.success('Tạo tài khoản thành công!');
       navigate('/login');
     } catch (e) {
@@ -47,7 +47,7 @@ const RegisterForm = () => {
         >
           <Form.Item
             label="Họ và tên"
-            name="fullName"
+            name="name"
             rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
           >
             <Input placeholder="Nguyễn Văn A" />
@@ -63,14 +63,15 @@ const RegisterForm = () => {
           >
             <Input placeholder="example@email.com" />
           </Form.Item>
-
-          <Form.Item
-            label="Tên đăng nhập"
-            name="username"
-            rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
+            <Form.Item
+            label="Phone Number"
+            name="phoneNumber"
+            rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
+            hasFeedback
           >
-            <Input placeholder="username123" />
+            <Input.Password placeholder="Nhập số điện thoại" />
           </Form.Item>
+         
 
           <Form.Item
             label="Mật khẩu"
@@ -81,7 +82,7 @@ const RegisterForm = () => {
             <Input.Password placeholder="Nhập mật khẩu" />
           </Form.Item>
 
-          <Form.Item
+          {/* <Form.Item
             label="Xác nhận mật khẩu"
             name="confirm"
             dependencies={['password']}
@@ -99,11 +100,9 @@ const RegisterForm = () => {
             ]}
           >
             <Input.Password placeholder="Nhập lại mật khẩu" />
-          </Form.Item>
+          </Form.Item> */}
 
-          <Form.Item name="remember" valuePropName="checked">
-            <Checkbox>Tôi đồng ý với điều khoản và chính sách</Checkbox>
-          </Form.Item>
+          
 
           <Form.Item>
             <Button

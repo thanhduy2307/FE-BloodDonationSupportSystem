@@ -25,7 +25,7 @@ function getItem(label, key, icon, children) {
 const items = [
   getItem("User", "member-staff", <UserOutlined />),
   getItem("Feedback", "feedback-staff", <DesktopOutlined />),
-  getItem("Request", "request", < DesktopOutlined />),
+  getItem("Donor List", "donorList-staff", < DesktopOutlined />),
   getItem("donationEvent", "donation-event", < DesktopOutlined />),
   getItem("Request", "request-staff", < DesktopOutlined />),
 

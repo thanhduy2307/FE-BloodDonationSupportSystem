@@ -93,6 +93,10 @@ function App() {
           path: "member-staff",
           element: <StaffMember />,
         },
+        {
+          path: "donorList-staff",
+          element: <BloodDonationList/>
+        }
       ],
     },
     {
