@@ -23,6 +23,7 @@ import StaffFeedback from "./Page/dashboard-staff/feedback";
 import StaffMember from "./Page/dashboard-staff/member";
 import BloodDonationList from "./Page/dashboard-admin/blood-donor";
 import BloodRequestList from "./Page/dashboard-staff/request-blood";
+import ManageBlogs from "./Page/dashboard-staff/blogs";
 
 
 function App() {
@@ -105,6 +106,10 @@ function App() {
          {
           path: "requestList-staff",
           element: <BloodRequestList/>
+        },
+         {
+          path: "manageBlogs",
+          element: <ManageBlogs/>
         },
       ],
     },
