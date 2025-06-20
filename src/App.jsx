@@ -22,6 +22,7 @@ import DashboardStaff from "./components/dashboard/dashboardstaff";
 import StaffFeedback from "./Page/dashboard-staff/feedback";
 import StaffMember from "./Page/dashboard-staff/member";
 import BloodDonationList from "./Page/dashboard-admin/blood-donor";
+import BloodRequestList from "./Page/dashboard-staff/request-blood";
 
 
 function App() {
@@ -79,6 +80,10 @@ function App() {
           path: "bloodDonor",
           element: <BloodDonationList/>
         },
+        {
+          path: "requestBlood",
+          element: <BloodRequestList/>
+        },
       ],
     },
     {
@@ -96,7 +101,11 @@ function App() {
         {
           path: "donorList-staff",
           element: <BloodDonationList/>
-        }
+        },
+         {
+          path: "requestList-staff",
+          element: <BloodRequestList/>
+        },
       ],
     },
     {
