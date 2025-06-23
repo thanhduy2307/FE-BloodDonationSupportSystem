@@ -10,33 +10,58 @@ import { User, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { login } from '../../redux/features/userSlice';
 import api from '../../configs/axios';
+import axios from 'axios';
 
 
 const LoginForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const onFinish = async (values) => {
-    try {
-      const response = await api.post('login', values);
-      dispatch(login(response.data.data));
-      localStorage.setItem("token", response.data.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-      const user = response.data.data;
-      if (user.role === "ADMIN") {
-        navigate("/dashboard/overview");
-      } else if (user.role === "USER") {
-        navigate("/");
-      }else if (user.role === "STAFF") {
-        navigate("/dashboard-staff/user");
-      }
+  // const onFinish = async (values) => {
+  //   try {
+  //     const response = await axios.post('https://ae7d-14-226-226-52.ngrok-free.app/api/Auth/login', values);
+  //     dispatch(login(response.data));
+  //     localStorage.setItem("token", response.data.token);
+  //     localStorage.setItem("user", JSON.stringify(response.data.user));
+  //     // const user = response.data.data;
+  //     // // if (user.role === "ADMIN") {
+  //     // //   navigate("/dashboard/overview");
+  //     // // } else if (user.role === "USER") {
+  //     // //   navigate("/");
+  //     // // }else if (user.role === "STAFF") {
+  //     // //   navigate("/dashboard-staff/user");
+  //     // // }
 
-    } catch (e) {
-      console.log(e);
-      toast.error(e?.response?.data || "Đã xảy ra lỗi khi đăng nhập");
+  //   } catch (e) {
+  //     console.log(e);
+  //     toast.error(e?.response?.data || "Đã xảy ra lỗi khi đăng nhập");
+  //   }
+  // };
+const onFinish = async (values) => {
+  try {
+    const response = await axios.post('https://ae7d-14-226-226-52.ngrok-free.app/api/Auth/login', values);
+
+    const { token, user } = response.data || {};
+
+    if (!token || !user) {
+      toast.error("Login không thành công: thiếu token hoặc user");
+      return;
     }
-  };
 
+    // Chỉ toast thành công
+    toast.success("Đăng nhập thành công!");
+
+    // Lưu lại token và user nếu muốn
+    dispatch(login(user));
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+
+    // Không chuyển trang
+  } catch (e) {
+    console.log("Login error:", e);
+    toast.error(e?.response?.data?.message || "Đã xảy ra lỗi khi đăng nhập");
+  }
+};
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
@@ -63,8 +88,8 @@ const LoginForm = () => {
           onFinishFailed={onFinishFailed}
         >
           <Form.Item
-            label="Tên đăng nhập"
-            name="username"
+            label="Email"
+            name="email"
             rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
           >
             <Input
