@@ -1,27 +1,27 @@
-import React from 'react';
-import { Button, Checkbox, Form, Input } from 'antd';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { Droplet } from 'lucide-react';
-import api from '../../configs/axios';
-import './register.css';
+import React from "react";
+import { Button, Checkbox, Form, Input } from "antd";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { Droplet } from "lucide-react";
+import api from "../../configs/axios";
+import "./register.css";
 
 const RegisterForm = () => {
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
     try {
-      await api.post('Auth/register', values);
-      toast.success('Tạo tài khoản thành công!');
-      navigate('/login');
+      await api.post("Auth/register", values);
+      toast.success("Tạo tài khoản thành công!");
+      navigate("/login");
     } catch (e) {
       console.log(e);
-      toast.error(e?.response?.data );
+      toast.error(e?.response?.data);
     }
   };
 
   const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
+    console.log("Failed:", errorInfo);
   };
 
   return (
@@ -32,7 +32,9 @@ const RegisterForm = () => {
             <Droplet className="text-red-600 mr-2" size={32} />
             <span className="text-2xl font-bold text-red-600">HeartDrop</span>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Đăng ký tài khoản</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            Đăng ký tài khoản
+          </h2>
           <p className="text-gray-600">
             Tham gia cộng đồng hiến máu nhân đạo ngay hôm nay
           </p>
@@ -48,7 +50,7 @@ const RegisterForm = () => {
           <Form.Item
             label="Họ và tên"
             name="name"
-            rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
+            rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
           >
             <Input placeholder="Nguyễn Văn A" />
           </Form.Item>
@@ -57,29 +59,30 @@ const RegisterForm = () => {
             label="Email"
             name="email"
             rules={[
-              { required: true, message: 'Vui lòng nhập email!' },
-              { type: 'email', message: 'Email không hợp lệ!' },
+              { required: true, message: "Vui lòng nhập email!" },
+              { type: "email", message: "Email không hợp lệ!" },
             ]}
           >
             <Input placeholder="example@email.com" />
           </Form.Item>
-            <Form.Item
-            label="Phone Number"
-            name="phoneNumber"
-            rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
-            hasFeedback
-          >
-            <Input.Password placeholder="Nhập số điện thoại" />
-          </Form.Item>
-         
-
           <Form.Item
             label="Mật khẩu"
             name="password"
-            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
             hasFeedback
           >
             <Input.Password placeholder="Nhập mật khẩu" />
+          </Form.Item>
+
+          <Form.Item
+            label="Phone Number"
+            name="phoneNumber"
+            rules={[
+              { required: true, message: "Vui lòng nhập số điện thoại!" },
+            ]}
+            hasFeedback
+          >
+            <Input.Password placeholder="Nhập số điện thoại" />
           </Form.Item>
 
           {/* <Form.Item
@@ -102,8 +105,6 @@ const RegisterForm = () => {
             <Input.Password placeholder="Nhập lại mật khẩu" />
           </Form.Item> */}
 
-          
-
           <Form.Item>
             <Button
               type="primary"
@@ -116,8 +117,11 @@ const RegisterForm = () => {
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Đã có tài khoản?{' '}
-              <a href="/login" className="font-medium text-red-600 hover:text-red-500">
+              Đã có tài khoản?{" "}
+              <a
+                href="/login"
+                className="font-medium text-red-600 hover:text-red-500"
+              >
                 Đăng nhập
               </a>
             </p>
