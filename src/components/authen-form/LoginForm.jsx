@@ -1,6 +1,7 @@
-import React from 'react';
-import { Form, Input, Button, Checkbox } from 'antd';
+import React from "react";
+import { Form, Input, Button, Checkbox } from "antd";
 
+<<<<<<< Updated upstream
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -11,12 +12,24 @@ import { Link } from 'react-router-dom';
 import { login } from '../../redux/features/userSlice';
 import api from '../../configs/axios';
 import axios from 'axios';
+=======
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { User, Lock } from "lucide-react";
+>>>>>>> Stashed changes
 
+import { Link } from "react-router-dom";
+import { login } from "../../redux/features/userSlice";
+import api from "../../configs/axios";
+import axios from "axios";
 
 const LoginForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  
 
+<<<<<<< Updated upstream
   // const onFinish = async (values) => {
   //   try {
   //     const response = await axios.post('https://ae7d-14-226-226-52.ngrok-free.app/api/Auth/login', values);
@@ -46,6 +59,26 @@ const onFinish = async (values) => {
     if (!token || !user) {
       toast.error("Login không thành công: thiếu token hoặc user");
       return;
+=======
+  const onFinish = async (values) => {
+    try {
+      const response = await axios.post(
+        "https://ae7d-14-226-226-52.ngrok-free.app/api/Auth/login", values);
+      dispatch(login(response.data.data));
+      localStorage.setItem("token", response.data.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      const user = response.data.data;
+      if (user.role === "ADMIN") {
+        navigate("/dashboard/overview");
+      } else if (user.role === "USER") {
+        navigate("/");
+      } else if (user.role === "STAFF") {
+        navigate("/dashboard-staff/user");
+      }
+    } catch (e) {
+      console.log(e);
+      toast.error(e?.response?.data || "Đã xảy ra lỗi khi đăng nhập");
+>>>>>>> Stashed changes
     }
 
     // Chỉ toast thành công
@@ -63,7 +96,7 @@ const onFinish = async (values) => {
   }
 };
   const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
+    console.log("Failed:", errorInfo);
   };
 
   return (
@@ -88,9 +121,17 @@ const onFinish = async (values) => {
           onFinishFailed={onFinishFailed}
         >
           <Form.Item
+<<<<<<< Updated upstream
             label="Email"
             name="email"
             rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
+=======
+            label="Tên đăng nhập"
+            name="email"
+            rules={[
+              { required: true, message: "Vui lòng nhập tên đăng nhập!" },
+            ]}
+>>>>>>> Stashed changes
           >
             <Input
               prefix={<User className="text-gray-400 mr-2" size={16} />}
@@ -101,7 +142,7 @@ const onFinish = async (values) => {
           <Form.Item
             label="Mật khẩu"
             name="password"
-            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
           >
             <Input.Password
               prefix={<Lock className="text-gray-400 mr-2" size={16} />}
@@ -124,8 +165,11 @@ const onFinish = async (values) => {
           </Form.Item>
 
           <div className="text-center text-sm text-gray-600">
-            Chưa có tài khoản?{' '}
-            <Link to="/register" className="font-medium text-red-600 hover:text-red-500">
+            Chưa có tài khoản?{" "}
+            <Link
+              to="/register"
+              className="font-medium text-red-600 hover:text-red-500"
+            >
               Đăng ký ngay
             </Link>
           </div>
