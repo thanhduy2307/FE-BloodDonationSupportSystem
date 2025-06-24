@@ -88,7 +88,14 @@ const onFinish = async (values) => {
     dispatch(login(user));
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
-
+     user = response.data.data;
+      if (user.role === "1") {
+        navigate("/dashboard/overview");
+      } else if (user.role === "2") {
+        navigate("/");
+      }else if (user.role === "3") {
+        navigate("/dashboard-staff/user");
+      }
     // Không chuyển trang
   } catch (e) {
     console.log("Login error:", e);
