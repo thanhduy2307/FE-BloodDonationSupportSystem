@@ -29,6 +29,7 @@ const items = [
   getItem("donationEvent", "donation-event", < DesktopOutlined />),
   getItem("Request List", "requestList-staff", < DesktopOutlined />),
   getItem("Blogs", "manageBlogs", < DesktopOutlined />),
+  getItem("Notification", "notification", < DesktopOutlined />),
 
 ];
 

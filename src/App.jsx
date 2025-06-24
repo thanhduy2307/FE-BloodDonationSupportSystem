@@ -24,6 +24,7 @@ import StaffMember from "./Page/dashboard-staff/member";
 import BloodDonationList from "./Page/dashboard-admin/blood-donor";
 import BloodRequestList from "./Page/dashboard-staff/request-blood";
 import ManageBlogs from "./Page/dashboard-staff/blogs";
+import NotificationPage from "./Page/dashboard-staff/notification";
 
 
 function App() {
@@ -110,6 +111,10 @@ function App() {
          {
           path: "manageBlogs",
           element: <ManageBlogs/>
+        },
+         {
+          path: "notification",
+          element: <NotificationPage/>
         },
       ],
     },
