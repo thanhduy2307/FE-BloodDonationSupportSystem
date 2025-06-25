@@ -9,6 +9,7 @@ import {
 import CreateBloodEvent from "./formCreateEvent";
 import api from "../../../configs/axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const EventTable = ({ data, onView, onEdit, onDelete, onCreate }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,20 +17,27 @@ const EventTable = ({ data, onView, onEdit, onDelete, onCreate }) => {
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
-
+const navigate = useNavigate()
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
 
-  const handleFormSubmit = (formData) => {
-    onCreate(formData); 
-    handleCloseModal();
+  const handleFormSubmit = async() => {
+    try {
+        await api.post("event");
+        toast.success("Tạo sự kiện thành công!");
+        navigate("/eventStaff");
+      } catch (error) {
+        console.error(error);
+        toast.error("Đã có lỗi xảy ra khi tạo mới.");
+      }
+   
   };
   const fetchEvent= async ()=>{
     try {
         const response = await api.get('event')
         setEvent(response.data)
-        
+
     } catch (error) {
         console.log(error)
         toast.error('Failed to fetch Event')
