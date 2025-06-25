@@ -68,7 +68,7 @@ const BloodDonationForm = () => {
 
           {/* Số điện thoại */}
           <div className="md:col-span-2">
-            <label className="block text-gray-700 mb-1 font-medium" name= >
+            <label className="block text-gray-700 mb-1 font-medium"  >
               Số điện thoại
             </label>
             <input
