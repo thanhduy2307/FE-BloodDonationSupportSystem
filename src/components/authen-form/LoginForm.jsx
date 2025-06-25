@@ -10,7 +10,7 @@ import { User, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { login } from '../../redux/features/userSlice';
 import api from '../../configs/axios';
-import axios from 'axios';
+
 
 
 const LoginForm = () => {
@@ -20,7 +20,7 @@ const LoginForm = () => {
 
 const onFinish = async (values) => {
   try {
-    const response = await axios.post('https://6568-14-226-226-52.ngrok-free.app/api/Auth/login', values);
+    const response = await api.post('Auth/login', values);
 
     const { token, user } = response.data || {};
 
@@ -35,11 +35,11 @@ const onFinish = async (values) => {
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
     
-      if (user.role == "2") {
+      if (user.role == "3") {
         navigate("/dashboard/overview");
       } else if (user.role == "1") {
         navigate("/");
-      }else if (user.role == "3") {
+      }else if (user.role == "2") {
         navigate("/dashboard-staff/user");
       }
   
