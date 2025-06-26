@@ -9,7 +9,7 @@ const BloodDonationList = () => {
   const fetchData = async () => {
     try {
       const response = await api.get("/blood-donations"); 
-      setDonors(response.data);
+      setDonors(response.data.data);
     } catch (error) {
       console.error("Failed to fetch donor list", error);
       toast.error("Failed to fetch blood donation list. Please try again later.");

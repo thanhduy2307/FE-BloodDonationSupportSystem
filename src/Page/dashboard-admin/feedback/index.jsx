@@ -9,7 +9,7 @@ function ManageFeedback() {
   const fetchFeedBack = async () => {
     try {
       const response = await api.get("feedback");
-      setDatas(response.data);
+      setDatas(response.data.data);
     } catch (error) {
       console.error(error);
       toast.error("Failed to fetch feedback");

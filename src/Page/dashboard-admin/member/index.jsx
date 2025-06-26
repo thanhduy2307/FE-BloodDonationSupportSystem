@@ -8,8 +8,10 @@ function ManageUser() {
 
   const fetchUser = async () => {
     try {
-      const response = await api.get("profiles");
-      setDatas(response.data);
+      const response = await api.get("User/profile");
+      console.log("Fetched users:", response.data.data);
+
+      setDatas(response.data.data);
     } catch (error) {
       console.error(error);
       toast.error("Failed to fetch profiles");
@@ -48,7 +50,7 @@ function ManageUser() {
     },
     {
       title: "Full Name",
-      dataIndex: "Fullname",
+      dataIndex: "fullName",
       key: "Fullname",
     },
     {
@@ -58,7 +60,7 @@ function ManageUser() {
     },
     {
       title: "Phone Number",
-      dataIndex: "PhoneNumber",
+      dataIndex: "phoneNumber",
       key: "PhoneNumber",
     },
     {
