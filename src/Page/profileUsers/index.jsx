@@ -47,11 +47,11 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-<<<<<<< HEAD
-        const response = await api.get("User/update-profile");
-=======
+
+       
+
         const response = await api.get("User/profile");
->>>>>>> 87e639c970ce37381fef044745b18bf7c4f443c5
+
         setUser(response.data);
       } catch (error) {
         console.error("Lỗi khi lấy thông tin người dùng:", error);

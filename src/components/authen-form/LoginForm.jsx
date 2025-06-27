@@ -45,7 +45,7 @@ const onFinish = async (values) => {
   
   } catch (e) {
     console.log("Login error:", e);
-    toast.error(e?.response?.data?.message || "Đã xảy ra lỗi khi đăng nhập");
+    toast.error(e?.response?.data?.message );
   }
 };
   const onFinishFailed = (errorInfo) => {

@@ -7,14 +7,26 @@ const BlogSection = () => {
   const [blogPosts, setBlogPosts] = useState([]);
 
   useEffect(() => {
-    api.get('blogs')
-      .then((res) => {
-        setBlogPosts(res.data);
-      })
-      .catch((err) => {
-        console.error("Lỗi khi lấy danh sách blogs:", err);
-      });
-  }, []);
+  api.get('Blog/getAllBlog')
+    .then((res) => {
+      const data = res.data;
+
+      // Kiểm tra nếu response có .data là mảng
+      if (Array.isArray(data)) {
+        setBlogPosts(data);
+      } else if (Array.isArray(data.data)) {
+        setBlogPosts(data.data);
+      } else {
+        console.error("Cấu trúc không hợp lệ:", data);
+        setBlogPosts([]); // fallback
+      }
+    })
+    .catch((err) => {
+      console.error("Lỗi khi lấy danh sách blogs:", err);
+      setBlogPosts([]);
+    });
+}, []);
+
 
   return (
     <section id="blog" className="py-16 bg-white">
