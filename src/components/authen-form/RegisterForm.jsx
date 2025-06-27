@@ -1,22 +1,29 @@
 import React from "react";
-import { Button, Checkbox, Form, Input } from "antd";
+import { Button, Form, Input, Select, DatePicker } from "antd";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Droplet } from "lucide-react";
 import api from "../../configs/axios";
 import "./register.css";
 
+const { Option } = Select;
+
 const RegisterForm = () => {
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
+    const formattedValues = {
+      ...values,
+      dateOfBirth: values.dateOfBirth.format("YYYY-MM-DD"),
+    };
+
     try {
-      await api.post("Auth/register", values);
+      await api.post("Auth/register", formattedValues );
       toast.success("Tạo tài khoản thành công!");
       navigate("/login");
     } catch (e) {
       console.log(e);
-      toast.error(e?.response?.data);
+      toast.error("Đăng ký thất bại!");
     }
   };
 
@@ -65,6 +72,7 @@ const RegisterForm = () => {
           >
             <Input placeholder="example@email.com" />
           </Form.Item>
+
           <Form.Item
             label="Mật khẩu"
             name="password"
@@ -75,35 +83,55 @@ const RegisterForm = () => {
           </Form.Item>
 
           <Form.Item
-            label="Phone Number"
+            label="Số điện thoại"
             name="phoneNumber"
             rules={[
               { required: true, message: "Vui lòng nhập số điện thoại!" },
             ]}
             hasFeedback
           >
-            <Input.Password placeholder="Nhập số điện thoại" />
+            <Input placeholder="Nhập số điện thoại" />
           </Form.Item>
 
-          {/* <Form.Item
-            label="Xác nhận mật khẩu"
-            name="confirm"
-            dependencies={['password']}
+          <Form.Item
+            label="Giới tính"
+            name="gender"
+            rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
             hasFeedback
-            rules={[
-              { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue('password') === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(new Error('Mật khẩu không khớp!'));
-                },
-              }),
-            ]}
           >
-            <Input.Password placeholder="Nhập lại mật khẩu" />
-          </Form.Item> */}
+            <Input placeholder="Nhập địa chỉ" />
+          </Form.Item>
+
+          <Form.Item
+            label="Địa chỉ"
+            name="address"
+            rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
+            hasFeedback
+          >
+            <Input placeholder="Nhập địa chỉ" />
+          </Form.Item>
+
+          <Form.Item
+            label="Ngày sinh"
+            name="dateOfBirth"
+            rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}
+            hasFeedback
+          >
+            <DatePicker
+              style={{ width: "100%" }}
+              format="YYYY-MM-DD"
+              placeholder="Chọn ngày sinh"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Nhóm máu"
+            name="bloodGroup"
+            rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
+            hasFeedback
+          >
+            <Input placeholder="Nhập địa chỉ" />
+          </Form.Item>
 
           <Form.Item>
             <Button

@@ -15,20 +15,22 @@ const RequestForm = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (values) => {
+    
     try {
       const data = {
         userId: user.id,
-        bloodGroup: values.bloodGroup,
+        bloodGroup: values.BloodType,
         quantity: values.quantity,
         requestDate: values.requestDate.format("YYYY-MM-DD"),
       };
-
-      await api.post("/bloodrequests", data);
+      
+      await api.post("User/request", data);
       toast.success("Đã gửi yêu cầu thành công!");
       form.resetFields();
     } catch (error) {
       toast.error("Gửi yêu cầu thất bại!");
     }
+    
   };
 
   return (
@@ -72,7 +74,9 @@ const RequestForm = () => {
           <Form.Item
             name="quantity"
             label="Số lượng (đơn vị) – 1 đơn vị ~ 250ml"
-            rules={[{ required: true, message: "Vui lòng nhập số lượng máu cần" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập số lượng máu cần" },
+            ]}
           >
             <InputNumber min={1} className="w-full" />
           </Form.Item>
