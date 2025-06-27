@@ -47,7 +47,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await api.get("profile");
+        const response = await api.get("User/profile");
         setUser(response.data);
       } catch (error) {
         console.error("Lỗi khi lấy thông tin người dùng:", error);
