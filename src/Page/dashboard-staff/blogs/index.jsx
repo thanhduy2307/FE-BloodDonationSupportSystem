@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Table,
-  Button,
-  Popconfirm,
-  message,
-  Modal,
-  Form,
-  Input,
-} from "antd";
+import { Table, Button, Popconfirm, message, Modal, Form, Input } from "antd";
 import api from "../../../configs/axios";
 import { Pencil, Trash2 } from "lucide-react";
 
@@ -25,6 +17,7 @@ const ManageBlogs = () => {
     try {
       const res = await api.get("Blog/getAllBlog");
       setBlogs(res.data);
+      console.log("📦 Danh sách blog:", res.data);
     } catch {
       message.error("Không thể tải danh sách blog!");
     }
@@ -53,9 +46,10 @@ const ManageBlogs = () => {
 
   const openEditModal = async (blog) => {
     try {
-      const res = await api.get(`/Blog/${blog.blogId}`);
+      const res = await api.get(`/Blog/getBlog/${blog.blogId}`);
       const blogData = res.data;
-
+      console.log("📡 Gọi API Blog:", `/Blog/${blog.blogId}`);
+      setModalVisible(true);
       form.setFieldsValue({
         title: blogData.title,
         image: blogData.image,
@@ -65,7 +59,6 @@ const ManageBlogs = () => {
 
       setCurrentBlog(blog);
       setIsEditing(true);
-      setModalVisible(true);
     } catch (err) {
       console.error("❌ Lỗi khi load blog:", err);
       message.error("Không thể tải dữ liệu bài viết!");
@@ -116,11 +109,7 @@ const ManageBlogs = () => {
       dataIndex: "image",
       key: "image",
       render: (url) => (
-        <img
-          src={url}
-          alt="thumb"
-          className="w-16 h-16 object-cover rounded"
-        />
+        <img src={url} alt="thumb" className="w-16 h-16 object-cover rounded" />
       ),
     },
     {
@@ -133,31 +122,29 @@ const ManageBlogs = () => {
       ),
     },
     {
-  title: "Hành động",
-  key: "action",
-  render: (_, record) => (
-    <div className="flex gap-2">
-      <Button
-        type="text"
-        icon={<Pencil className="w-4 h-4 text-blue-500" />}
-        onClick={() => openEditModal(record)}
-      />
-      <Popconfirm
-        title="Bạn có chắc muốn xoá?"
-        onConfirm={() => handleDelete(record.blogId)}
-        okText="Xoá"
-        cancelText="Huỷ"
-      >
-        <Button
-          type="text"
-          danger
-          icon={<Trash2 className="w-4 h-4" />}
-        />
-      </Popconfirm>
-    </div>
-  ),
-}
-
+      title: "Hành động",
+      key: "action",
+      render: (_, record) => (
+        <div className="flex gap-2">
+          <Button
+            type="text"
+            icon={<Pencil className="w-4 h-4 text-blue-500" />}
+            onClick={() => {
+              console.log("🛠️ Bấm sửa blog:", record);
+              openEditModal(record);
+            }}
+          />
+          <Popconfirm
+            title="Bạn có chắc muốn xoá?"
+            onConfirm={() => handleDelete(record.blogId)}
+            okText="Xoá"
+            cancelText="Huỷ"
+          >
+            <Button type="text" danger icon={<Trash2 className="w-4 h-4" />} />
+          </Popconfirm>
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -191,7 +178,6 @@ const ManageBlogs = () => {
         okText={isEditing ? "Cập nhật" : "Đăng bài"}
         cancelText="Huỷ"
         centered
-        destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item
