@@ -22,12 +22,10 @@ const onFinish = async (values) => {
   try {
     const response = await api.post('Auth/login', values);
 
-    const { token, user } = response.data || {};
+   const { token, ...user } = response.data;
 
-    if (!token || !user) {
-      toast.error("Login không thành công: thiếu token hoặc user");
-      return;
-    }
+ 
+    
     toast.success("Đăng nhập thành công!");
     
 
@@ -35,14 +33,14 @@ const onFinish = async (values) => {
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
     
-      if (user.role == "3") {
+      if (user.role == "Admin") {
         navigate("/dashboard/overview");
-      } else if (user.role == "1") {
+      } else if (user.role == "User") {
         navigate("/");
-      }else if (user.role == "2") {
+      }else if (user.role == "Staff") {
         navigate("/dashboard-staff/user");
       }
-  
+  console.log("User role:", user.role);
   } catch (e) {
     console.log("Login error:", e);
     toast.error(e?.response?.data?.message );
