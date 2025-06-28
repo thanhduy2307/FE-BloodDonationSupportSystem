@@ -10,7 +10,7 @@ const BloodDonationList = () => {
 
   const fetchData = async () => {
     try {
-      const response = await api.get("/blood-donations");
+      const response = await api.get("User/donations");
       console.log("Data:", response.data); // debug
       setDonors(response.data);
       setFilteredDonors(response.data);

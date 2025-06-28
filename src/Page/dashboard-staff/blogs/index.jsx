@@ -1,8 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Popconfirm, message, Modal, Form, Input } from "antd";
-import { useNavigate } from "react-router-dom";
-import dayjs from "dayjs";
+import {
+  Table,
+  Button,
+  Popconfirm,
+  message,
+  Modal,
+  Form,
+  Input,
+} from "antd";
 import api from "../../../configs/axios";
+import { Pencil, Trash2 } from "lucide-react";
 
 const ManageBlogs = () => {
   const [blogs, setBlogs] = useState([]);
@@ -10,12 +17,14 @@ const ManageBlogs = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentBlog, setCurrentBlog] = useState(null);
   const [form] = Form.useForm();
-  const navigate = useNavigate();
+
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedBlog, setSelectedBlog] = useState(null);
 
   const fetchBlogs = async () => {
     try {
       const res = await api.get("Blog/getAllBlog");
-      setBlogs(res.data.data);
+      setBlogs(res.data);
     } catch {
       message.error("Không thể tải danh sách blog!");
     }
@@ -25,62 +34,67 @@ const ManageBlogs = () => {
     fetchBlogs();
   }, []);
 
-  // const handleDelete = async (id) => {
-  //   try {
-  //     await api.delete(`/blogs/${id}`);
-  //     message.success("Xoá thành công!");
-  //     fetchBlogs();
-  //   } catch {
-  //     message.error("Xoá thất bại!");
-  //   }
-  // };
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/Blog/delete/${id}`);
+      message.success("Xoá thành công!");
+      fetchBlogs();
+    } catch {
+      message.error("Xoá thất bại!");
+    }
+  };
 
-//   const openCreateModal = () => {
-//     form.resetFields();
-//     setIsEditing(false);
-//     setCurrentBlog(null);
-//     setModalVisible(true);
-//   };
+  const openCreateModal = () => {
+    form.resetFields();
+    setIsEditing(false);
+    setCurrentBlog(null);
+    setModalVisible(true);
+  };
 
-//   const openEditModal = async (blog) => {
-//   try {
-//     const res = await api.get(`/blogs/${blog.id}`);
-//     const blogData = res.data;
+  const openEditModal = async (blog) => {
+    try {
+      const res = await api.get(`/Blog/${blog.blogId}`);
+      const blogData = res.data;
 
-//     form.setFieldsValue({
-//       title: blogData.title,
-//       image: blogData.image,
-//       link: blogData.link,
-//       description: blogData.description,
-//     });
+      form.setFieldsValue({
+        title: blogData.title,
+        image: blogData.image,
+        link: blogData.link,
+        description: blogData.description,
+      });
 
-//     setCurrentBlog(blog);
-//     setIsEditing(true);
-//     setModalVisible(true);
-//   } catch (err) {
-//     console.error("❌ Lỗi khi load blog:", err);
-//     message.error("Không thể tải dữ liệu bài viết!");
-//   }
-// };
+      setCurrentBlog(blog);
+      setIsEditing(true);
+      setModalVisible(true);
+    } catch (err) {
+      console.error("❌ Lỗi khi load blog:", err);
+      message.error("Không thể tải dữ liệu bài viết!");
+    }
+  };
 
-  // const handleSubmit = async () => {
-  //   try {
-  //     const values = await form.validateFields();
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
 
-  //     if (isEditing && currentBlog) {
-  //       await api.put(`/Blog/update/${currentBlog.id}`, values);
-  //       message.success("Cập nhật thành công!");
-  //     } else {
-  //       await api.post("/Blog/create", values);
-  //       message.success("Tạo bài viết thành công!");
-  //     }
+      if (isEditing && currentBlog) {
+        await api.put(`/Blog/update/${currentBlog.blogId}`, values);
+        message.success("Cập nhật thành công!");
+      } else {
+        await api.post("/Blog/create", values);
+        message.success("Tạo bài viết thành công!");
+      }
 
-  //     setModalVisible(false);
-  //     fetchBlogs();
-  //   } catch {
-  //     message.error("Có lỗi xảy ra!");
-  //   }
-  // };
+      setModalVisible(false);
+      fetchBlogs();
+    } catch {
+      message.error("Có lỗi xảy ra!");
+    }
+  };
+
+  const openDetailModal = (blog) => {
+    setSelectedBlog(blog);
+    setDetailModalVisible(true);
+  };
 
   const columns = [
     {
@@ -92,40 +106,58 @@ const ManageBlogs = () => {
       ),
     },
     {
-      title: "Tác giả",
-      dataIndex: ["author", "fullName"],
-      key: "author",
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+      ellipsis: true,
     },
     {
-      title: "Ngày đăng",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (date) => dayjs(date).format("DD/MM/YYYY"),
-    },
-    {
-      title: "Hành động",
-      key: "action",
-      render: (_, record) => (
-        <div className="flex gap-2">
-          <Button type="link" onClick={() => navigate(`/blogs/${record.id}`)}>
-            Xem
-          </Button>
-          {/* <Button type="link" onClick={() => openEditModal(record)}>
-            Sửa
-          </Button> */}
-          {/* <Popconfirm
-            title="Bạn có chắc muốn xoá?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Xoá"
-            cancelText="Huỷ"
-          >
-            <Button type="link" danger>
-              Xoá
-            </Button>
-          </Popconfirm> */}
-        </div>
+      title: "Ảnh",
+      dataIndex: "image",
+      key: "image",
+      render: (url) => (
+        <img
+          src={url}
+          alt="thumb"
+          className="w-16 h-16 object-cover rounded"
+        />
       ),
     },
+    {
+      title: "Xem chi tiết",
+      key: "view",
+      render: (_, record) => (
+        <Button type="link" onClick={() => openDetailModal(record)}>
+          Xem chi tiết
+        </Button>
+      ),
+    },
+    {
+  title: "Hành động",
+  key: "action",
+  render: (_, record) => (
+    <div className="flex gap-2">
+      <Button
+        type="text"
+        icon={<Pencil className="w-4 h-4 text-blue-500" />}
+        onClick={() => openEditModal(record)}
+      />
+      <Popconfirm
+        title="Bạn có chắc muốn xoá?"
+        onConfirm={() => handleDelete(record.blogId)}
+        okText="Xoá"
+        cancelText="Huỷ"
+      >
+        <Button
+          type="text"
+          danger
+          icon={<Trash2 className="w-4 h-4" />}
+        />
+      </Popconfirm>
+    </div>
+  ),
+}
+
   ];
 
   return (
@@ -136,7 +168,7 @@ const ManageBlogs = () => {
           <Button
             type="primary"
             className="bg-red-600"
-            // onClick={openCreateModal}
+            onClick={openCreateModal}
           >
             + Tạo mới
           </Button>
@@ -145,14 +177,15 @@ const ManageBlogs = () => {
         <Table
           dataSource={blogs}
           columns={columns}
-          rowKey="id"
+          rowKey="blogId"
           pagination={{ pageSize: 6 }}
         />
       </div>
 
-      {/* <Modal
+      {/* Modal Thêm/Sửa Blog */}
+      <Modal
         title={isEditing ? "Chỉnh sửa bài viết" : "Tạo bài viết mới"}
-        visible={modalVisible}
+        open={modalVisible}
         onCancel={() => setModalVisible(false)}
         onOk={handleSubmit}
         okText={isEditing ? "Cập nhật" : "Đăng bài"}
@@ -195,7 +228,38 @@ const ManageBlogs = () => {
             <Input.TextArea rows={4} />
           </Form.Item>
         </Form>
-      </Modal> */}
+      </Modal>
+
+      {/* Modal Chi tiết Blog */}
+      <Modal
+        title="Chi tiết bài viết"
+        open={detailModalVisible}
+        onCancel={() => setDetailModalVisible(false)}
+        footer={null}
+        centered
+      >
+        {selectedBlog && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold text-red-600">
+              {selectedBlog.title}
+            </h2>
+            <img
+              src={selectedBlog.image}
+              alt="Ảnh blog"
+              className="w-full max-h-64 object-cover rounded"
+            />
+            <p className="text-gray-800">{selectedBlog.description}</p>
+            <a
+              href={selectedBlog.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-red-500 underline block"
+            >
+              Đọc bài viết gốc
+            </a>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
