@@ -10,7 +10,7 @@ const { Option } = Select;
 
 const RegisterForm = () => {
   const navigate = useNavigate();
-
+  
   const onFinish = async (values) => {
     const formattedValues = {
       ...values,
@@ -21,11 +21,16 @@ const RegisterForm = () => {
       await api.post("Auth/register", formattedValues );
       toast.success("Tạo tài khoản thành công!");
       navigate("/login");
-    } catch (e) {
-      console.log(e);
-      toast.error("Đăng ký thất bại!");
     }
-  };
+    catch (e) {
+  console.log("❌ Lỗi BE trả về:", e.response?.data);
+
+  const errorMessage =
+    e.response?.data?.message || "Đăng ký thất bại!";
+
+  toast.error(errorMessage);
+}
+};
 
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
@@ -132,7 +137,7 @@ const RegisterForm = () => {
           >
             <Input placeholder="Nhập địa chỉ" />
           </Form.Item>
-
+            
           <Form.Item>
             <Button
               type="primary"
@@ -158,6 +163,7 @@ const RegisterForm = () => {
       </div>
     </div>
   );
-};
+}
+
 
 export default RegisterForm;
