@@ -13,6 +13,7 @@ import {
   Input,
   DatePicker,
   Select,
+  Upload,
 } from "antd";
 import {
   UserOutlined,
@@ -21,6 +22,7 @@ import {
   HomeOutlined,
   HeartOutlined,
   EditOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import api from "../../configs/axios";
@@ -39,37 +41,42 @@ const InfoItem = ({ label, value, icon }) => (
 );
 
 const ProfilePage = () => {
-  const [user, setUser] = useState([]);
+  const [user, setUser] = useState(null);
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(null); // ảnh đại diện tạm
 
-  // Load user profile từ API
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-
-       
-
         const response = await api.get("User/profile");
-
         setUser(response.data);
+        setAvatarUrl(response.data.avatarUrl || null); // nếu có sẵn avatar
       } catch (error) {
         console.error("Lỗi khi lấy thông tin người dùng:", error);
         toast.error("Không thể tải hồ sơ!");
       }
     };
-
     fetchProfile();
   }, []);
 
   const showModal = () => {
     if (!user) return;
+
     form.setFieldsValue({
       email: user.email,
-      gender: user.profile?.gender,
-      dateOfBirth: user.profile?.dateOfBirth ? dayjs(user.profile.dateOfBirth) : null,
-      bloodGroup: user.profile?.bloodGroup,
+      gender: user.gender,
+      dateOfBirth: user.dateOfBirth ? dayjs(user.dateOfBirth) : null,
+      bloodGroup: user.bloodGroup,
+      address: user.address,
+      lastDonationDate: user.lastDonationDate
+        ? dayjs(user.lastDonationDate)
+        : null,
+      lastReceivedDate: user.lastReceivedDate
+        ? dayjs(user.lastReceivedDate)
+        : null,
     });
+
     setIsModalVisible(true);
   };
 
@@ -77,12 +84,16 @@ const ProfilePage = () => {
     form.validateFields().then(async (values) => {
       try {
         const payload = {
+          ...user,
           ...values,
+          avatarUrl: avatarUrl, // nếu muốn gửi avatar URL về server
           dateOfBirth: values.dateOfBirth?.format("YYYY-MM-DD"),
+          lastDonationDate: values.lastDonationDate?.format("YYYY-MM-DD"),
+          lastReceivedDate: values.lastReceivedDate?.format("YYYY-MM-DD"),
         };
 
-        const res = await api.put("profile", payload);
-        setUser(res.data);
+        const response = await api.put("User/updateProfile", payload);
+        setUser(response.data);
         toast.success("Cập nhật hồ sơ thành công!");
         setIsModalVisible(false);
         form.resetFields();
@@ -93,9 +104,21 @@ const ProfilePage = () => {
     });
   };
 
-  if (!user) return null;
+  const handleAvatarChange = (info) => {
+    const file = info.file.originFileObj;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setAvatarUrl(e.target.result); // hiển thị ngay trên UI
+    };
+    reader.readAsDataURL(file);
 
-  const profile = user.profile || {};
+    // Nếu backend có API upload ảnh, thì call tại đây
+    // const formData = new FormData();
+    // formData.append("avatar", file);
+    // await api.post("/upload/avatar", formData)
+  };
+
+  if (!user) return null;
 
   return (
     <div
@@ -136,34 +159,39 @@ const ProfilePage = () => {
 
         <Row gutter={24} align="middle">
           <Col xs={24} md={6} style={{ textAlign: "center", marginBottom: 20 }}>
-            <Avatar size={120} icon={<UserOutlined />} />
+            <Avatar
+              size={120}
+              icon={<UserOutlined />}
+              src={avatarUrl}
+              style={{ objectFit: "cover" }}
+            />
             <div style={{ marginTop: 10 }}>
-              <Tag color="blue">{user.role}</Tag>
+              <Tag color="blue">{user.roleName}</Tag>
             </div>
           </Col>
 
           <Col xs={24} md={18}>
             <Title level={3} style={{ marginBottom: 0 }}>
-              {user.fullName}
+              {user.fullname}
             </Title>
             <Text type="secondary" style={{ fontSize: "16px" }}>
-              @{user.username}
+              @{user.phoneNumber}
             </Text>
 
             <Divider style={{ margin: "24px 0" }} />
 
             <InfoItem label="Email" value={user.email} icon={<MailOutlined />} />
-            <InfoItem label="Giới tính" value={profile.gender} icon={<IdcardOutlined />} />
-            <InfoItem label="Ngày sinh" value={profile.dateOfBirth} icon={<IdcardOutlined />} />
-            <InfoItem label="Địa chỉ" value={profile.address} icon={<HomeOutlined />} />
-            <InfoItem label="Nhóm máu" value={profile.bloodGroup} icon={<HeartOutlined />} />
-            <InfoItem label="Hiến máu gần nhất" value={profile.lastDonationDate} icon={<HeartOutlined />} />
-            <InfoItem label="Nhận máu gần nhất" value={profile.lastReceivedDate} icon={<HeartOutlined />} />
+            <InfoItem label="Giới tính" value={user.gender} icon={<IdcardOutlined />} />
+            <InfoItem label="Ngày sinh" value={user.dateOfBirth} icon={<IdcardOutlined />} />
+            <InfoItem label="Địa chỉ" value={user.address} icon={<HomeOutlined />} />
+            <InfoItem label="Nhóm máu" value={user.bloodGroup} icon={<HeartOutlined />} />
+            <InfoItem label="Hiến máu gần nhất" value={user.lastDonationDate} icon={<HeartOutlined />} />
+            <InfoItem label="Nhận máu gần nhất" value={user.lastReceivedDate} icon={<HeartOutlined />} />
           </Col>
         </Row>
       </Card>
 
-      {/* Modal Chỉnh sửa */}
+      {/* Modal chỉnh sửa */}
       <Modal
         title="Chỉnh sửa hồ sơ"
         open={isModalVisible}
@@ -173,6 +201,24 @@ const ProfilePage = () => {
         cancelText="Hủy"
       >
         <Form layout="vertical" form={form}>
+          <Form.Item label="Ảnh đại diện">
+            <Upload
+              showUploadList={false}
+              beforeUpload={() => false}
+              onChange={handleAvatarChange}
+              accept="image/*"
+            >
+              <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
+            </Upload>
+            {avatarUrl && (
+              <Avatar
+                src={avatarUrl}
+                size={80}
+                style={{ marginTop: 10, border: "1px solid #ccc" }}
+              />
+            )}
+          </Form.Item>
+
           <Form.Item
             label="Email"
             name="email"
@@ -193,6 +239,10 @@ const ProfilePage = () => {
             <DatePicker style={{ width: "100%" }} />
           </Form.Item>
 
+          <Form.Item label="Địa chỉ" name="address">
+            <Input />
+          </Form.Item>
+
           <Form.Item label="Nhóm máu" name="bloodGroup">
             <Select>
               <Option value="A+">A+</Option>
@@ -204,6 +254,14 @@ const ProfilePage = () => {
               <Option value="AB+">AB+</Option>
               <Option value="AB-">AB-</Option>
             </Select>
+          </Form.Item>
+
+          <Form.Item label="Hiến máu gần nhất" name="lastDonationDate">
+            <DatePicker style={{ width: "100%" }} />
+          </Form.Item>
+
+          <Form.Item label="Nhận máu gần nhất" name="lastReceivedDate">
+            <DatePicker style={{ width: "100%" }} />
           </Form.Item>
         </Form>
       </Modal>
