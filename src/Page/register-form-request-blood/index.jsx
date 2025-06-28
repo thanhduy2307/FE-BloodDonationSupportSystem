@@ -23,7 +23,7 @@ const BloodDonationForm = () => {
         status: "Pending",
       };
 
-      await api.post("User/donate", data);
+      await api.post("User/request", data);
       toast.success("Đăng ký hiến máu thành công!");
       form.resetFields();
     } catch (error) {
