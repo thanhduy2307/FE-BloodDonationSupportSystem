@@ -24,7 +24,11 @@ const BloodDonationForm = () => {
       };
 
       await api.post("User/donate", data);
+      toast.success("Đăng ký hiến máu thành công!");
+
+      await api.post("User/request", data);
       toast.success("Đăng ký nhận máu thành công!");
+      
       form.resetFields();
     } catch (error) {
       toast.error("Lỗi khi gửi đăng ký!");

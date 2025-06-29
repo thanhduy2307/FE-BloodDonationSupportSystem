@@ -27,6 +27,7 @@ import ManageBlogs from "./Page/dashboard-staff/blogs";
 import NotificationPage from "./Page/dashboard-staff/notification";
 import CreateBloodEvent from "./Page/dashboard-staff/donationEvent/formCreateEvent";
 import EventTable from "./Page/dashboard-staff/donationEvent";
+import BloodHistoryPage from "./Page/history";
 
 
 function App() {
@@ -139,6 +140,10 @@ function App() {
     {
       path: "requestForm",
       element: <RequestForm/>,
+    },
+     {
+      path: "history",
+      element: <BloodHistoryPage/>,
     },
     
   ]);
