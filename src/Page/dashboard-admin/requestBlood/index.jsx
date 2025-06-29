@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Select, Table, Tag } from "antd";
+import { Table, Tag } from "antd";
 import { toast } from "react-toastify";
 import api from "../../../configs/axios";
 
-const BloodRequestList = () => {
+const BloodRequestListAdmin = () => {
   const [requests, setRequests] = useState([]);
 
   const fetchRequests = async () => {
@@ -23,20 +23,6 @@ const BloodRequestList = () => {
   useEffect(() => {
     fetchRequests();
   }, []);
-const handleChangeStatus = async (requestId, newStatus) => {
-  try {
-    await api.put(`Admin/requests/${requestId}/status`, newStatus, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    toast.success("Cập nhật trạng thái thành công!");
-    fetchRequests();
-  } catch (error) {
-    console.error(error);
-    toast.error("Cập nhật trạng thái thất bại!");
-  }
-};
 
   const columns = [
     { title: "ID", dataIndex: "requestId", key: "requestId" },
@@ -48,20 +34,18 @@ const handleChangeStatus = async (requestId, newStatus) => {
     { title: "Ngày yêu cầu", dataIndex: "requestDate", key: "requestDate" },
     { title: "Giờ yêu cầu", dataIndex: "requestTime", key: "requestTime" },
     {
-  title: "Cập nhật trạng thái",
-  key: "action",
-  render: (_, record) => (
-    <Select
-      defaultValue={record.status}
-      style={{ width: 140 }}
-      onChange={(value) => handleChangeStatus(record.requestId, value)}
-    >
-      <Select.Option value="pending">Pending</Select.Option>
-      <Select.Option value="approved">Approved</Select.Option>
-      <Select.Option value="rejected">Rejected</Select.Option>
-    </Select>
-  ),
-},
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => {
+        const colorMap = {
+          pending: "orange",
+          approved: "green",
+          rejected: "red",
+        };
+        return <Tag color={colorMap[status] || "default"}>{status}</Tag>;
+      },
+    },
   ];
 
   return (
@@ -80,4 +64,4 @@ const handleChangeStatus = async (requestId, newStatus) => {
   );
 };
 
-export default BloodRequestList;
+export default BloodRequestListAdmin;

@@ -8,9 +8,9 @@ function StaffMember() {
 
   const fetchUser = async () => {
     try {
-      const response = await api.get("User/profile");
+      const response = await api.get("Admin/users");
       console.log("📦 response.data:", response.data);
-      setDatas([response.data]);
+      setDatas(response.data);
     } catch (error) {
       console.error(error);
       toast.error("Failed to fetch profiles");
@@ -22,6 +22,11 @@ function StaffMember() {
   }, []);
 
   const columns = [
+    {
+      title: "ID",
+      dataIndex: "userId",
+      key: "userId",
+    },
     {
       title: "Full Name",
       dataIndex: "fullname",
@@ -41,21 +46,6 @@ function StaffMember() {
       title: "Blood Group",
       dataIndex: "bloodGroup",
       key: "bloodGroup",
-    },
-    {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
-    },
-    {
-      title: "Gender",
-      dataIndex: "gender",
-      key: "gender",
-    },
-    {
-      title: "Date Of Birth",
-      dataIndex: "dateOfBirth",
-      key: "dateOfBirth",
     },
     {
       title: "Role",

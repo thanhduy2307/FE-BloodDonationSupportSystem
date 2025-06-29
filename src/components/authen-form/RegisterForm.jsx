@@ -10,7 +10,7 @@ const { Option } = Select;
 
 const RegisterForm = () => {
   const navigate = useNavigate();
-  
+
   const onFinish = async (values) => {
     const formattedValues = {
       ...values,
@@ -18,19 +18,16 @@ const RegisterForm = () => {
     };
 
     try {
-      await api.post("Auth/register", formattedValues );
+      await api.post("Auth/register", formattedValues);
       toast.success("Tạo tài khoản thành công!");
       navigate("/login");
+    } catch (e) {
+      console.log("❌ Lỗi BE trả về:", e.response?.data);
+      const errorMessage =
+        e.response?.data?.message || "Đăng ký thất bại!";
+      toast.error(errorMessage);
     }
-    catch (e) {
-  console.log("❌ Lỗi BE trả về:", e.response?.data);
-
-  const errorMessage =
-    e.response?.data?.message || "Đăng ký thất bại!";
-
-  toast.error(errorMessage);
-}
-};
+  };
 
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
@@ -90,10 +87,7 @@ const RegisterForm = () => {
           <Form.Item
             label="Số điện thoại"
             name="phoneNumber"
-            rules={[
-              { required: true, message: "Vui lòng nhập số điện thoại!" },
-            ]}
-            hasFeedback
+            rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }]}
           >
             <Input placeholder="Nhập số điện thoại" />
           </Form.Item>
@@ -101,17 +95,19 @@ const RegisterForm = () => {
           <Form.Item
             label="Giới tính"
             name="gender"
-            rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
-            hasFeedback
+            rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
           >
-            <Input placeholder="Nhập địa chỉ" />
+            <Select placeholder="Chọn giới tính">
+              <Option value="male">Nam</Option>
+              <Option value="female">Nữ</Option>
+              <Option value="other">Khác</Option>
+            </Select>
           </Form.Item>
 
           <Form.Item
             label="Địa chỉ"
             name="address"
             rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
-            hasFeedback
           >
             <Input placeholder="Nhập địa chỉ" />
           </Form.Item>
@@ -120,7 +116,6 @@ const RegisterForm = () => {
             label="Ngày sinh"
             name="dateOfBirth"
             rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}
-            hasFeedback
           >
             <DatePicker
               style={{ width: "100%" }}
@@ -132,12 +127,16 @@ const RegisterForm = () => {
           <Form.Item
             label="Nhóm máu"
             name="bloodGroup"
-            rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
-            hasFeedback
+            rules={[{ required: true, message: "Vui lòng chọn nhóm máu!" }]}
           >
-            <Input placeholder="Nhập địa chỉ" />
+            <Select placeholder="Chọn nhóm máu">
+              <Option value="A">A</Option>
+              <Option value="B">B</Option>
+              <Option value="AB">AB</Option>
+              <Option value="O">O</Option>
+            </Select>
           </Form.Item>
-            
+
           <Form.Item>
             <Button
               type="primary"
@@ -163,7 +162,6 @@ const RegisterForm = () => {
       </div>
     </div>
   );
-}
-
+};
 
 export default RegisterForm;

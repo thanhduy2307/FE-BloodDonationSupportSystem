@@ -38,7 +38,7 @@ const onFinish = async (values) => {
       } else if (user.role == "User") {
         navigate("/");
       }else if (user.role == "Staff") {
-        navigate("/dashboard-staff/user");
+        navigate("/dashboard-staff/member-staff");
       }
   console.log("User role:", user.role);
   } catch (e) {

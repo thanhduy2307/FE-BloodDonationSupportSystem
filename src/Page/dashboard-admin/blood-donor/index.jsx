@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { Table } from "antd";
+import { Table, Tag } from "antd";
 import api from "../../../configs/axios";
 import { toast } from "react-toastify";
 
 const BloodDonationList = () => {
-  const [donors, setDonors] = useState([]);
+  const [donations, setDonations] = useState([]);
 
   const fetchData = async () => {
     try {
-      const response = await api.get("/blood-donations"); 
-      setDonors(response.data.data);
+      const response = await api.get("Admin/donations");
+      const dataWithKey = response.data.map((item, index) => ({
+        ...item,
+        key: item.donationId || index,
+      }));
+      setDonations(dataWithKey);
     } catch (error) {
-      console.error("Failed to fetch donor list", error);
-      toast.error("Failed to fetch blood donation list. Please try again later.");
+      console.error("❌ Failed to fetch donations", error);
+      toast.error("Không thể tải danh sách hiến máu.");
     }
   };
 
@@ -21,23 +25,74 @@ const BloodDonationList = () => {
   }, []);
 
   const columns = [
-    { title: "Họ tên", dataIndex: "fullName", key: "fullName" },
-    { title: "Tuổi", dataIndex: "age", key: "age" },
-    { title: "Giới tính", dataIndex: "gender", key: "gender" },
-    { title: "Ngày sinh", dataIndex: "birthDate", key: "birthDate" },
-    { title: "Nhóm máu", dataIndex: "bloodType", key: "bloodType" },
-    { title: "Địa chỉ", dataIndex: "address", key: "address" },
-    { title: "SĐT", dataIndex: "phone", key: "phone" },
+    {
+      title: "ID",
+      dataIndex: "donationId",
+      key: "donationId",
+    },
+    {
+      title: "User ID",
+      dataIndex: "userId",
+      key: "userId",
+    },
+    {
+      title: "Full Name",
+      dataIndex: "fullname",
+      key: "userId",
+    },
+    {
+      title: "Giới tính",
+      dataIndex: "gender",
+      key: "gender",
+    },
+    {
+      title: "Ngày sinh",
+      dataIndex: "dateOfBirth",
+      key: "dateOfBirth",
+    },
+    {
+      title: "Nhóm máu",
+      dataIndex: "bloodGroup",
+      key: "bloodGroup",
+    },
+    {
+      title: "Số lượng",
+      dataIndex: "quantity",
+      key: "quantity",
+    },
+    {
+      title: "Ngày hiến",
+      dataIndex: "donationDate",
+      key: "donationDate",
+    },
+    {
+      title: "Giờ hiến",
+      dataIndex: "donationTime",
+      key: "donationTime",
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => {
+        const colorMap = {
+          pending: "orange",
+          completed: "green",
+          cancelled: "red",
+        };
+        return <Tag color={colorMap[status] || "default"}>{status}</Tag>;
+      },
+    },
   ];
 
   return (
     <div className="min-h-screen bg-gray-100 px-4 py-8 flex justify-center">
       <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-6xl">
         <h2 className="text-2xl font-bold text-red-600 mb-4 text-center">
-          Danh sách người đăng ký hiến máu
+          Danh sách đăng ký hiến máu
         </h2>
         <Table
-          dataSource={donors.map((item, index) => ({ ...item, key: index }))}
+          dataSource={donations}
           columns={columns}
           pagination={{ pageSize: 10 }}
         />

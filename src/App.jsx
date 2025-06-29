@@ -28,6 +28,7 @@ import NotificationPage from "./Page/dashboard-staff/notification";
 import CreateBloodEvent from "./Page/dashboard-staff/donationEvent/formCreateEvent";
 import EventTable from "./Page/dashboard-staff/donationEvent";
 import BloodHistoryPage from "./Page/history";
+import BloodRequestListAdmin from "./Page/dashboard-admin/requestBlood";
 
 
 function App() {
@@ -87,7 +88,7 @@ function App() {
         },
         {
           path: "requestBlood",
-          element: <BloodRequestList/>
+          element: <BloodRequestListAdmin/>
         },
       ],
     },

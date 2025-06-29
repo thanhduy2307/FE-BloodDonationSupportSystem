@@ -31,18 +31,20 @@ const BloodDonationList = () => {
     setFilteredDonors(filtered);
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await api.delete(`/blood-donations/${id}`);
-      toast.success("Xóa thành công");
-      const updated = donors.filter((item) => item.id !== id);
-      setDonors(updated);
-      setFilteredDonors(updated);
-    } catch (error) {
-      console.error("Delete error:", error);
-      toast.error("Không thể xóa, thử lại sau");
-    }
-  };
+const handleUpdateStatus = async (donationId, newStatus) => {
+  try {
+    await api.put(`Admin/donations/${donationId}/status`, newStatus, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    toast.success("Cập nhật trạng thái thành công");
+    fetchData(); // reload lại bảng
+  } catch (error) {
+    console.error("❌ Lỗi cập nhật trạng thái:", error);
+    toast.error("Không thể cập nhật trạng thái");
+  }
+};
 
   const columns = [
     { title: "Họ tên", dataIndex: "fullName", key: "fullName" },
