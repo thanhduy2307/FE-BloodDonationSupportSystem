@@ -176,8 +176,8 @@ const BloodHistoryPage = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Thêm state cho modal cập nhật
-  const [selectedRecord, setSelectedRecord] = useState(null);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState([]);
+  const [showUpdateModal, setShowUpdateModal] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -234,8 +234,31 @@ const BloodHistoryPage = () => {
   }, [receiveRecords, currentPage, itemsPerPage]);
 
   // Hàm mở modal cập nhật
-  const handleUpdate = (record) => {
-    setSelectedRecord(record);
+  const handleUpdate = async (record) => {
+    let detailData = {};
+    try {
+      if (record.type === 'donation') {
+        // Lấy chi tiết hiến máu
+        const res = await api.get(`User/getDonate/${record.raw.id}`);
+        detailData = res.data;
+      } else if (record.type === 'receive') {
+        // Lấy chi tiết nhận máu
+        const res = await api.get(`User/getRequest/${record.raw.id}`);
+        detailData = res.data;
+      }
+    } catch (error) {
+      // Nếu lỗi thì dùng dữ liệu cũ
+      detailData = record.raw;
+    }
+
+    setSelectedRecord({
+      ...record,
+      // Ưu tiên lấy dữ liệu chi tiết nếu có
+      date: detailData.donationDate || record.date,
+      bloodType: detailData.bloodGroup || record.bloodType,
+      amount: detailData.quantity || record.amount,
+      raw: { ...record.raw, ...detailData }
+    });
     setShowUpdateModal(true);
   };
 
