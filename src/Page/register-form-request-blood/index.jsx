@@ -84,7 +84,20 @@ const BloodDonationForm = () => {
             name="donationDate"
             label="Ngày hiến máu"
             className="md:col-span-2"
-            rules={[{ required: true, message: "Vui lòng chọn ngày" }]}
+            rules={[
+              { required: true, message: "Vui lòng chọn ngày" },
+              {
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  if (value.isBefore(dayjs().startOf("day"))) {
+                    return Promise.reject(
+                      new Error("Ngày đăng ký phải là hôm nay hoặc trong tương lai")
+                    );
+                  }
+                  return Promise.resolve();
+                },
+              },
+            ]}
           >
             <DatePicker className="w-full" />
           </Form.Item>

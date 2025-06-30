@@ -17,21 +17,22 @@ const OverviewPage = () => {
   const [stats, setStats] = useState({
     users: 0,
     events: 0,
+    donations: 0,
     requests: 0,
   });
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [userRes, eventRes, requestRes] = await Promise.all([
-          api.get("/api/users/count"),
-          api.get("/api/events/count"),
-          api.get("/api/requests/count"),
-        ]);
+        // Gọi API tổng hợp thống kê
+        const overviewRes = await api.get("/Dashboard/summary");
+        console.log("overviewRes.data", overviewRes.data); // Kiểm tra dữ liệu trả về
+        // Sửa lại theo đúng trường backend trả về
         setStats({
-          users: userRes.data.count,
-          events: eventRes.data.count,
-          requests: requestRes.data.count,
+          users: overviewRes.data.totalUsers,
+          events: overviewRes.data.totalEvents,
+          donations: overviewRes.data.totalDonations,
+          requests: overviewRes.data.totalRequests,
         });
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu thống kê:", error);
@@ -40,6 +41,7 @@ const OverviewPage = () => {
 
     fetchStats();
   }, []);
+  
   const userSelect = useSelector((state) => state.user);
 
   const chartData = [
@@ -61,6 +63,11 @@ const OverviewPage = () => {
       label: "Sự kiện",
       value: stats.events,
       icon: <Calendar className="w-6 h-6 text-blue-500" />,
+    },
+    {
+      label: "Lượt hiến máu",
+      value: stats.donations,
+      icon: <Activity className="w-6 h-6 text-green-500" />,
     },
     {
       label: "Yêu cầu máu",
