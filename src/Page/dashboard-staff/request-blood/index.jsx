@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Select, Table, Tag } from "antd";
+import { Button, Input, Select, Space, Table, Tag } from "antd";
 import { toast } from "react-toastify";
 import api from "../../../configs/axios";
 
 const BloodRequestList = () => {
   const [requests, setRequests] = useState([]);
-
+const [searchBloodType, setSearchBloodType] = useState("");
+const [filteredDonors, setFilteredDonors] = useState([]);
   const fetchRequests = async () => {
     try {
       const response = await api.get("Admin/requests");
@@ -37,7 +38,12 @@ const handleChangeStatus = async (requestId, newStatus) => {
     toast.error("Cập nhật trạng thái thất bại!");
   }
 };
-
+const handleSearch = () => {
+    const filtered = donors.filter((item) =>
+      item.bloodGroup?.toLowerCase().includes(searchBloodType.toLowerCase())
+    );
+    setFilteredDonors(filtered);
+  };  
   const columns = [
     { title: "ID", dataIndex: "requestId", key: "requestId" },
     { title: "Người yêu cầu", dataIndex: "fullname", key: "fullname" },
@@ -70,6 +76,16 @@ const handleChangeStatus = async (requestId, newStatus) => {
         <h2 className="text-2xl font-bold text-red-600 mb-4 text-center">
           Danh sách yêu cầu nhận máu
         </h2>
+         <Space className="mb-4">
+          <Input
+            placeholder="Tìm theo nhóm máu (A, B, AB, O...)"
+            value={searchBloodType}
+            onChange={(e) => setSearchBloodType(e.target.value)}
+          />
+          <Button type="primary" onClick={handleSearch}>
+            Tìm kiếm
+          </Button>
+        </Space>
         <Table
           dataSource={requests}
           columns={columns}

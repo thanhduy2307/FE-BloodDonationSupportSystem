@@ -23,6 +23,10 @@ const NotificationPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNotification, setEditingNotification] = useState(null);
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const fetchData = async () => {
     try {
       const [notiRes, userRes, eventRes] = await Promise.all([
@@ -38,9 +42,26 @@ const NotificationPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const openCreateModal = () => {
+    setEditingNotification(null);
+    form.resetFields();
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (record) => {
+    setEditingNotification(record);
+    form.setFieldsValue({
+      ...record,
+      notifDate: dayjs(record.notifDate),
+    });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    form.resetFields();
+    setEditingNotification(null);
+    setIsModalOpen(false);
+  };
 
   const handleSubmit = async (values) => {
     const payload = {
@@ -50,18 +71,13 @@ const NotificationPage = () => {
 
     try {
       if (editingNotification) {
-        await api.put(`/notifications/${editingNotification.notificationId}`, {
-          ...editingNotification,
-          ...payload,
-        });
+        await api.put(`/notifications/${editingNotification.notificationId}`, payload);
         message.success("Cập nhật thông báo thành công");
       } else {
         await api.post("/notifications", payload);
         message.success("Tạo thông báo thành công");
       }
-      setIsModalOpen(false);
-      setEditingNotification(null);
-      form.resetFields();
+      closeModal();
       fetchData();
     } catch {
       message.error("Lỗi khi lưu thông báo");
@@ -118,26 +134,12 @@ const NotificationPage = () => {
       key: "action",
       render: (_, record) => (
         <>
-          <Button
-            type="link"
-            onClick={() => {
-              setEditingNotification(record);
-              form.setFieldsValue({
-                ...record,
-                notifDate: dayjs(record.notifDate),
-              });
-              setIsModalOpen(true);
-            }}
-          >
-            Sửa
-          </Button>
+          <Button type="link" onClick={() => openEditModal(record)}>Sửa</Button>
           <Popconfirm
             title="Xác nhận xóa?"
             onConfirm={() => handleDelete(record.notificationId)}
           >
-            <Button danger type="link">
-              Xóa
-            </Button>
+            <Button danger type="link">Xóa</Button>
           </Popconfirm>
         </>
       ),
@@ -149,16 +151,7 @@ const NotificationPage = () => {
       <div className="bg-white p-6 rounded-xl shadow">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-red-600">Thông báo đã gửi</h2>
-          <Button
-            type="primary"
-            onClick={() => {
-              setEditingNotification(null);
-              form.resetFields();
-              setIsModalOpen(true);
-            }}
-          >
-            Tạo mới
-          </Button>
+          <Button type="primary" onClick={openCreateModal}>Tạo mới</Button>
         </div>
 
         <Table
@@ -171,41 +164,32 @@ const NotificationPage = () => {
       <Modal
         title={editingNotification ? "Cập nhật thông báo" : "Tạo thông báo"}
         open={isModalOpen}
-        onCancel={() => {
-          setIsModalOpen(false);
-          form.resetFields();
-          setEditingNotification(null);
-        }}
+        onCancel={closeModal}
         onOk={() => form.submit()}
         okText={editingNotification ? "Cập nhật" : "Tạo"}
       >
         <Form layout="vertical" form={form} onFinish={handleSubmit}>
-          <Form.Item name="userId" label="Người nhận" rules={[{ required: true }]}>
+          <Form.Item name="userId" label="Người nhận" rules={[{ required: true }]}>  
             <Select placeholder="Chọn người dùng">
               {users.map((u) => (
-                <Option key={u.userId} value={u.userId}>
-                  {u.fullName}
-                </Option>
+                <Option key={u.userId} value={u.userId}>{u.fullName}</Option>
               ))}
             </Select>
           </Form.Item>
 
           <Form.Item name="eventId" label="Sự kiện (tuỳ chọn)">
-            <Select placeholder="Liên kết sự kiện">
-              <Option value={null}>Không có</Option>
+            <Select placeholder="Liên kết sự kiện" allowClear>
               {events.map((e) => (
-                <Option key={e.eventId} value={e.eventId}>
-                  {e.eventName}
-                </Option>
+                <Option key={e.eventId} value={e.eventId}>{e.eventName}</Option>
               ))}
             </Select>
           </Form.Item>
 
-          <Form.Item name="message" label="Nội dung" rules={[{ required: true }]}>
+          <Form.Item name="message" label="Nội dung" rules={[{ required: true }]}>  
             <Input.TextArea rows={4} />
           </Form.Item>
 
-          <Form.Item name="notifDate" label="Ngày gửi" rules={[{ required: true }]}>
+          <Form.Item name="notifDate" label="Ngày gửi" rules={[{ required: true }]}>  
             <DatePicker format="YYYY-MM-DD" className="w-full" />
           </Form.Item>
 

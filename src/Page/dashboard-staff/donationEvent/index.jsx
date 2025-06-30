@@ -1,55 +1,106 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Tag, Space, Modal } from "antd";
 import {
-  EyeOutlined,
+  Table,
+  Button,
+  Tag,
+  Space,
+  Modal,
+  Form,
+  Input,
+  DatePicker,
+} from "antd";
+import {
   EditOutlined,
   DeleteOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import CreateBloodEvent from "./formCreateEvent";
 import api from "../../../configs/axios";
 import { toast } from "react-toastify";
+import dayjs from "dayjs";
 
-const EventTable = ({ data, onView, onEdit, onDelete, onCreate }) => {
+const EventTable = ({ onEdit, onDelete }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-    const [Event,setEvent]= useState()
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [eventList, setEventList] = useState([]);
+
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
 
-  const handleFormSubmit = async(formData) => {
+  const handleFormSubmit = async (formData) => {
     try {
-        await api.post("Event/create",formData);
-        toast.success("Tạo sự kiện thành công!");
-        handleCloseModal(true)
-      } catch (error) {
-        console.error(error);
-        toast.error("Đã có lỗi xảy ra khi tạo mới.");
-      }
-   
-  };
-  const fetchEvent= async ()=>{
-    try {
-        const response = await api.get('Event/getAll')
-        setEvent(response.data)
-
-    } catch (error) {
-        console.log(error)
-        toast.error('Failed to fetch Event')
-    }   
-  }
-   useEffect(() => {
+      await api.post("Event/create", formData);
+      toast.success("Tạo sự kiện thành công!");
+      handleCloseModal();
       fetchEvent();
-    }, []);
+    } catch (error) {
+      console.error(error);
+      toast.error("Đã có lỗi xảy ra khi tạo mới.");
+    }
+  };
+
+  const handleEdit = (record) => {
+    setSelectedEvent({
+      ...record,
+      eventDate: record.eventDate ? dayjs(record.eventDate) : null,
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = async (values) => {
+    try {
+      const payload = {
+        ...values,
+        eventDate: values.eventDate.format("YYYY-MM-DD"),
+      };
+      await api.put(`Event/update/${selectedEvent.eventId}`, payload);
+      toast.success("Cập nhật sự kiện thành công!");
+      setIsEditModalOpen(false);
+      fetchEvent();
+    } catch (error) {
+      console.error("❌ Lỗi cập nhật:", error);
+      toast.error("Cập nhật thất bại");
+    }
+  };
+
+  const handleDelete = async (record) => {
+    try {
+      console.log("🧨 ID cần xoá:", record.eventId);
+      await api.delete(`Event/delete/${record.eventId}`);
+      console.log("Đang xóa sự kiện với ID:",record.eventId);
+
+      toast.success("Xóa sự kiện thành công!");
+      fetchEvent();
+    } catch (error) {
+      console.error("❌ Lỗi xóa:", error);
+      toast.error("Không thể xóa sự kiện");
+    }
+  };
+
+  const fetchEvent = async () => {
+    try {
+      const response = await api.get("Event/getAll");
+      setEventList(response.data);
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to fetch Event");
+    }
+  };
+
+  useEffect(() => {
+    fetchEvent();
+  }, []);
 
   const columns = [
     {
       title: "ID sự kiện",
-      dataIndex: "enventId",
-      key: "name",
+      dataIndex: "eventId",
+      key: "eventId",
     },
     {
       title: "Chủ đề",
@@ -57,7 +108,7 @@ const EventTable = ({ data, onView, onEdit, onDelete, onCreate }) => {
       key: "title",
     },
     {
-      title:"Ngày",
+      title: "Ngày",
       dataIndex: "eventDate",
       key: "eventDate",
     },
@@ -66,12 +117,11 @@ const EventTable = ({ data, onView, onEdit, onDelete, onCreate }) => {
       key: "action",
       render: (_, record) => (
         <Space>
-          <Button icon={<EyeOutlined />} onClick={() => onView(record)} />
-          <Button icon={<EditOutlined />} onClick={() => onEdit(record)} />
+          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
           <Button
             icon={<DeleteOutlined />}
             danger
-            onClick={() => onDelete(record)}
+            onClick={() => handleDelete(record)}
           />
         </Space>
       ),
@@ -89,18 +139,100 @@ const EventTable = ({ data, onView, onEdit, onDelete, onCreate }) => {
 
       <Table
         columns={columns}
-        dataSource={Event}
-        rowKey={(record) => record.id}
+        dataSource={eventList}
+        rowKey={(record) => record.eventId}
         pagination={{ pageSize: 5 }}
       />
 
+      {/* Modal tạo sự kiện */}
       <Modal
         title="Tạo sự kiện mới"
         open={isModalOpen}
         onCancel={handleCloseModal}
         footer={null}
       >
-        <CreateBloodEvent onSubmit={handleFormSubmit} onCancel={handleCloseModal} />
+        <Form layout="vertical" onFinish={handleFormSubmit}>
+          <Form.Item
+            name="title"
+            label="Chủ đề"
+            rules={[{ required: true, message: "Vui lòng nhập chủ đề!" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="description"
+            label="Mô tả"
+            rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
+          >
+            <Input.TextArea rows={3} />
+          </Form.Item>
+
+          <Form.Item
+            name="eventDate"
+            label="Ngày diễn ra"
+            rules={[{ required: true, message: "Vui lòng chọn ngày!" }]}
+          >
+            <DatePicker className="w-full" />
+          </Form.Item>
+
+          <div className="flex justify-end mt-4">
+            <Button onClick={handleCloseModal} className="mr-2">
+              Hủy
+            </Button>
+            <Button type="primary" htmlType="submit">
+              Tạo
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+
+      {/* Modal chỉnh sửa sự kiện */}
+      <Modal
+        title="Chỉnh sửa sự kiện"
+        open={isEditModalOpen}
+        onCancel={() => setIsEditModalOpen(false)}
+        footer={null}
+      >
+        <Form
+          layout="vertical"
+          initialValues={selectedEvent}
+          onFinish={handleEditSubmit}
+          key={selectedEvent?.eventId}
+        >
+          <Form.Item
+            name="title"
+            label="Chủ đề"
+            rules={[{ required: true, message: "Vui lòng nhập chủ đề!" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="description"
+            label="Mô tả"
+            rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
+          >
+            <Input.TextArea rows={3} />
+          </Form.Item>
+
+          <Form.Item
+            name="eventDate"
+            label="Ngày diễn ra"
+            rules={[{ required: true, message: "Vui lòng chọn ngày!" }]}
+          >
+            <DatePicker className="w-full" />
+          </Form.Item>
+
+          <div className="flex justify-end mt-4">
+            <Button onClick={() => setIsEditModalOpen(false)} className="mr-2">
+              Hủy
+            </Button>
+            <Button type="primary" htmlType="submit">
+              Cập nhật
+            </Button>
+          </div>
+        </Form>
       </Modal>
     </div>
   );

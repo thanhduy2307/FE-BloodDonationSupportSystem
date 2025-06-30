@@ -1,25 +1,18 @@
 import React, { useEffect, useState } from "react";
-import {
-  Table,
-  Input,
-  Button,
-  Space,
-  Select,
-  Tag,
-} from "antd";
+import { Table, Input, Button, Space, Select, Tag } from "antd";
 import { toast } from "react-toastify";
 import api from "../../../configs/axios";
 
 const { Option } = Select;
 const statusOptions = ["pending", "approved", "rejected"];
-const BloodDonationList = () => {
+const BloodDonationListt = () => {
   const [donors, setDonors] = useState([]);
   const [filteredDonors, setFilteredDonors] = useState([]);
   const [searchBloodType, setSearchBloodType] = useState("");
-
+  const statusOptions = ["pending", "approved", "rejected", "cancelled"];
   const fetchData = async () => {
     try {
-      const response = await api.get("User/donations");
+      const response = await api.get("Admin/donations");
       setDonors(response.data);
       setFilteredDonors(response.data);
     } catch (error) {
@@ -34,16 +27,16 @@ const BloodDonationList = () => {
 
   const handleSearch = () => {
     const filtered = donors.filter((item) =>
-      item.bloodType?.toLowerCase().includes(searchBloodType.toLowerCase())
+      item.bloodGroup?.toLowerCase().includes(searchBloodType.toLowerCase())
     );
     setFilteredDonors(filtered);
   };
 
-  const handleUpdateStatus = async (donationId, newStatus) => {
+  const handleUpdateStatus = async (donationId, value) => {
     try {
       await api.put(
         `Admin/donations/${donationId}/status`,
-        { status: newStatus },
+        `"${value}"`, // 👈 raw string (phải thêm dấu ngoặc kép thủ công)
         { headers: { "Content-Type": "application/json" } }
       );
       toast.success("Cập nhật trạng thái thành công");
@@ -54,53 +47,33 @@ const BloodDonationList = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Approved":
-        return "green";
-      case "Pending":
-        return "orange";
-      case "Rejected":
-        return "red";
-      default:
-        return "default";
-    }
-  };
-
   const columns = [
-    { title: "Họ tên", dataIndex: "fullName", key: "fullName" },
-    { title: "Tuổi", dataIndex: "age", key: "age" },
+    { title: "User ID", dataIndex: "userId", key: "userId" },
+    { title: "Full Name", dataIndex: "fullname", key: "fullname" },
     { title: "Giới tính", dataIndex: "gender", key: "gender" },
-    { title: "Ngày sinh", dataIndex: "birthDate", key: "birthDate" },
-    { title: "Nhóm máu", dataIndex: "bloodType", key: "bloodType" },
-    { title: "Địa chỉ", dataIndex: "address", key: "address" },
-    { title: "SĐT", dataIndex: "phone", key: "phone" },
+    { title: "Ngày sinh", dataIndex: "dateOfBirth", key: "dateOfBirth" },
+    { title: "Nhóm máu", dataIndex: "bloodGroup", key: "bloodGroup" },
+    { title: "Số lượng", dataIndex: "quantity", key: "quantity" },
+    { title: "Ngày hiến", dataIndex: "donationDate", key: "donationDate" },
+    { title: "Giờ hiến", dataIndex: "donationTime", key: "donationTime" },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (text) => (
-        <Tag color={getStatusColor(text)}>{text || "Chưa cập nhật"}</Tag>
+      render: (text, record) => (
+        <Select
+          value={text}
+          style={{ width: 150 }}
+          onChange={(value) => handleUpdateStatus(record.donationId, value)}
+        >
+          {statusOptions.map((option) => (
+            <Select.Option key={option} value={option}>
+              {option}
+            </Select.Option>
+          ))}
+        </Select>
       ),
     },
-   {
-  title: "Trạng thái",
-  dataIndex: "status",
-  key: "status",
-  render: (text, record) => (
-    <Select
-      value={text}
-      onChange={(value) => handleUpdateStatus(record.donationId, value)} // đảm bảo dùng đúng `donationId`
-      style={{ width: 120 }}
-    >
-      {statusOptions.map((option) => (
-        <Select.Option key={option} value={option}>
-          {option}
-        </Select.Option>
-      ))}
-    </Select>
-  ),
-}
   ];
 
   return (
@@ -134,4 +107,4 @@ const BloodDonationList = () => {
   );
 };
 
-export default BloodDonationList;
+export default BloodDonationListt;

@@ -22,13 +22,13 @@ import DashboardStaff from "./components/dashboard/dashboardstaff";
 import StaffFeedback from "./Page/dashboard-staff/feedback";
 import StaffMember from "./Page/dashboard-staff/member";
 import BloodDonationList from "./Page/dashboard-admin/blood-donor";
-import BloodRequestList from "./Page/dashboard-staff/request-blood";
 import ManageBlogs from "./Page/dashboard-staff/blogs";
 import NotificationPage from "./Page/dashboard-staff/notification";
-import CreateBloodEvent from "./Page/dashboard-staff/donationEvent/formCreateEvent";
 import EventTable from "./Page/dashboard-staff/donationEvent";
 import BloodHistoryPage from "./Page/history";
 import BloodRequestListAdmin from "./Page/dashboard-admin/requestBlood";
+import BloodDonationListt from "./Page/dashboard-staff/blood-donor";
+import BloodRequestList from "./Page/dashboard-staff/request-blood";
 
 
 function App() {
@@ -106,11 +106,11 @@ function App() {
         },
         {
           path: "donorList-staff",
-          element: <BloodDonationList/>
+          element: <BloodDonationListt/>
         },
          {
           path: "requestList-staff",
-          element: <BloodRequestList/>
+          element:<BloodRequestList/>
         },
          {
           path: "manageBlogs",
