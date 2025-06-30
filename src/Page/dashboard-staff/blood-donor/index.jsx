@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Table, Input, Button, Space, Popconfirm } from "antd";
+import {
+  Table,
+  Input,
+  Button,
+  Space,
+  Select,
+  Tag,
+} from "antd";
 import { toast } from "react-toastify";
 import api from "../../../configs/axios";
 
+const { Option } = Select;
+const statusOptions = ["pending", "approved", "rejected"];
 const BloodDonationList = () => {
   const [donors, setDonors] = useState([]);
   const [filteredDonors, setFilteredDonors] = useState([]);
@@ -11,7 +20,6 @@ const BloodDonationList = () => {
   const fetchData = async () => {
     try {
       const response = await api.get("User/donations");
-      console.log("Data:", response.data); // debug
       setDonors(response.data);
       setFilteredDonors(response.data);
     } catch (error) {
@@ -31,20 +39,33 @@ const BloodDonationList = () => {
     setFilteredDonors(filtered);
   };
 
-const handleUpdateStatus = async (donationId, newStatus) => {
-  try {
-    await api.put(`Admin/donations/${donationId}/status`, newStatus, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    toast.success("Cập nhật trạng thái thành công");
-    fetchData(); // reload lại bảng
-  } catch (error) {
-    console.error("❌ Lỗi cập nhật trạng thái:", error);
-    toast.error("Không thể cập nhật trạng thái");
-  }
-};
+  const handleUpdateStatus = async (donationId, newStatus) => {
+    try {
+      await api.put(
+        `Admin/donations/${donationId}/status`,
+        { status: newStatus },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      toast.success("Cập nhật trạng thái thành công");
+      fetchData();
+    } catch (error) {
+      console.error("❌ Lỗi cập nhật trạng thái:", error);
+      toast.error("Không thể cập nhật trạng thái");
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Approved":
+        return "green";
+      case "Pending":
+        return "orange";
+      case "Rejected":
+        return "red";
+      default:
+        return "default";
+    }
+  };
 
   const columns = [
     { title: "Họ tên", dataIndex: "fullName", key: "fullName" },
@@ -55,21 +76,31 @@ const handleUpdateStatus = async (donationId, newStatus) => {
     { title: "Địa chỉ", dataIndex: "address", key: "address" },
     { title: "SĐT", dataIndex: "phone", key: "phone" },
     {
-      title: "Thao tác",
-      key: "action",
-      render: (_, record) => (
-        <Popconfirm
-          title="Bạn có chắc chắn muốn xóa bản ghi này?"
-          onConfirm={() => handleDelete(record.id)}
-          okText="Có"
-          cancelText="Không"
-        >
-          <Button danger type="link">
-            Xóa
-          </Button>
-        </Popconfirm>
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (text) => (
+        <Tag color={getStatusColor(text)}>{text || "Chưa cập nhật"}</Tag>
       ),
     },
+   {
+  title: "Trạng thái",
+  dataIndex: "status",
+  key: "status",
+  render: (text, record) => (
+    <Select
+      value={text}
+      onChange={(value) => handleUpdateStatus(record.donationId, value)} // đảm bảo dùng đúng `donationId`
+      style={{ width: 120 }}
+    >
+      {statusOptions.map((option) => (
+        <Select.Option key={option} value={option}>
+          {option}
+        </Select.Option>
+      ))}
+    </Select>
+  ),
+}
   ];
 
   return (
@@ -89,7 +120,6 @@ const handleUpdateStatus = async (donationId, newStatus) => {
             Tìm kiếm
           </Button>
         </Space>
-<p>Test: Đang hiển thị layout</p>
 
         <Table
           dataSource={filteredDonors.map((item, index) => ({

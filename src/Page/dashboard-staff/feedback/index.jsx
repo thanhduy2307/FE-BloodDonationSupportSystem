@@ -50,35 +50,26 @@ const columns = [
     key: "feedbackId",
   },
   {
-    title: "Created By",
-    dataIndex: "createdBy",
-    key: "createdBy",
+    title: "Người gửi",
+    dataIndex: "createdByName",
+    key: "createdByName",
   },
   {
-    title: "Content",
+    title: "Email",
+    dataIndex: "email",
+    key: "email",
+  },
+  {
+    title: "Nội dung",
     dataIndex: "content",
     key: "content",
   },
   {
-    title: "Feedback Date",
+    title: "Ngày góp ý",
     dataIndex: "feedbackDate",
     key: "feedbackDate",
     render: (date) => dayjs(date).format("DD/MM/YYYY"),
   },
-  // {
-  //   title: "Action",
-  //   key: "action",
-  //   render: (_, record) => (
-  //     <Popconfirm
-  //       title={`Are you sure to delete feedback ${record.feedbackId}?`}
-  //       onConfirm={() => handleDelete(record.feedbackId)}
-  //       okText="Yes"
-  //       cancelText="No"
-  //     >
-  //       <Button danger type="link">Delete</Button>
-  //     </Popconfirm>
-  //   ),
-  // },
 ];
 
 
