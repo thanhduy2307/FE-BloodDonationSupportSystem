@@ -9,7 +9,6 @@ import {
 import CreateBloodEvent from "./formCreateEvent";
 import api from "../../../configs/axios";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 
 const EventTable = ({ data, onView, onEdit, onDelete, onCreate }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,16 +16,15 @@ const EventTable = ({ data, onView, onEdit, onDelete, onCreate }) => {
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
-const navigate = useNavigate()
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
 
-  const handleFormSubmit = async() => {
+  const handleFormSubmit = async(formData) => {
     try {
-        await api.post("event");
+        await api.post("Event/create",formData);
         toast.success("Tạo sự kiện thành công!");
-        navigate("/eventStaff");
+        handleCloseModal(true)
       } catch (error) {
         console.error(error);
         toast.error("Đã có lỗi xảy ra khi tạo mới.");
@@ -35,7 +33,7 @@ const navigate = useNavigate()
   };
   const fetchEvent= async ()=>{
     try {
-        const response = await api.get('event')
+        const response = await api.get('Event/getAll')
         setEvent(response.data)
 
     } catch (error) {
@@ -49,24 +47,19 @@ const navigate = useNavigate()
 
   const columns = [
     {
-      title: "Tên sự kiện",
-      dataIndex: "name",
+      title: "ID sự kiện",
+      dataIndex: "enventId",
       key: "name",
     },
     {
-      title: "Ngày ",
-      dataIndex: "date",
-      key: "date",
+      title: "Chủ đề",
+      dataIndex: "title",
+      key: "title",
     },
     {
-      title: "Địa điểm",
-      dataIndex: "location",
-      key: "location",
-    },
-    {
-      title: "Giờ",
-      dataIndex: "time",
-      key: "time",
+      title:"Ngày",
+      dataIndex: "eventDate",
+      key: "eventDate",
     },
     {
       title: "Hành động",
@@ -96,7 +89,7 @@ const navigate = useNavigate()
 
       <Table
         columns={columns}
-        dataSource={data}
+        dataSource={Event}
         rowKey={(record) => record.id}
         pagination={{ pageSize: 5 }}
       />

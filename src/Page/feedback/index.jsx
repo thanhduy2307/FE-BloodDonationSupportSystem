@@ -22,7 +22,7 @@ const FeedbackForm = () => {
       };
 
       try {
-        await api.post("feedback", payload);
+        await api.post("Feedback", payload);
         toast.success("Gửi phản hồi thành công!");
         form.resetFields();
         navigate("/feedback");

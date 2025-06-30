@@ -2,6 +2,7 @@ import { Table, Input, Button, Space, Popconfirm } from "antd";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../../configs/axios";
+import dayjs from "dayjs";
 
 function StaffFeedback() {
   const [datas, setDatas] = useState([]);
@@ -10,7 +11,7 @@ function StaffFeedback() {
 
   const fetchFeedBack = async () => {
     try {
-      const response = await api.get("feedback");
+      const response = await api.get("Feedback");
       setDatas(response.data);
       setFilteredData(response.data); // init filtered data
     } catch (error) {
@@ -42,49 +43,44 @@ function StaffFeedback() {
     }
   };
 
-  const columns = [
-    {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-    },
-    {
-      title: "Created By",
-      dataIndex: "createdBy",
-      key: "createdBy",
-    },
-    {
-      title: "Feedback Type",
-      dataIndex: "feedbackType",
-      key: "feedbackType",
-    },
-    {
-      title: "Content",
-      dataIndex: "content",
-      key: "content",
-    },
-    {
-      title: "Report Date",
-      dataIndex: "reportDate",
-      key: "reportDate",
-    },
-    {
-      title: "Action",
-      key: "action",
-      render: (_, record) => (
-        <Popconfirm
-          title="Are you sure to delete this feedback?"
-          onConfirm={() => handleDelete(record.id)}
-          okText="Yes"
-          cancelText="No"
-        >
-          <Button danger type="link">
-            Delete
-          </Button>
-        </Popconfirm>
-      ),
-    },
-  ];
+const columns = [
+  {
+    title: "ID",
+    dataIndex: "feedbackId",
+    key: "feedbackId",
+  },
+  {
+    title: "Created By",
+    dataIndex: "createdBy",
+    key: "createdBy",
+  },
+  {
+    title: "Content",
+    dataIndex: "content",
+    key: "content",
+  },
+  {
+    title: "Feedback Date",
+    dataIndex: "feedbackDate",
+    key: "feedbackDate",
+    render: (date) => dayjs(date).format("DD/MM/YYYY"),
+  },
+  // {
+  //   title: "Action",
+  //   key: "action",
+  //   render: (_, record) => (
+  //     <Popconfirm
+  //       title={`Are you sure to delete feedback ${record.feedbackId}?`}
+  //       onConfirm={() => handleDelete(record.feedbackId)}
+  //       okText="Yes"
+  //       cancelText="No"
+  //     >
+  //       <Button danger type="link">Delete</Button>
+  //     </Popconfirm>
+  //   ),
+  // },
+];
+
 
   return (
     <div>

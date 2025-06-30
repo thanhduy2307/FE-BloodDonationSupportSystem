@@ -1,18 +1,19 @@
 import React from "react";
-import { Form, Input, DatePicker, TimePicker, Button, message } from "antd";
+import { Form, Input, DatePicker, Button } from "antd";
 import dayjs from "dayjs";
 
-const CreateBloodEvent = () => {
-   const handleCreate = async (formData) => {
-    try {
-      const response = await api.post("event", formData);
-      toast.success("Event created successfully");
-      setEvents((prev) => [...prev, response.data]);
-      handleCloseModal();
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to create event");
-    }
+const CreateBloodEvent = ({ onSubmit, onCancel }) => {
+  const [form] = Form.useForm();
+
+  const handleFinish = (values) => {
+    const formData = {
+      title: values.title,
+      description: values.description || "",
+      eventDate: dayjs(values.eventDate).format("YYYY-MM-DD"),
+    };
+
+    onSubmit && onSubmit(formData);
+    form.resetFields();
   };
 
   return (
@@ -23,39 +24,23 @@ const CreateBloodEvent = () => {
       className="mt-2"
     >
       <Form.Item
-        name="name"
-        label="Tên sự kiện"
-        rules={[{ required: true, message: "Vui lòng nhập tên sự kiện" }]}
+        name="title"
+        label="Chủ đề sự kiện"
+        rules={[{ required: true, message: "Vui lòng nhập chủ đề" }]}
       >
         <Input />
-      </Form.Item>
-
-      <Form.Item
-        name="location"
-        label="Địa điểm"
-        rules={[{ required: true, message: "Vui lòng nhập địa điểm" }]}
-      >
-        <Input />
-      </Form.Item>
-
-      <Form.Item
-        name="date"
-        label="Ngày tổ chức"
-        rules={[{ required: true, message: "Vui lòng chọn ngày" }]}
-      >
-        <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
-      </Form.Item>
-
-      <Form.Item
-        name="time"
-        label="Giờ"
-        rules={[{ required: true, message: "Vui lòng chọn giờ" }]}
-      >
-        <TimePicker format="HH:mm" style={{ width: "100%" }} />
       </Form.Item>
 
       <Form.Item name="description" label="Mô tả">
         <Input.TextArea rows={4} />
+      </Form.Item>
+
+      <Form.Item
+        name="eventDate"
+        label="Ngày tổ chức"
+        rules={[{ required: true, message: "Vui lòng chọn ngày tổ chức" }]}
+      >
+        <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
       </Form.Item>
 
       <Form.Item>

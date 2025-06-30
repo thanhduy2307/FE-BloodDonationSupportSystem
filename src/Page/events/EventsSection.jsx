@@ -9,7 +9,7 @@ const [activeSlide, setActiveSlide] = useState(0);
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await api.get('events');
+        const response = await api.get('Event/upcoming');
         const data = response.data;
         const formatted = data.map(event => ({
           id: event.eventId,

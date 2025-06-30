@@ -2,13 +2,15 @@ import { Table } from "antd";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../../configs/axios";
+import dayjs from "dayjs";
 
 function ManageFeedback() {
   const [datas, setDatas] = useState([]);
 
   const fetchFeedBack = async () => {
     try {
-      const response = await api.get("feedback");
+      const response = await api.get("Feedback");
+      console.log("Feedback data:", response.data.data);
       setDatas(response.data.data);
     } catch (error) {
       console.error(error);
@@ -23,18 +25,13 @@ function ManageFeedback() {
 const columns = [
   {
     title: "ID",
-    dataIndex: "id",
-    key: "id",
+    dataIndex: "feedbackId",
+    key: "feedbackId",
   },
   {
     title: "Created By",
-    dataIndex: "createdBy", 
+    dataIndex: "createdBy",
     key: "createdBy",
-  },
-  {
-    title: "Feedback Type",
-    dataIndex: "feedbackType",
-    key: "feedbackType",
   },
   {
     title: "Content",
@@ -42,9 +39,10 @@ const columns = [
     key: "content",
   },
   {
-    title: "Report Date",
-    dataIndex: "reportDate",
-    key: "reportDate",
+    title: "Feedback Date",
+    dataIndex: "feedbackDate",
+    key: "feedbackDate",
+    render: (date) => dayjs(date).format("DD/MM/YYYY"),
   },
 ];
 
