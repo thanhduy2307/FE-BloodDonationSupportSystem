@@ -11,11 +11,10 @@ const BloodDonationForm = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    BloodType: "",
-    quantity: 0,
+    bloodType: "",
+    quantity: 250,
     donationDate: dayjs().format("YYYY-MM-DD"),
     donationTime: "",
-    status: "Pending",
   });
 
   useEffect(() => {
@@ -37,25 +36,24 @@ const BloodDonationForm = () => {
 
     try {
       const data = {
-        BloodType: formData.BloodType,
-        quantity: formData.quantity,
+        bloodType: formData.bloodType,
+        quantity: Number(formData.quantity),
         donationDate: formData.donationDate,
-        donationTime: formData.donationTime,
-        status: formData.status,
-        userId: user?.id || user?.userId || null,
+        donationTime: formData.donationTime.length === 5
+          ? `${formData.donationTime}:00` // thêm giây nếu chỉ có HH:mm
+          : formData.donationTime,
       };
 
-      await api.post("/User/donate", { dto: data });
+      await api.post("/User/donate", data);
 
       message.success("Đăng ký hiến máu thành công!");
-      toast.success("Đăng kí thành công");
+      toast.success("Đăng ký thành công");
 
       setFormData({
-        BloodType: "",
-        quantity: 0,
+        bloodType: "",
+        quantity: 250,
         donationDate: dayjs().format("YYYY-MM-DD"),
         donationTime: "",
-        status: "Pending",
       });
     } catch (err) {
       console.error("❌ Lỗi gửi đăng ký:", err);
@@ -81,12 +79,11 @@ const BloodDonationForm = () => {
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
-          {/* Nhóm máu */}
           <div>
             <label className="block text-gray-700 mb-1 font-medium">Nhóm máu</label>
             <select
-              name="BloodType"
-              value={formData.BloodType}
+              name="bloodType"
+              value={formData.bloodType}
               onChange={handleChange}
               required
               className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
@@ -100,7 +97,6 @@ const BloodDonationForm = () => {
             </select>
           </div>
 
-          {/* Số lượng */}
           <div>
             <label className="block text-gray-700 mb-1 font-medium">Lượng máu (ml)</label>
             <input
@@ -116,7 +112,6 @@ const BloodDonationForm = () => {
             />
           </div>
 
-          {/* Ngày hiến */}
           <div>
             <label className="block text-gray-700 mb-1 font-medium">Ngày hiến máu</label>
             <input
@@ -129,7 +124,6 @@ const BloodDonationForm = () => {
             />
           </div>
 
-          {/* Giờ hiến */}
           <div>
             <label className="block text-gray-700 mb-1 font-medium">Giờ hiến máu</label>
             <input
@@ -142,17 +136,6 @@ const BloodDonationForm = () => {
             />
           </div>
 
-          {/* Hidden status */}
-          <div className="md:col-span-2 hidden">
-            <input
-              type="text"
-              name="status"
-              value={formData.status}
-              readOnly
-            />
-          </div>
-
-          {/* Submit */}
           <div className="md:col-span-2">
             <button
               type="submit"
