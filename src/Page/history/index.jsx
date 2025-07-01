@@ -195,29 +195,14 @@ const BloodHistoryPage = () => {
           api.get("User/requests"),
           api.get("User/donations"),
         ]);
-
-        const mapData = (data, type) =>
-          data.map((item, index) => ({
-            id: `${type}-${index}`,
-            date: item.donationDate && item.donationTime
-              ? `${item.donationDate}T${item.donationTime}`
-              : item.donationDate || '',
-            amount: item.quantity || 0,
-            unit: 'ml',
-            bloodType: item.bloodGroup || 'N/A',
-            status: item.status || 'pending',
-            notes: item.notes || '',
-            type,
-            raw: item, // lưu lại dữ liệu gốc để update
-          }));
-
-        setRecords([...mapData(donations.data, 'donation'), ...mapData(requests.data, 'receive')]);
+        setRecords([
+          ...mapData(donations.data, "donation"),
+          ...mapData(requests.data, "receive"),
+        ]);
       } catch (error) {
-        console.error("Lỗi khi fetch:", error);
         setRecords([]);
       }
     };
-
     fetchData();
   }, []);
 
