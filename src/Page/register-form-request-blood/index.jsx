@@ -11,7 +11,7 @@ const BloodRequestForm = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    bloodGroup: "",
+    bloodType: "",
     quantity: 0,
     requestDate: dayjs().format("YYYY-MM-DD"),
     requestTime: "",
@@ -25,9 +25,13 @@ const BloodRequestForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    const formattedValue =
+      name === "requestTime" && value.length === 5 ? `${value}:00` : value;
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: formattedValue,
     }));
   };
 
@@ -39,17 +43,17 @@ const BloodRequestForm = () => {
         userId: user?.id || user?.userId || null,
         status: "Pending",
       };
-      await api.post("/User/request", data);
+      await api.post("/User/request", data); // ✅ Gửi đúng structure
       message.success("Đăng ký nhận máu thành công!");
       toast.success("Đăng ký thành công!");
       setFormData({
-        bloodGroup: "",
+        bloodType: "",
         quantity: 0,
         requestDate: dayjs().format("YYYY-MM-DD"),
         requestTime: "",
       });
     } catch (err) {
-      console.error("❌ Lỗi gửi đăng ký:", err);
+      console.error("❌ Lỗi gửi đăng ký:", err?.response?.data || err);
       message.error("Gửi đăng ký thất bại!");
     }
   };
@@ -78,8 +82,8 @@ const BloodRequestForm = () => {
               Nhóm máu
             </label>
             <select
-              name="bloodGroup"
-              value={formData.bloodGroup}
+              name="bloodType"
+              value={formData.bloodType}
               onChange={handleChange}
               required
               className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
@@ -111,7 +115,6 @@ const BloodRequestForm = () => {
             />
           </div>
 
-
           {/* Ngày cần */}
           <div>
             <label className="block text-gray-700 mb-1 font-medium">
@@ -123,31 +126,10 @@ const BloodRequestForm = () => {
               value={formData.requestDate}
               onChange={handleChange}
               required
+              min={dayjs().format("YYYY-MM-DD")}
               className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
             />
           </div>
-
-          <Form.Item
-            name="donationDate"
-            label="Ngày hiến máu"
-            className="md:col-span-2"
-            rules={[
-              { required: true, message: "Vui lòng chọn ngày" },
-              {
-                validator: (_, value) => {
-                  if (!value) return Promise.resolve();
-                  if (value.isBefore(dayjs().startOf("day"))) {
-                    return Promise.reject(
-                      new Error("Ngày đăng ký phải là hôm nay hoặc trong tương lai")
-                    );
-                  }
-                  return Promise.resolve();
-                },
-              },
-            ]}
-          >
-            <DatePicker className="w-full" />
-          </Form.Item>
 
           {/* Giờ cần */}
           <div>
@@ -157,7 +139,7 @@ const BloodRequestForm = () => {
             <input
               type="time"
               name="requestTime"
-              value={formData.requestTime}
+              value={formData.requestTime.slice(0, 5)} // Hiển thị HH:mm
               onChange={handleChange}
               required
               className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
