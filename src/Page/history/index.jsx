@@ -178,6 +178,26 @@ const Pagination = ({ currentPage, totalPages, itemsPerPage, totalItems, onPageC
   );
 };
 
+const mapData = (data, type) =>
+  data.map((item, index) => ({
+    id: `${type}-${index}`,
+    date:
+      type === "donation"
+        ? (item.donationDate && item.donationTime
+            ? `${item.donationDate}T${item.donationTime}`
+            : item.donationDate || "")
+        : (item.requestDate && item.requestTime
+            ? `${item.requestDate}T${item.requestTime}`
+            : item.requestDate || ""),
+    amount: item.quantity || 0,
+    unit: "ml",
+    bloodType: item.bloodGroup || "N/A",
+    status: item.status || "pending",
+    notes: item.notes || "",
+    type,
+    raw: item,
+  }));
+
 const BloodHistoryPage = () => {
   const [records, setRecords] = useState([]);
   const [filters, setFilters] = useState({ search: '', startDate: '', endDate: '', status: '' });
@@ -195,29 +215,14 @@ const BloodHistoryPage = () => {
           api.get("User/requests"),
           api.get("User/donations"),
         ]);
-
-        const mapData = (data, type) =>
-          data.map((item, index) => ({
-            id: `${type}-${index}`,
-            date: item.donationDate && item.donationTime
-              ? `${item.donationDate}T${item.donationTime}`
-              : item.donationDate || '',
-            amount: item.quantity || 0,
-            unit: 'ml',
-            bloodType: item.bloodGroup || 'N/A',
-            status: item.status || 'pending',
-            notes: item.notes || '',
-            type,
-            raw: item, // lưu lại dữ liệu gốc để update
-          }));
-
-        setRecords([...mapData(donations.data, 'donation'), ...mapData(requests.data, 'receive')]);
+        setRecords([
+          ...mapData(donations.data, "donation"),
+          ...mapData(requests.data, "receive"),
+        ]);
       } catch (error) {
-        console.error("Lỗi khi fetch:", error);
         setRecords([]);
       }
     };
-
     fetchData();
   }, []);
 
@@ -248,7 +253,7 @@ const BloodHistoryPage = () => {
     setShowUpdateModal(true);
   };
 
-  // Hàm xử lý cập nhật (giả lập, bạn cần thay đổi theo API thực tế)
+  // Hàm xử lý cập nhật
   const handleSaveUpdate = async (updatedData) => {
     try {
       if (selectedRecord.type === "donation") {
@@ -268,7 +273,7 @@ const BloodHistoryPage = () => {
             requestId: selectedRecord.raw.id, // Sử dụng requestId thay vì id
             quantity: updatedData.amount,
             requestDate: updatedData.date,
-            requestTime: selectedRecord.raw.requestTime || "08:00", // hoặc cho phép sửa thêm
+            requestTime: selectedRecord.raw.requestTime || "08:00",
           }
         );
       }
