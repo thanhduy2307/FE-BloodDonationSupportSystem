@@ -31,6 +31,7 @@ import BloodDonationListt from "./Page/dashboard-staff/blood-donor";
 import BloodRequestList from "./Page/dashboard-staff/request-blood";
 
 
+
 function App() {
   const router = createBrowserRouter([
     {
@@ -144,7 +145,7 @@ function App() {
     },
      {
       path: "history",
-      element: <BloodHistoryPage/>,
+      element: <BloodHistoryPage />,
     },
     
   ]);

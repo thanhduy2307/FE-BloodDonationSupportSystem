@@ -78,7 +78,7 @@ const FilterPanel = ({ filters, onFilterChange }) => {
   );
 };
 
-const BloodHistoryTable = ({ records, title, onUpdate }) => {
+const BloodHistoryTable = ({ records, title, onUpdate, onDelete }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return isNaN(date) ? 'Ngày không hợp lệ' : date.toLocaleDateString('vi-VN');
@@ -105,6 +105,7 @@ const BloodHistoryTable = ({ records, title, onUpdate }) => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ghi chú</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cập nhật</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Xóa</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -124,6 +125,14 @@ const BloodHistoryTable = ({ records, title, onUpdate }) => {
                         onClick={() => onUpdate(r)}
                       >
                         Cập nhật
+                      </button>
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-xs"
+                        onClick={() => onDelete(r)}
+                      >
+                        Xóa
                       </button>
                     </td>
                   </tr>
@@ -176,8 +185,8 @@ const BloodHistoryPage = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Thêm state cho modal cập nhật
-  const [selectedRecord, setSelectedRecord] = useState([]);
-  const [showUpdateModal, setShowUpdateModal] = useState([]);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -234,48 +243,36 @@ const BloodHistoryPage = () => {
   }, [receiveRecords, currentPage, itemsPerPage]);
 
   // Hàm mở modal cập nhật
-  const handleUpdate = async (record) => {
-    let detailData = {};
-    try {
-      if (record.type === 'donation') {
-        // Lấy chi tiết hiến máu
-        const res = await api.get(`User/getDonate/${record.raw.id}`);
-        detailData = res.data;
-      } else if (record.type === 'receive') {
-        // Lấy chi tiết nhận máu
-        const res = await api.get(`User/getRequest/${record.raw.id}`);
-        detailData = res.data;
-      }
-    } catch (error) {
-      // Nếu lỗi thì dùng dữ liệu cũ
-      detailData = record.raw;
-    }
-
-    setSelectedRecord({
-      ...record,
-      // Ưu tiên lấy dữ liệu chi tiết nếu có
-      date: detailData.donationDate || record.date,
-      bloodType: detailData.bloodGroup || record.bloodType,
-      amount: detailData.quantity || record.amount,
-      raw: { ...record.raw, ...detailData }
-    });
+  const handleUpdate = (record) => {
+    setSelectedRecord(record);
     setShowUpdateModal(true);
   };
 
   // Hàm xử lý cập nhật (giả lập, bạn cần thay đổi theo API thực tế)
   const handleSaveUpdate = async (updatedData) => {
     try {
-      // Gọi API cập nhật, ví dụ với endpoint: User/updateDonation/{id}
-      await api.put(
-        `User/updateDonation/${selectedRecord.raw.id}`,
-        {
-          donationDate: updatedData.date,
-          bloodGroup: updatedData.bloodType,
-          quantity: updatedData.amount,
-        }
-      );
+      if (selectedRecord.type === "donation") {
+        await api.put(
+          `User/updateDonation/${selectedRecord.raw.id}`,
+          {
+            id: selectedRecord.raw.id,
+            donationDate: updatedData.date,
+            bloodGroup: updatedData.bloodType,
+            quantity: updatedData.amount,
+          }
+        );
+      } else if (selectedRecord.type === "receive") {
+        await api.put(
+          `User/updateRequest/${selectedRecord.raw.id}`,
+          {
+            requestId: selectedRecord.raw.id, // Sử dụng requestId thay vì id
+            quantity: updatedData.amount,
+            requestDate: updatedData.date,
+            requestTime: selectedRecord.raw.requestTime || "08:00", // hoặc cho phép sửa thêm
+          }
+        );
+      }
 
-      // Cập nhật lại state records (hiển thị ngay trên UI)
       setRecords((prev) =>
         prev.map((r) =>
           r.id === selectedRecord.id
@@ -290,13 +287,38 @@ const BloodHistoryPage = () => {
     }
   };
 
+  // Hàm xóa bản ghi
+  const handleDelete = async (record) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bản ghi này?")) return;
+    try {
+      if (record.type === "donation") {
+        await api.delete(`User/deleteDonation/${record.raw.id}`);
+      } else if (record.type === "receive") {
+        await api.delete(`User/deleteRequest/${record.raw.id}`);
+      }
+      setRecords((prev) => prev.filter((r) => r.id !== record.id));
+    } catch (error) {
+      alert("Xóa thất bại!");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Lịch sử hiến và nhận máu</h1>
         <FilterPanel filters={filters} onFilterChange={setFilters} />
-        <BloodHistoryTable records={paginatedDonation} title="Lịch sử hiến máu" onUpdate={handleUpdate} />
-        <BloodHistoryTable records={paginatedReceive} title="Lịch sử nhận máu" onUpdate={handleUpdate} />
+        <BloodHistoryTable
+          records={paginatedDonation}
+          title="Lịch sử hiến máu"
+          onUpdate={handleUpdate}
+          onDelete={handleDelete}
+        />
+        <BloodHistoryTable
+          records={paginatedReceive}
+          title="Lịch sử nhận máu"
+          onUpdate={handleUpdate}
+          onDelete={handleDelete}
+        />
         <Pagination
           currentPage={currentPage}
           totalPages={Math.ceil((donationRecords.length + receiveRecords.length) / itemsPerPage)}

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Bell, CheckCircle, Info } from "lucide-react";
+import api from "path-to-your-api"; // Adjust the import based on your project structure
 
 const mockNotifications = [
   {
@@ -26,6 +27,35 @@ export default function NotificationPage() {
     // Simulate fetch notifications
     setNotifications(mockNotifications);
     setHasNew(false);
+  };
+
+  // Lấy tất cả thông báo
+  const getAllNotifications = async () => {
+    const res = await api.get("Notification/getAll");
+    return res.data; // [{id, title, content, time, type}, ...]
+  };
+
+  // Tạo mới một thông báo
+  const createNotification = async (notification) => {
+    // notification: { title, content, type }
+    const res = await api.post("Notification/create", notification);
+    return res.data; // trả về thông báo vừa tạo hoặc status
+  };
+
+  // Lấy danh sách thông báo
+  useEffect(() => {
+    getAllNotifications().then(setNotifications);
+  }, []);
+
+  // Tạo thông báo mới
+  const handleCreate = async () => {
+    await createNotification({
+      title: "Tiêu đề mới",
+      content: "Nội dung thông báo",
+      type: "info", // hoặc "success"
+    });
+    // Sau khi tạo xong, reload lại danh sách
+    getAllNotifications().then(setNotifications);
   };
 
   return (
@@ -69,7 +99,6 @@ export default function NotificationPage() {
             </div>
           ))
         )}
-      </div>
-    </div>
+      </div    </div>
   );
 }
