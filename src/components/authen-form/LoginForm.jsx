@@ -43,7 +43,7 @@ const onFinish = async (values) => {
   console.log("User role:", user.role);
   } catch (e) {
     console.log("Login error:", e);
-    toast.error(e?.response?.data?.message );
+    toast.error(e?.response?.data);
   }
 };
   const onFinishFailed = (errorInfo) => {

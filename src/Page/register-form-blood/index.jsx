@@ -120,6 +120,7 @@ const BloodDonationForm = () => {
               value={formData.donationDate}
               onChange={handleChange}
               required
+              min={dayjs().format("YYYY-MM-DD")}
               className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
             />
           </div>
