@@ -8,6 +8,7 @@ import {
   Filter as FilterIcon,
 } from 'lucide-react';
 import api from '../../configs/axios';
+import { toast } from 'react-toastify';
 
 const StatusBadge = ({ status }) => {
   const statusClasses = {
@@ -27,6 +28,9 @@ const FilterPanel = ({ filters, onFilterChange }) => {
   const handleFilterChange = (key, value) => {
     onFilterChange({ ...filters, [key]: value });
   };
+
+  const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
       <div className="flex items-center gap-2 mb-4">
@@ -48,6 +52,7 @@ const FilterPanel = ({ filters, onFilterChange }) => {
           <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="date"
+            min={todayStr}
             value={filters.startDate}
             onChange={(e) => handleFilterChange('startDate', e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
@@ -57,6 +62,7 @@ const FilterPanel = ({ filters, onFilterChange }) => {
           <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="date"
+            min={todayStr}
             value={filters.endDate}
             onChange={(e) => handleFilterChange('endDate', e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
@@ -128,12 +134,18 @@ const BloodHistoryTable = ({ records, title, onUpdate, onDelete }) => {
                       </button>
                     </td>
                     <td className="px-6 py-4">
-                      <button
-                        className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-xs"
-                        onClick={() => onDelete(r)}
-                      >
-                        Xóa
-                      </button>
+                      {r.status === "pending" ? (
+                        <button
+                          className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-xs"
+                          onClick={() => onDelete(r)}
+                        >
+                          Xóa
+                        </button>
+                      ) : (
+                        <span className="text-xs text-gray-400 italic" title="Chỉ được xóa khi ở trạng thái chờ">
+                          Không thể xóa
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -179,24 +191,32 @@ const Pagination = ({ currentPage, totalPages, itemsPerPage, totalItems, onPageC
 };
 
 const mapData = (data, type) =>
-  data.map((item, index) => ({
-    id: `${type}-${index}`,
-    date:
-      type === "donation"
-        ? (item.donationDate && item.donationTime
-            ? `${item.donationDate}T${item.donationTime}`
-            : item.donationDate || "")
-        : (item.requestDate && item.requestTime
-            ? `${item.requestDate}T${item.requestTime}`
-            : item.requestDate || ""),
-    amount: item.quantity || 0,
-    unit: "ml",
-    bloodType: item.bloodGroup || "N/A",
-    status: item.status || "pending",
-    notes: item.notes || "",
-    type,
-    raw: item,
-  }));
+  data.map((item, index) => {
+    const realId = item.id || item.donationId || item.requestId || index; // 👈 Dòng quan trọng
+
+    return {
+      id: `${type}-${realId}`,
+      date:
+        type === "donation"
+          ? (item.donationDate && item.donationTime
+              ? `${item.donationDate}T${item.donationTime}`
+              : item.donationDate || "")
+          : (item.requestDate && item.requestTime
+              ? `${item.requestDate}T${item.requestTime}`
+              : item.requestDate || ""),
+      amount: item.quantity || 0,
+      unit: "ml",
+      bloodType: item.bloodGroup || "N/A",
+      status: item.status || "pending",
+      notes: item.notes || "",
+      type,
+      raw: {
+        ...item,
+        id: realId, // 👈 Thêm dòng này để đảm bảo raw.id không undefined
+      },
+    };
+  });
+
 
 const BloodHistoryPage = () => {
   const [records, setRecords] = useState([]);
@@ -204,7 +224,6 @@ const BloodHistoryPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Thêm state cho modal cập nhật
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
 
@@ -214,7 +233,10 @@ const BloodHistoryPage = () => {
         const [requests, donations] = await Promise.all([
           api.get("User/requests"),
           api.get("User/donations"),
+          
         ]);
+        console.log("✅ donations", donations.data); // 👈 THÊM DÒNG NÀY
+    console.log("✅ requests", requests.data);   // 👈 VÀ DÒNG NÀY
         setRecords([
           ...mapData(donations.data, "donation"),
           ...mapData(requests.data, "receive"),
@@ -247,42 +269,32 @@ const BloodHistoryPage = () => {
     return receiveRecords.slice(start, start + itemsPerPage);
   }, [receiveRecords, currentPage, itemsPerPage]);
 
-  // Hàm mở modal cập nhật
   const handleUpdate = (record) => {
     setSelectedRecord(record);
     setShowUpdateModal(true);
   };
 
-  // Hàm xử lý cập nhật
   const handleSaveUpdate = async (updatedData) => {
     try {
       if (selectedRecord.type === "donation") {
-        await api.put(
-          `User/updateDonation/${selectedRecord.raw.id}`,
-          {
-            id: selectedRecord.raw.id,
-            donationDate: updatedData.date,
-            bloodGroup: updatedData.bloodType,
-            quantity: updatedData.amount,
-          }
-        );
+        await api.put(`User/updateDonation/${selectedRecord.raw.id}`, {
+          id: selectedRecord.raw.id,
+          donationDate: updatedData.date,
+          bloodGroup: updatedData.bloodType,
+          quantity: updatedData.amount,
+        });
       } else if (selectedRecord.type === "receive") {
-        await api.put(
-          `User/updateRequest/${selectedRecord.raw.id}`,
-          {
-            requestId: selectedRecord.raw.id, // Sử dụng requestId thay vì id
-            quantity: updatedData.amount,
-            requestDate: updatedData.date,
-            requestTime: selectedRecord.raw.requestTime || "08:00",
-          }
-        );
+        await api.put(`User/updateRequest/${selectedRecord.raw.id}`, {
+          requestId: selectedRecord.raw.id,
+          quantity: updatedData.amount,
+          requestDate: updatedData.date,
+          requestTime: selectedRecord.raw.requestTime || "08:00",
+        });
       }
 
       setRecords((prev) =>
         prev.map((r) =>
-          r.id === selectedRecord.id
-            ? { ...r, ...updatedData }
-            : r
+          r.id === selectedRecord.id ? { ...r, ...updatedData } : r
         )
       );
       setShowUpdateModal(false);
@@ -292,14 +304,22 @@ const BloodHistoryPage = () => {
     }
   };
 
-  // Hàm xóa bản ghi
   const handleDelete = async (record) => {
+    if (record.status !== "pending") {
+      alert("Chỉ có thể xóa các bản ghi đang chờ xử lý.");
+      return;
+    }
+
     if (!window.confirm("Bạn có chắc chắn muốn xóa bản ghi này?")) return;
+console.log("💥 Delete donation:", record);
+console.log("💥 ID gửi vào:", record.raw.id);
     try {
       if (record.type === "donation") {
         await api.delete(`User/deleteDonation/${record.raw.id}`);
+        toast.success("Xóa hiến máu thành công!");
       } else if (record.type === "receive") {
         await api.delete(`User/deleteRequest/${record.raw.id}`);
+        toast.success("Xóa nhận máu thành công!");
       }
       setRecords((prev) => prev.filter((r) => r.id !== record.id));
     } catch (error) {
@@ -355,6 +375,7 @@ const BloodHistoryPage = () => {
                   <input
                     name="date"
                     type="date"
+                    min={new Date().toISOString().split("T")[0]}
                     defaultValue={selectedRecord.date ? selectedRecord.date.slice(0, 10) : ""}
                     className="w-full border rounded px-3 py-2"
                   />
