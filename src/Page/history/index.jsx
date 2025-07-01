@@ -310,7 +310,7 @@ const BloodHistoryPage = () => {
       return;
     }
 
-    if (!window.confirm("Bạn có chắc chắn muốn xóa bản ghi này?")) return;
+    if (!window.confirm("Bạn có chắc chắn muốn xóa ?")) return;
 console.log("💥 Delete donation:", record);
 console.log("💥 ID gửi vào:", record.raw.id);
     try {
