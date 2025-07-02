@@ -68,7 +68,7 @@ const NotificationPage = () => {
         );
         message.success("Cập nhật thông báo thành công");
       } else {
-        await api.post("/notifications", payload);
+        await api.post("Notification/create", payload);
         message.success("Tạo thông báo thành công");
       }
       closeModal();
