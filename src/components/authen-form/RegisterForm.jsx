@@ -9,6 +9,7 @@ import "./register.css";
 const { Option } = Select;
 
 const RegisterForm = () => {
+  const [form] = Form.useForm();
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
@@ -23,14 +24,30 @@ const RegisterForm = () => {
       navigate("/login");
     } catch (e) {
       console.log("❌ Lỗi BE trả về:", e.response?.data);
-      const errorMessage =
-        e.response?.data?.message || "Đăng ký thất bại!";
-      toast.error(errorMessage);
+
+      const errorData = e.response?.data;
+
+      if (errorData?.errors) {
+        // Hiển thị lỗi từng field trong form
+        const fieldErrors = Object.entries(errorData.errors).map(([field, messages]) => ({
+          name: field.charAt(0).toLowerCase() + field.slice(1),
+          errors: messages,
+        }));
+        form.setFields(fieldErrors);
+
+        // Cũng hiển thị lỗi bằng toast (tuỳ chọn)
+        Object.entries(errorData.errors).forEach(([field, messages]) => {
+          messages.forEach((msg) => toast.error(`${msg}`));
+        });
+      } else {
+        const errorMessage = errorData?.message || "Đăng ký thất bại!";
+        toast.error(errorMessage);
+      }
     }
   };
 
   const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
+    console.log("❌ Validate failed:", errorInfo);
   };
 
   return (
@@ -41,15 +58,12 @@ const RegisterForm = () => {
             <Droplet className="text-red-600 mr-2" size={32} />
             <span className="text-2xl font-bold text-red-600">HeartDrop</span>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Đăng ký tài khoản
-          </h2>
-          <p className="text-gray-600">
-            Tham gia cộng đồng hiến máu nhân đạo ngay hôm nay
-          </p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Đăng ký tài khoản</h2>
+          <p className="text-gray-600">Tham gia cộng đồng hiến máu nhân đạo ngay hôm nay</p>
         </div>
 
         <Form
+          form={form}
           layout="vertical"
           name="register"
           onFinish={onFinish}
@@ -117,11 +131,7 @@ const RegisterForm = () => {
             name="dateOfBirth"
             rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}
           >
-            <DatePicker
-              style={{ width: "100%" }}
-              format="YYYY-MM-DD"
-              placeholder="Chọn ngày sinh"
-            />
+            <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" placeholder="Chọn ngày sinh" />
           </Form.Item>
 
           <Form.Item
@@ -150,10 +160,7 @@ const RegisterForm = () => {
           <div className="text-center">
             <p className="text-sm text-gray-600">
               Đã có tài khoản?{" "}
-              <a
-                href="/login"
-                className="font-medium text-red-600 hover:text-red-500"
-              >
+              <a href="/login" className="font-medium text-red-600 hover:text-red-500">
                 Đăng nhập
               </a>
             </p>
