@@ -117,23 +117,23 @@ const handleChangeRole = async (userId, newRole) => {
         </Select>
       ),
     },
-    {
-      title: "Action",
-      key: "action",
-      render: (_, record) => (
-        <button
-          onClick={() => handleDelete(record.userId)}
-          style={{
-            color: "red",
-            border: "none",
-            background: "transparent",
-            cursor: "pointer",
-          }}
-        >
-          Delete
-        </button>
-      ),
-    },
+    // {
+    //   title: "Action",
+    //   key: "action",
+    //   render: (_, record) => (
+    //     <button
+    //       onClick={() => handleDelete(record.userId)}
+    //       style={{
+    //         color: "red",
+    //         border: "none",
+    //         background: "transparent",
+    //         cursor: "pointer",
+    //       }}
+    //     >
+    //       Delete
+    //     </button>
+    //   ),
+    // },
   ];
 
   return (
