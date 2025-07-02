@@ -29,6 +29,7 @@ import BloodHistoryPage from "./Page/history";
 import BloodRequestListAdmin from "./Page/dashboard-admin/requestBlood";
 import BloodDonationListt from "./Page/dashboard-staff/blood-donor";
 import BloodRequestList from "./Page/dashboard-staff/request-blood";
+import NotificationUser from "./Page/notification";
 
 
 
@@ -146,6 +147,10 @@ function App() {
      {
       path: "history",
       element: <BloodHistoryPage />,
+    },
+    {
+      path: "notificationn",
+      element: <NotificationUser />,
     },
     
   ]);
