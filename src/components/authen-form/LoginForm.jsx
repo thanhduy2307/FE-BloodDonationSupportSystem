@@ -1,53 +1,67 @@
-import React from 'react';
-import { Form, Input, Button, Checkbox } from 'antd';
+import React from "react";
+import { Form, Input, Button, Checkbox } from "antd";
 
-import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { User, Lock } from 'lucide-react';
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { User, Lock } from "lucide-react";
 
-
-import { Link } from 'react-router-dom';
-import { login } from '../../redux/features/userSlice';
-import api from '../../configs/axios';
-
-
+import { Link } from "react-router-dom";
+import { login } from "../../redux/features/userSlice";
+import api from "../../configs/axios";
 
 const LoginForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const onFinish = async (values) => {
+    try {
+      const response = await api.post("Auth/login", values);
 
-const onFinish = async (values) => {
-  try {
-    const response = await api.post('Auth/login', values);
+      const { token, ...user } = response.data;
 
-   const { token, ...user } = response.data;
+      toast.success("Đăng nhập thành công!");
 
- 
-    
-    toast.success("Đăng nhập thành công!");
-    
+      dispatch(login(user));
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
-    dispatch(login(user));
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-    
       if (user.role == "Admin") {
         navigate("/dashboard/overview");
       } else if (user.role == "User") {
         navigate("/");
-      }else if (user.role == "Staff") {
+      } else if (user.role == "Staff") {
         navigate("/dashboard-staff/member-staff");
       }
-  console.log("User role:", user.role);
-  } catch (e) {
-    console.log("Login error:", e);
-    toast.error(e?.response?.data);
+      console.log("User role:", user.role);
+    } catch (e) {
+  console.error("🧨 Lỗi đầy đủ:", e);
+
+  const data = e?.response?.data;
+
+  // 1. In thử để chắc chắn có gì trong data
+  console.log("📦 e.response.data:", data);
+
+  // 2. Nếu có lỗi dạng validation
+  if (data && typeof data === "object" && data.errors) {
+    const allErrors = Object.values(data.errors).flat();
+    console.log("📢 Toàn bộ lỗi cần hiển thị:", allErrors);
+
+    allErrors.forEach((msg) => {
+      toast.error(msg);
+    });
+  } else if (typeof data === "string") {
+    toast.error(data.data);
+  } else if (data.data?.message) {
+    toast.error(data.data.message);
+  } else {
+    toast.error("Lỗi không xác định từ máy chủ.");
   }
-};
+}
+
+  };
   const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
+    console.log("Failed:", errorInfo);
   };
 
   return (
@@ -74,7 +88,9 @@ const onFinish = async (values) => {
           <Form.Item
             label="Email"
             name="email"
-            rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập tên đăng nhập!" },
+            ]}
           >
             <Input
               prefix={<User className="text-gray-400 mr-2" size={16} />}
@@ -85,7 +101,7 @@ const onFinish = async (values) => {
           <Form.Item
             label="Mật khẩu"
             name="password"
-            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
           >
             <Input.Password
               prefix={<Lock className="text-gray-400 mr-2" size={16} />}
@@ -108,8 +124,11 @@ const onFinish = async (values) => {
           </Form.Item>
 
           <div className="text-center text-sm text-gray-600">
-            Chưa có tài khoản?{' '}
-            <Link to="/register" className="font-medium text-red-600 hover:text-red-500">
+            Chưa có tài khoản?{" "}
+            <Link
+              to="/register"
+              className="font-medium text-red-600 hover:text-red-500"
+            >
               Đăng ký ngay
             </Link>
           </div>

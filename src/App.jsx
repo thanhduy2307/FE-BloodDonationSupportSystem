@@ -31,6 +31,8 @@ import BloodDonationListt from "./Page/dashboard-staff/blood-donor";
 import BloodRequestList from "./Page/dashboard-staff/request-blood";
 import NotificationUser from "./Page/notification";
 
+import { ToastContainer } from 'react-toastify';
+<ToastContainer position="top-right" autoClose={3000} />
 
 
 function App() {

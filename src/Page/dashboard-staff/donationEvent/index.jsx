@@ -33,16 +33,25 @@ const EventTable = ({ onEdit, onDelete }) => {
   };
 
   const handleFormSubmit = async (formData) => {
-    try {
-      await api.post("Event/create", formData);
-      toast.success("Tạo sự kiện thành công!");
-      handleCloseModal();
-      fetchEvent();
-    } catch (error) {
-      console.error(error);
-      toast.error("Đã có lỗi xảy ra khi tạo mới.");
-    }
-  };
+  try {
+    const payload = {
+      title: formData.title,
+      description: formData.description,
+      eventDate: formData.eventDate.format("YYYY-MM-DD"),
+    };
+
+    console.log("📦 Payload gửi:", payload);
+
+    await api.post("Event/create", payload); 
+    toast.success("Tạo sự kiện thành công!");
+    handleCloseModal();
+    fetchEvent();
+  } catch (error) {
+    console.error("❌ Lỗi tạo sự kiện:", error?.response?.data || error);
+    toast.error("Đã có lỗi xảy ra khi tạo mới.");
+  }
+};
+
 
   const handleEdit = (record) => {
     setSelectedEvent({

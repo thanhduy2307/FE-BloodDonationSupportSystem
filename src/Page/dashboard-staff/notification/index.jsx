@@ -11,6 +11,7 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import api from "../../../configs/axios";
+import { toast } from "react-toastify";
 
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
@@ -53,30 +54,33 @@ const NotificationPage = () => {
   };
 
   const handleSubmit = async (values) => {
-    const payload = {
-      ...values,
-      notifDate: values.notifDate.format("YYYY-MM-DD"),
-      userId: values.userId || null,
-      eventId: values.eventId || null,
-    };
-
-    try {
-      if (editingNotification) {
-        await api.put(
-          `/notifications/${editingNotification.notificationId}`,
-          payload
-        );
-        message.success("Cập nhật thông báo thành công");
-      } else {
-        await api.post("Notification/create", payload);
-        message.success("Tạo thông báo thành công");
-      }
-      closeModal();
-      fetchData();
-    } catch {
-      message.error("Lỗi khi lưu thông báo");
-    }
+  const payload = {
+    ...values,
+    notifDate: values.notifDate.format("YYYY-MM-DD"),
+    userId: values.userId?.trim() ? values.userId.trim() : null,
+    eventId: values.eventId?.trim() ? values.eventId.trim() : null,
   };
+
+  console.log("Payload gửi:", payload); // ✅ Kiểm tra lại giá trị gửi đi
+
+  try {
+    if (editingNotification) {
+      await api.put(
+        `/notifications/${editingNotification.notificationId}`,
+        payload
+      );
+      message.success("Cập nhật thông báo thành công");
+    } else {
+      await api.post("Notification/create", payload);
+      toast.success("Tạo thông báo thành công");
+    }
+    closeModal();
+    fetchData();
+  } catch {
+    toast.error("Lỗi khi lưu thông báo");
+  }
+};
+
 
   const columns = [
     {
