@@ -24,24 +24,40 @@ const RegisterForm = () => {
       navigate("/login");
     } catch (e) {
       console.log("❌ Lỗi BE trả về:", e.response?.data);
-
       const errorData = e.response?.data;
 
+      // Xử lý nếu dạng lỗi là errors: { Email: [...] }
       if (errorData?.errors) {
-        // Hiển thị lỗi từng field trong form
-        const fieldErrors = Object.entries(errorData.errors).map(([field, messages]) => ({
-          name: field.charAt(0).toLowerCase() + field.slice(1),
-          errors: messages,
-        }));
+        const fieldErrors = Object.entries(errorData.errors).map(
+          ([field, messages]) => ({
+            name: field.charAt(0).toLowerCase() + field.slice(1),
+            errors: messages,
+          })
+        );
         form.setFields(fieldErrors);
+        Object.values(errorData.errors)
+          .flat()
+          .forEach((msg) => toast.error(msg));
+      }
 
-        // Cũng hiển thị lỗi bằng toast (tuỳ chọn)
-        Object.entries(errorData.errors).forEach(([field, messages]) => {
-          messages.forEach((msg) => toast.error(`${msg}`));
-        });
-      } else {
-        const errorMessage = errorData?.message || "Đăng ký thất bại!";
-        toast.error(errorMessage);
+      // Xử lý nếu dạng lỗi là error: "Email đã được sử dụng"
+      else if (errorData?.error) {
+        const errorMsg = errorData.error;
+
+        // ✅ Gán lỗi vào field phù hợp, ví dụ "email"
+        form.setFields([
+          {
+            name: "email",
+            errors: [errorMsg],
+          },
+        ]);
+
+        toast.error(errorMsg);
+      }
+
+      // Trường hợp khác
+      else {
+        toast.error("Đăng ký thất bại!");
       }
     }
   };
@@ -58,8 +74,12 @@ const RegisterForm = () => {
             <Droplet className="text-red-600 mr-2" size={32} />
             <span className="text-2xl font-bold text-red-600">HeartDrop</span>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Đăng ký tài khoản</h2>
-          <p className="text-gray-600">Tham gia cộng đồng hiến máu nhân đạo ngay hôm nay</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            Đăng ký tài khoản
+          </h2>
+          <p className="text-gray-600">
+            Tham gia cộng đồng hiến máu nhân đạo ngay hôm nay
+          </p>
         </div>
 
         <Form
@@ -101,7 +121,9 @@ const RegisterForm = () => {
           <Form.Item
             label="Số điện thoại"
             name="phoneNumber"
-            rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập số điện thoại!" },
+            ]}
           >
             <Input placeholder="Nhập số điện thoại" />
           </Form.Item>
@@ -129,9 +151,43 @@ const RegisterForm = () => {
           <Form.Item
             label="Ngày sinh"
             name="dateOfBirth"
-            rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng chọn ngày sinh!",
+              },
+              {
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+
+                  const today = new Date();
+                  const birthDate = value.toDate(); // Chuyển từ dayjs sang Date
+                  const age =
+                    today.getFullYear() -
+                    birthDate.getFullYear() -
+                    (today.getMonth() < birthDate.getMonth() ||
+                    (today.getMonth() === birthDate.getMonth() &&
+                      today.getDate() < birthDate.getDate())
+                      ? 1
+                      : 0);
+
+                  if (age >= 18) {
+                    return Promise.resolve();
+                  } else {
+                    return Promise.reject(
+                      new Error("Bạn phải đủ 18 tuổi để được hiến máu.")
+                    );
+                  }
+                },
+              },
+            ]}
           >
-            <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" placeholder="Chọn ngày sinh" />
+            <DatePicker
+              style={{ width: "100%" }}
+              format="YYYY-MM-DD"
+              placeholder="Chọn ngày sinh"
+              disabledDate={(current) => current && current > new Date()}
+            />
           </Form.Item>
 
           <Form.Item
@@ -160,7 +216,10 @@ const RegisterForm = () => {
           <div className="text-center">
             <p className="text-sm text-gray-600">
               Đã có tài khoản?{" "}
-              <a href="/login" className="font-medium text-red-600 hover:text-red-500">
+              <a
+                href="/login"
+                className="font-medium text-red-600 hover:text-red-500"
+              >
                 Đăng nhập
               </a>
             </p>
