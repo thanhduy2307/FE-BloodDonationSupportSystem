@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import api from '../../configs/axios';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom'; // Thêm dòng này
 
 const StatusBadge = ({ status }) => {
   const statusClasses = {
@@ -227,6 +228,8 @@ const BloodHistoryPage = () => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
 
+  const navigate = useNavigate(); // Thêm dòng này
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -330,6 +333,15 @@ console.log("💥 ID gửi vào:", record.raw.id);
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
+        {/* Nút trở về trang chủ */}
+        <div className="mb-4">
+          <button
+            onClick={() => navigate("/")}
+            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+          >
+            ← Quay về trang chủ
+          </button>
+        </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Lịch sử hiến và nhận máu</h1>
         <FilterPanel filters={filters} onFilterChange={setFilters} />
         <BloodHistoryTable
