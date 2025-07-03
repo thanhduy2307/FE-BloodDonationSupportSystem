@@ -25,7 +25,6 @@ const BloodRequestForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     const formattedValue =
       name === "requestTime" && value.length === 5 ? `${value}:00` : value;
 
@@ -37,13 +36,29 @@ const BloodRequestForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Kiểm tra giờ nhận máu hợp lệ (07:00 - 16:30)
+    const time = formData.requestTime;
+    if (!time) {
+      return message.error("Vui lòng chọn giờ cần nhận máu!");
+    }
+
+    const [hour, minute] = time.split(":").map(Number);
+    const totalMinutes = hour * 60 + minute;
+    const minMinutes = 7 * 60; // 07:00
+    const maxMinutes = 16 * 60 + 30; // 16:30
+
+    if (totalMinutes < minMinutes || totalMinutes > maxMinutes) {
+      return message.error("Giờ nhận máu chỉ được phép từ 07:00 đến 16:30!");
+    }
+
     try {
       const data = {
         ...formData,
         userId: user?.id || user?.userId || null,
         status: "Pending",
       };
-      await api.post("/User/request", data); // ✅ Gửi đúng structure
+      await api.post("/User/request", data);
       message.success("Đăng ký nhận máu thành công!");
       toast.success("Đăng ký thành công!");
       setFormData({
@@ -131,7 +146,6 @@ const BloodRequestForm = () => {
             />
           </div>
 
-
           {/* Giờ cần */}
           <div>
             <label className="block text-gray-700 mb-1 font-medium">
@@ -143,6 +157,8 @@ const BloodRequestForm = () => {
               value={formData.requestTime.slice(0, 5)} // Hiển thị HH:mm
               onChange={handleChange}
               required
+              min="07:00"
+              max="16:30"
               className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
             />
           </div>
