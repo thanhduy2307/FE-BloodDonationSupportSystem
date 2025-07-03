@@ -34,14 +34,27 @@ const BloodDonationForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // ✅ Kiểm tra giờ hiến máu chỉ từ 07:00 đến 16:30
+    const time = formData.donationTime;
+    if (!time) {
+      return message.error("Vui lòng chọn giờ hiến máu!");
+    }
+
+    const [hour, minute] = time.split(":").map(Number);
+    const totalMinutes = hour * 60 + minute;
+    const minMinutes = 7 * 60;
+    const maxMinutes = 16 * 60 + 30;
+
+    if (totalMinutes < minMinutes || totalMinutes > maxMinutes) {
+      return message.error("Giờ hiến máu chỉ được phép từ 07:00 đến 16:30!");
+    }
+
     try {
       const data = {
         bloodType: formData.bloodType,
         quantity: Number(formData.quantity),
         donationDate: formData.donationDate,
-        donationTime: formData.donationTime.length === 5
-          ? `${formData.donationTime}:00` // thêm giây nếu chỉ có HH:mm
-          : formData.donationTime,
+        donationTime: time.length === 5 ? `${time}:00` : time,
       };
 
       await api.post("/User/donate", data);
@@ -79,8 +92,11 @@ const BloodDonationForm = () => {
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
+          {/* Nhóm máu */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Nhóm máu</label>
+            <label className="block text-gray-700 mb-1 font-medium">
+              Nhóm máu
+            </label>
             <select
               name="bloodType"
               value={formData.bloodType}
@@ -97,8 +113,11 @@ const BloodDonationForm = () => {
             </select>
           </div>
 
+          {/* Lượng máu */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Lượng máu (ml)</label>
+            <label className="block text-gray-700 mb-1 font-medium">
+              Lượng máu (ml)
+            </label>
             <input
               type="number"
               name="quantity"
@@ -112,8 +131,11 @@ const BloodDonationForm = () => {
             />
           </div>
 
+          {/* Ngày hiến */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Ngày hiến máu</label>
+            <label className="block text-gray-700 mb-1 font-medium">
+              Ngày hiến máu
+            </label>
             <input
               type="date"
               name="donationDate"
@@ -125,18 +147,24 @@ const BloodDonationForm = () => {
             />
           </div>
 
+          {/* Giờ hiến */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Giờ hiến máu</label>
+            <label className="block text-gray-700 mb-1 font-medium">
+              Giờ hiến máu
+            </label>
             <input
               type="time"
               name="donationTime"
               value={formData.donationTime}
               onChange={handleChange}
               required
+              min="07:00"
+              max="16:30"
               className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
             />
           </div>
 
+          {/* Nút gửi */}
           <div className="md:col-span-2">
             <button
               type="submit"
