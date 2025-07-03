@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
 import { persistor, store } from "./redux/store";
@@ -30,17 +30,25 @@ import BloodRequestListAdmin from "./Page/dashboard-admin/requestBlood";
 import BloodDonationListt from "./Page/dashboard-staff/blood-donor";
 import BloodRequestList from "./Page/dashboard-staff/request-blood";
 import NotificationUser from "./Page/notification";
-
+import * as Sentry from "@sentry/react";
 import { ToastContainer } from 'react-toastify';
+import SentryRouteTracker from "./SentryRouteTracker";
 <ToastContainer position="top-right" autoClose={3000} />
 
 
 function App() {
+  useEffect(() => {
+    // test tự động gửi lỗi sau 2 giây
+    setTimeout(() => {
+      Sentry.captureException(new Error("🔥 Lỗi test gửi lên Sentry"));
+    }, 2000);
+  }, []);
   const router = createBrowserRouter([
     {
       path: "",
-      element: (
+      element:(
         <>
+        <SentryRouteTracker /> 
           <Header />
           <Outlet />
           <Footer />
@@ -164,7 +172,11 @@ function App() {
           <RouterProvider router={router} />
         </PersistGate>
       </Provider>
+      <button onClick={() => { throw new Error("This is your first Sentry error!"); }}>
+  Click me to test Sentry
+</button>;
     </>
+    
   );
 }
 

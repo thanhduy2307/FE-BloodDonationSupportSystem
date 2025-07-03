@@ -282,14 +282,14 @@ const BloodHistoryPage = () => {
           donationDate: updatedData.date,
           bloodGroup: updatedData.bloodType,
           quantity: updatedData.amount,
-        });
+        });toast.success("Cập nhật hiến máu thành công!");
       } else if (selectedRecord.type === "receive") {
         await api.put(`User/updateRequest/${selectedRecord.raw.id}`, {
           requestId: selectedRecord.raw.id,
           quantity: updatedData.amount,
           requestDate: updatedData.date,
           requestTime: selectedRecord.raw.requestTime || "08:00",
-        });
+        });toast.success("Cập nhật nhận máu thành công!");
       }
 
       setRecords((prev) =>
