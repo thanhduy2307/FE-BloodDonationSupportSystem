@@ -6,7 +6,7 @@ import {
   Form,
   Input,
   DatePicker,
-  Popconfirm,
+  Select,
   message,
 } from "antd";
 import dayjs from "dayjs";
@@ -15,12 +15,14 @@ import { toast } from "react-toastify";
 
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
+  const [users, setUsers] = useState([]);
   const [form] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNotification, setEditingNotification] = useState(null);
 
   useEffect(() => {
     fetchData();
+    fetchUsers();
   }, []);
 
   const fetchData = async () => {
@@ -28,7 +30,16 @@ const NotificationPage = () => {
       const notiRes = await api.get("/Notification/getAll");
       setNotifications(notiRes.data);
     } catch {
-      message.error("Lỗi khi tải dữ liệu.");
+      message.error("Lỗi khi tải danh sách thông báo.");
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const res = await api.get("/Admin/users");
+      setUsers(res.data);
+    } catch {
+      message.error("Lỗi khi tải danh sách người dùng.");
     }
   };
 
@@ -39,11 +50,15 @@ const NotificationPage = () => {
   };
 
   const openEditModal = (record) => {
-    setEditingNotification(record);
+    const selectedUser = users.find((u) => u.userId === record.userId);
+
     form.setFieldsValue({
       ...record,
+      userId: selectedUser ? selectedUser.userId : null,
       notifDate: dayjs(record.notifDate),
     });
+
+    setEditingNotification(record);
     setIsModalOpen(true);
   };
 
@@ -54,33 +69,30 @@ const NotificationPage = () => {
   };
 
   const handleSubmit = async (values) => {
-  const payload = {
-    ...values,
-    notifDate: values.notifDate.format("YYYY-MM-DD"),
-    userId: values.userId?.trim() ? values.userId.trim() : null,
-    eventId: values.eventId?.trim() ? values.eventId.trim() : null,
-  };
+    const payload = {
+      ...values,
+      notifDate: values.notifDate.format("YYYY-MM-DD"),
+      userId: values.userId || null,
+      eventId: values.eventId?.trim?.() || values.eventId || null,
+    };
 
-  console.log("Payload gửi:", payload); // ✅ Kiểm tra lại giá trị gửi đi
-
-  try {
-    if (editingNotification) {
-      await api.put(
-        `/notifications/${editingNotification.notificationId}`,
-        payload
-      );
-      message.success("Cập nhật thông báo thành công");
-    } else {
-      await api.post("Notification/sendToUser", payload);
-      toast.success("Tạo thông báo thành công");
+    try {
+      if (editingNotification) {
+        await api.put(
+          `/notifications/${editingNotification.notificationId}`,
+          payload
+        );
+        message.success("Cập nhật thông báo thành công");
+      } else {
+        await api.post("Notification/sendToUser", payload);
+        toast.success("Tạo thông báo thành công");
+      }
+      closeModal();
+      fetchData();
+    } catch {
+      toast.error("Lỗi khi lưu thông báo");
     }
-    closeModal();
-    fetchData();
-  } catch {
-    toast.error("Lỗi khi lưu thông báo");
-  }
-};
-
+  };
 
   const columns = [
     {
@@ -136,8 +148,17 @@ const NotificationPage = () => {
         okText={editingNotification ? "Cập nhật" : "Tạo"}
       >
         <Form layout="vertical" form={form} onFinish={handleSubmit}>
-          <Form.Item name="userId" label="ID người nhận">
-            <Input placeholder="Nhập userId (bỏ trống để gửi cho tất cả)" />
+          <Form.Item name="userId" label="Người nhận">
+            <Select
+              showSearch
+              allowClear
+              placeholder="Chọn người nhận (bỏ trống để gửi cho tất cả)"
+              optionFilterProp="label"
+              options={users.map((u) => ({
+                label: u.fullname,
+                value: u.userId,
+              }))}
+            />
           </Form.Item>
 
           <Form.Item name="eventId" label="ID sự kiện">
@@ -147,7 +168,7 @@ const NotificationPage = () => {
           <Form.Item
             name="message"
             label="Nội dung"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Vui lòng nhập nội dung" }]}
           >
             <Input.TextArea rows={4} />
           </Form.Item>
@@ -155,7 +176,7 @@ const NotificationPage = () => {
           <Form.Item
             name="notifDate"
             label="Ngày gửi"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Vui lòng chọn ngày gửi" }]}
           >
             <DatePicker
               format="YYYY-MM-DD"

@@ -12,7 +12,7 @@ const NotificationUser = () => {
 
   const fetchNotifications = async () => {
     try {
-      const res = await api.get("/Notification/getAll"); 
+      const res = await api.get("/Notification/getByUser"); 
       setNotifications(res.data);
     } catch (error) {
       console.error("Lỗi khi tải thông báo:", error);
