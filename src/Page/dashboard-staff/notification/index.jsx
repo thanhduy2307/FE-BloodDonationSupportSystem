@@ -71,7 +71,7 @@ const NotificationPage = () => {
       );
       message.success("Cập nhật thông báo thành công");
     } else {
-      await api.post("Notification/create", payload);
+      await api.post("Notification/sendToUser", payload);
       toast.success("Tạo thông báo thành công");
     }
     closeModal();
