@@ -172,9 +172,7 @@ function App() {
           <RouterProvider router={router} />
         </PersistGate>
       </Provider>
-      <button onClick={() => { throw new Error("This is your first Sentry error!"); }}>
-  Click me to test Sentry
-</button>;
+
     </>
     
   );

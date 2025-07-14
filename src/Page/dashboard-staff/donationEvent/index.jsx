@@ -8,6 +8,7 @@ import {
   Form,
   Input,
   DatePicker,
+  Popconfirm, // Thêm dòng này
 } from "antd";
 import {
   EditOutlined,
@@ -127,11 +128,14 @@ const EventTable = ({ onEdit, onDelete }) => {
       render: (_, record) => (
         <Space>
           <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-          <Button
-            icon={<DeleteOutlined />}
-            danger
-            onClick={() => handleDelete(record)}
-          />
+          <Popconfirm
+            title="Bạn có chắc chắn muốn xóa sự kiện này?"
+            onConfirm={() => handleDelete(record)}
+            okText="Đồng ý"
+            cancelText="Hủy"
+          >
+            <Button icon={<DeleteOutlined />} danger />
+          </Popconfirm>
         </Space>
       ),
     },

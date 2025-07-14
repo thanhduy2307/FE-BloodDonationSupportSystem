@@ -75,16 +75,7 @@ const columns = [
 
   return (
     <div>
-      <Space style={{ marginBottom: 16 }}>
-        <Input
-          placeholder="Search by feedback type"
-          value={searchType}
-          onChange={(e) => setSearchType(e.target.value)}
-        />
-        <Button type="primary" onClick={handleSearch}>
-          Search
-        </Button>
-      </Space>
+      
 
       <Table columns={columns} dataSource={filteredData} rowKey="id" />
     </div>

@@ -60,13 +60,7 @@ const EventsSection = () => {
           </div>
         </div>
       </div>
-      <a
-        href="#register"
-        className="text-red-600 text-sm font-medium flex items-center hover:text-red-700 transition"
-      >
-        Đăng ký tham gia
-        <ArrowRight className="w-4 h-4 ml-1" />
-      </a>
+     
     </div>
   );
 
