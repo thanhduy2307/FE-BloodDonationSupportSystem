@@ -70,6 +70,19 @@ const BloodDonationListt = () => {
     { title: "Ngày hiến", dataIndex: "donationDate", key: "donationDate" },
     { title: "Giờ hiến", dataIndex: "donationTime", key: "donationTime" },
     {
+      title: "Thông tin bổ sung",
+      key: "extraInfo",
+      render: (text, record) => (
+        <div>
+          <p>Chiều cao: {record.height} cm</p>
+          <p>Cân nặng: {record.weight} kg</p>
+          <p>Có bầu: {record.isPregnant === "yes" ? "Có" : "Không"}</p>
+          <p>Bệnh truyền nhiễm: {record.hasInfectiousDisease === "yes" ? "Có" : "Không"}</p>
+          <p>Đã hiến máu trước đó: {record.hasDonatedBefore === "yes" ? `Có (ngày ${record.lastDonationDate})` : "Chưa"}</p>
+        </div>
+      ),
+    },
+    {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
