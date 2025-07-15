@@ -10,13 +10,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+     "@rollbar/react": "^0.11.1",
+   "rollbar": "^2.26.0",
+    "@highlight-run/react": "^19.0.19",
     "@reduxjs/toolkit": "^2.8.2",
+    "@rollbar/react": "^0.12.1",
     "@sentry/react": "^9.34.0",
     "@tailwindcss/vite": "^4.1.10",
     "antd": "^5.26.0",
     "axios": "^1.9.0",
     "dayjs": "^1.11.13",
     "framer-motion": "^12.18.1",
+    "highlight.run": "^9.18.19",
     "lucide-react": "^0.514.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -26,6 +31,7 @@
     "react-toastify": "^11.0.5",
     "recharts": "^2.15.3",
     "redux-persist": "^6.0.0",
+    "rollbar": "^2.26.4",
     "tailwindcss": "^4.1.10"
   },
   "devDependencies": {
