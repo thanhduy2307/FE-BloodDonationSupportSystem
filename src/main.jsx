@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // nếu bạn chưa import file CSS
 
 import { Provider, ErrorBoundary } from '@rollbar/react';
 
@@ -14,14 +15,9 @@ const rollbarConfig = {
   captureUnhandledRejections: true,
 };
 
+const root = ReactDOM.createRoot(document.getElementById('root'));
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-
-const container = document.getElementById("root");
-const root = createRoot(container);
-root.render(<App />);
-createRoot(document.getElementById('root')).render(
-
+root.render(
   <StrictMode>
     <Provider config={rollbarConfig}>
       <ErrorBoundary>
