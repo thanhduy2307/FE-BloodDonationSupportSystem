@@ -190,19 +190,6 @@ const RegisterForm = () => {
             />
           </Form.Item>
 
-          <Form.Item
-            label="Nhóm máu"
-            name="bloodGroup"
-            rules={[{ required: true, message: "Vui lòng chọn nhóm máu!" }]}
-          >
-            <Select placeholder="Chọn nhóm máu">
-              <Option value="A">A</Option>
-              <Option value="B">B</Option>
-              <Option value="AB">AB</Option>
-              <Option value="O">O</Option>
-            </Select>
-          </Form.Item>
-
           <Form.Item>
             <Button
               type="primary"
