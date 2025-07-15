@@ -8,6 +8,7 @@ import {
   Form,
   Input,
   DatePicker,
+  Popconfirm,
 } from "antd";
 import {
   EditOutlined,
@@ -23,6 +24,7 @@ const EventTable = ({ onEdit, onDelete }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [eventList, setEventList] = useState([]);
+  const [form] = Form.useForm(); // Thêm dòng này
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -30,28 +32,27 @@ const EventTable = ({ onEdit, onDelete }) => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    form.resetFields(); // Reset khi đóng modal
   };
 
   const handleFormSubmit = async (formData) => {
-  try {
-    const payload = {
-      title: formData.title,
-      description: formData.description,
-      eventDate: formData.eventDate.format("YYYY-MM-DD"),
-    };
+    try {
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        eventDate: formData.eventDate.format("YYYY-MM-DD"),
+      };
 
-    console.log("📦 Payload gửi:", payload);
-
-    await api.post("Event/create", payload); 
-    toast.success("Tạo sự kiện thành công!");
-    handleCloseModal();
-    fetchEvent();
-  } catch (error) {
-    console.error("❌ Lỗi tạo sự kiện:", error?.response?.data || error);
-    toast.error("Đã có lỗi xảy ra khi tạo mới.");
-  }
-};
-
+      await api.post("Event/create", payload);
+      toast.success("Tạo sự kiện thành công!");
+      handleCloseModal();
+      form.resetFields(); // Reset sau khi tạo thành công
+      fetchEvent();
+    } catch (error) {
+      console.error("❌ Lỗi tạo sự kiện:", error?.response?.data || error);
+      toast.error("Đã có lỗi xảy ra khi tạo mới.");
+    }
+  };
 
   const handleEdit = (record) => {
     setSelectedEvent({
@@ -79,10 +80,7 @@ const EventTable = ({ onEdit, onDelete }) => {
 
   const handleDelete = async (record) => {
     try {
-      console.log("🧨 ID cần xoá:", record.eventId);
       await api.delete(`Event/delete/${record.eventId}`);
-      console.log("Đang xóa sự kiện với ID:",record.eventId);
-
       toast.success("Xóa sự kiện thành công!");
       fetchEvent();
     } catch (error) {
@@ -127,11 +125,14 @@ const EventTable = ({ onEdit, onDelete }) => {
       render: (_, record) => (
         <Space>
           <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-          <Button
-            icon={<DeleteOutlined />}
-            danger
-            onClick={() => handleDelete(record)}
-          />
+          <Popconfirm
+            title="Bạn có chắc chắn muốn xóa sự kiện này?"
+            onConfirm={() => handleDelete(record)}
+            okText="Đồng ý"
+            cancelText="Hủy"
+          >
+            <Button icon={<DeleteOutlined />} danger />
+          </Popconfirm>
         </Space>
       ),
     },
@@ -159,8 +160,9 @@ const EventTable = ({ onEdit, onDelete }) => {
         open={isModalOpen}
         onCancel={handleCloseModal}
         footer={null}
+        destroyOnClose
       >
-        <Form layout="vertical" onFinish={handleFormSubmit}>
+        <Form layout="vertical" onFinish={handleFormSubmit} form={form}>
           <Form.Item
             name="title"
             label="Chủ đề"
@@ -182,7 +184,11 @@ const EventTable = ({ onEdit, onDelete }) => {
             label="Ngày diễn ra"
             rules={[{ required: true, message: "Vui lòng chọn ngày!" }]}
           >
-            <DatePicker className="w-full" />
+            <DatePicker
+              className="w-full"
+              disabledDate={current => current && current < dayjs().startOf('day')}
+              // Không cho chọn ngày trong quá khứ
+            />
           </Form.Item>
 
           <div className="flex justify-end mt-4">

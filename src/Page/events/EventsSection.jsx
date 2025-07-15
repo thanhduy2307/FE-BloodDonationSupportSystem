@@ -41,9 +41,6 @@ const EventsSection = () => {
   const EventCard = ({ title, date, time, location }) => (
     <div className="bg-white rounded-xl shadow-md p-6 h-full flex flex-col justify-between hover:shadow-lg transition transform hover:-translate-y-1 border">
       <div className="mb-4">
-        <span className="inline-block bg-red-600 text-white px-3 py-1 rounded-full text-xs font-medium mb-2">
-          Sắp diễn ra
-        </span>
         <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
         <div className="space-y-1 text-gray-600 text-sm">
           <div className="flex items-center">
@@ -54,19 +51,10 @@ const EventsSection = () => {
             <Clock className="w-4 h-4 mr-2 text-red-600" />
             <span>{time}</span>
           </div>
-          <div className="flex items-center">
-            <MapPin className="w-4 h-4 mr-2 text-red-600" />
-            <span>{location}</span>
-          </div>
+        
         </div>
       </div>
-      <a
-        href="#register"
-        className="text-red-600 text-sm font-medium flex items-center hover:text-red-700 transition"
-      >
-        Đăng ký tham gia
-        <ArrowRight className="w-4 h-4 ml-1" />
-      </a>
+     
     </div>
   );
 

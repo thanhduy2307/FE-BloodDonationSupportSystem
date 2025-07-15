@@ -155,7 +155,7 @@ const NotificationPage = () => {
               placeholder="Chọn người nhận (bỏ trống để gửi cho tất cả)"
               optionFilterProp="label"
               options={users.map((u) => ({
-                label: u.fullname,
+                label: u.email,
                 value: u.userId,
               }))}
             />

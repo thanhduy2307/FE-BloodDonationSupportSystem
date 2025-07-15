@@ -1,11 +1,9 @@
 import React from "react";
 import { Form, Input, Button, Checkbox } from "antd";
-
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { User, Lock } from "lucide-react";
-
 import { Link } from "react-router-dom";
 import { login } from "../../redux/features/userSlice";
 import api from "../../configs/axios";
@@ -26,42 +24,34 @@ const LoginForm = () => {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      if (user.role == "Admin") {
+      if (user.role === "Admin") {
         navigate("/dashboard/overview");
-      } else if (user.role == "User") {
+      } else if (user.role === "User") {
         navigate("/");
-      } else if (user.role == "Staff") {
+      } else if (user.role === "Staff") {
         navigate("/dashboard-staff/member-staff");
       }
+
       console.log("User role:", user.role);
     } catch (e) {
-  console.error("🧨 Lỗi đầy đủ:", e);
+      console.error("🧨 Lỗi đầy đủ:", e);
+      const data = e?.response?.data;
 
-  const data = e?.response?.data;
+      console.log("📦 e.response.data:", data);
 
-  // 1. In thử để chắc chắn có gì trong data
-  console.log("📦 e.response.data:", data);
-
-  // 2. Nếu có lỗi dạng validation
-  if (data && typeof data === "object" && data.errors) {
-    const allErrors = Object.values(data.errors).flat();
-    console.log("📢 Toàn bộ lỗi cần hiển thị:", allErrors);
-
-    allErrors.forEach((msg) => {
-      toast.error(msg);
-    });
-  } else if (typeof data === "string") {
-    toast.error(data.data);
-  } else if (data.data?.message) {
-    toast.error(data.data.message);
-  } else {
-    toast.error("Lỗi không xác định từ máy chủ.");
-  }
-}
-
+      if (data && typeof data === "object" && data.errors) {
+        const allErrors = Object.values(data.errors).flat();
+        allErrors.forEach((msg) => toast.error(msg));
+      } else if (data?.message) {
+        toast.error(data.message);
+      } else {
+        toast.error("Lỗi không xác định từ máy chủ.");
+      }
+    }
   };
+
   const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
+    console.log("❌ Thất bại khi submit:", errorInfo);
   };
 
   return (
@@ -89,12 +79,16 @@ const LoginForm = () => {
             label="Email"
             name="email"
             rules={[
-              { required: true, message: "Vui lòng nhập tên đăng nhập!" },
+              {
+                required: true,
+                message: "Vui lòng nhập email của bạn!",
+                type: "email",
+              },
             ]}
           >
             <Input
               prefix={<User className="text-gray-400 mr-2" size={16} />}
-              placeholder="Tên đăng nhập"
+              placeholder="Email của bạn"
             />
           </Form.Item>
 
