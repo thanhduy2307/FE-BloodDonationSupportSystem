@@ -6,14 +6,19 @@ import { useNavigate } from "react-router-dom";
 const NotificationUser = () => {
   const [notifications, setNotifications] = useState([]);
   const navigate = useNavigate();
+
   useEffect(() => {
     fetchNotifications();
   }, []);
 
   const fetchNotifications = async () => {
     try {
-      const res = await api.get("/Notification/getByUser"); 
+      // Lấy danh sách thông báo
+      const res = await api.get("/Notification/getByUser");
       setNotifications(res.data);
+
+      // Đánh dấu tất cả là đã đọc
+      await api.post("/Notification/markAsRead");
     } catch (error) {
       console.error("Lỗi khi tải thông báo:", error);
     }

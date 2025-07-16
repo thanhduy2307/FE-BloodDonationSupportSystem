@@ -50,17 +50,7 @@ const FeedbackForm = () => {
           layout="vertical"
           onFinish={handleSubmit}
         >
-          <Form.Item
-            label="Loại phản hồi"
-            name="feedbackType"
-            rules={[{ required: true, message: "Vui lòng chọn loại phản hồi!" }]}
-          >
-            <Select placeholder="Chọn loại phản hồi">
-              <Option value="Góp ý">Góp ý</Option>
-              <Option value="Báo lỗi">Báo lỗi</Option>
-              <Option value="Khác">Khác</Option>
-            </Select>
-          </Form.Item>
+
 
           <Form.Item
             label="Nội dung"

@@ -7,7 +7,7 @@ import api from "../../configs/axios";
 import { toast } from "react-toastify";
 
 const BloodDonationForm = () => {
- const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -36,16 +36,19 @@ const BloodDonationForm = () => {
           api.get("/User/donations"),
         ]);
 
-        const bloodType = profileRes?.data?.bloodGroup || ""; // ✅ API trả bloodGroup
+        const bloodType = profileRes?.data?.bloodGroup;
+
+        if (!bloodType) {
+          toast.error("Vui lòng cập nhật nhóm máu trong hồ sơ trước khi đăng ký hiến máu.");
+          navigate("/profile");
+          return;
+        }
 
         const history = donationRes?.data || [];
-        const approvedDonations = history.filter(
-          (d) => d.status === "approved"
-        );
+        const approvedDonations = history.filter((d) => d.status === "approved");
         const latestDonation = approvedDonations.length
           ? approvedDonations.sort(
-              (a, b) =>
-                new Date(b.donationDate) - new Date(a.donationDate)
+              (a, b) => new Date(b.donationDate) - new Date(a.donationDate)
             )[0]
           : null;
 
@@ -81,7 +84,7 @@ const BloodDonationForm = () => {
       return;
     }
 
-    const [hour, minute] = time.split(":").map(Number);
+    const [hour, minute] = time.split(":" ).map(Number);
     const totalMinutes = hour * 60 + minute;
     const minMinutes = 7 * 60;
     const maxMinutes = 16 * 60 + 30;
@@ -94,10 +97,7 @@ const BloodDonationForm = () => {
     if (
       formData.hasDonatedBefore === "yes" &&
       formData.lastDonationDate &&
-      dayjs(formData.donationDate).diff(
-        dayjs(formData.lastDonationDate),
-        "day"
-      ) < 84
+      dayjs(formData.donationDate).diff(dayjs(formData.lastDonationDate), "day") < 84
     ) {
       toast.error(
         `❌ Ngày hiến gần nhất (${formData.lastDonationDate}) chưa đủ 12 tuần!`
@@ -107,7 +107,7 @@ const BloodDonationForm = () => {
 
     try {
       const data = {
-        bloodType: formData.bloodType, // ✅ đúng key backend yêu cầu
+        bloodType: formData.bloodType,
         quantity: Number(formData.quantity),
         donationDate: formData.donationDate,
         donationTime: time.length === 5 ? `${time}:00` : time,
@@ -123,18 +123,16 @@ const BloodDonationForm = () => {
       toast.success("🎉 Đăng ký thành công!");
       message.success("✅ Đăng ký hiến máu thành công!");
 
-      setFormData({
-        bloodType: formData.bloodType,
+      setFormData((prev) => ({
+        ...prev,
         quantity: 250,
         donationDate: dayjs().format("YYYY-MM-DD"),
         donationTime: "",
-        hasDonatedBefore: formData.hasDonatedBefore,
-        lastDonationDate: formData.lastDonationDate,
         isPregnant: "",
         hasInfectiousDisease: "",
         height: "",
         weight: "",
-      });
+      }));
     } catch (err) {
       console.error("❌ Lỗi gửi đăng ký:", err);
       toast.error("🚨 Gửi đăng ký thất bại!");
@@ -147,26 +145,24 @@ const BloodDonationForm = () => {
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-200 flex items-center justify-center px-4 pt-24">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-2xl relative">
         <button
-      onClick={() => navigate("/")}
-      className="fixed top-6 left-6 bg-white text-red-600 font-semibold px-4 py-2 rounded shadow hover:bg-red-100 transition z-50"
-    >
-      ← Về trang chủ
-    </button>
+          onClick={() => navigate("/")}
+          className="fixed top-6 left-6 bg-white text-red-600 font-semibold px-4 py-2 rounded shadow hover:bg-red-100 transition z-50"
+        >
+          ← Về trang chủ
+        </button>
+
         <h2 className="text-3xl font-bold text-red-600 text-center mb-6">
           Phiếu đăng ký hiến máu
         </h2>
+
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
-          {/* Trường ẩn nhóm máu */}
           <input type="hidden" name="bloodType" value={formData.bloodType} />
 
-          {/* Lượng máu */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">
-              Lượng máu (ml)
-            </label>
+            <label className="block text-gray-700 mb-1 font-medium">Lượng máu (ml)</label>
             <input
               type="number"
               name="quantity"
@@ -180,11 +176,8 @@ const BloodDonationForm = () => {
             />
           </div>
 
-          {/* Chiều cao */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">
-              Chiều cao (cm)
-            </label>
+            <label className="block text-gray-700 mb-1 font-medium">Chiều cao (cm)</label>
             <input
               type="number"
               name="height"
@@ -198,11 +191,8 @@ const BloodDonationForm = () => {
             />
           </div>
 
-          {/* Cân nặng */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">
-              Cân nặng (kg)
-            </label>
+            <label className="block text-gray-700 mb-1 font-medium">Cân nặng (kg)</label>
             <input
               type="number"
               name="weight"
@@ -216,11 +206,8 @@ const BloodDonationForm = () => {
             />
           </div>
 
-          {/* Ngày hiến */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">
-              Ngày hiến máu
-            </label>
+            <label className="block text-gray-700 mb-1 font-medium">Ngày hiến máu</label>
             <input
               type="date"
               name="donationDate"
@@ -232,11 +219,8 @@ const BloodDonationForm = () => {
             />
           </div>
 
-          {/* Giờ hiến */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">
-              Giờ hiến máu
-            </label>
+            <label className="block text-gray-700 mb-1 font-medium">Giờ hiến máu</label>
             <input
               type="time"
               name="donationTime"
@@ -249,11 +233,8 @@ const BloodDonationForm = () => {
             />
           </div>
 
-          {/* Đã từng hiến máu chưa? */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">
-              Đã từng hiến máu chưa?
-            </label>
+            <label className="block text-gray-700 mb-1 font-medium">Đã từng hiến máu chưa?</label>
             <select
               name="hasDonatedBefore"
               value={formData.hasDonatedBefore}
@@ -267,12 +248,9 @@ const BloodDonationForm = () => {
             </select>
           </div>
 
-          {/* Ngày hiến gần nhất */}
           {formData.hasDonatedBefore === "yes" && formData.lastDonationDate && (
             <div>
-              <label className="block text-gray-700 mb-1 font-medium">
-                Ngày hiến gần nhất
-              </label>
+              <label className="block text-gray-700 mb-1 font-medium">Ngày hiến gần nhất</label>
               <input
                 type="date"
                 name="lastDonationDate"
@@ -284,11 +262,8 @@ const BloodDonationForm = () => {
             </div>
           )}
 
-          {/* Có đang mang thai không? */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">
-              Có đang mang thai không?
-            </label>
+            <label className="block text-gray-700 mb-1 font-medium">Có đang mang thai không?</label>
             <select
               name="isPregnant"
               value={formData.isPregnant}
@@ -302,11 +277,8 @@ const BloodDonationForm = () => {
             </select>
           </div>
 
-          {/* Có bệnh truyền nhiễm không? */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">
-              Có bệnh truyền nhiễm không?
-            </label>
+            <label className="block text-gray-700 mb-1 font-medium">Có bệnh truyền nhiễm không?</label>
             <select
               name="hasInfectiousDisease"
               value={formData.hasInfectiousDisease}
@@ -320,7 +292,6 @@ const BloodDonationForm = () => {
             </select>
           </div>
 
-          {/* Nút gửi */}
           <div className="md:col-span-2">
             <button
               type="submit"

@@ -1,12 +1,10 @@
 import React from "react";
-import { Button, Form, Input, Select, DatePicker } from "antd";
+import { Button, Form, Input, DatePicker } from "antd";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Droplet } from "lucide-react";
 import api from "../../configs/axios";
 import "./register.css";
-
-const { Option } = Select;
 
 const RegisterForm = () => {
   const [form] = Form.useForm();
@@ -23,10 +21,7 @@ const RegisterForm = () => {
       toast.success("Tạo tài khoản thành công!");
       navigate("/login");
     } catch (e) {
-      console.log("❌ Lỗi BE trả về:", e.response?.data);
       const errorData = e.response?.data;
-
-      // Xử lý nếu dạng lỗi là errors: { Email: [...] }
       if (errorData?.errors) {
         const fieldErrors = Object.entries(errorData.errors).map(
           ([field, messages]) => ({
@@ -35,28 +30,16 @@ const RegisterForm = () => {
           })
         );
         form.setFields(fieldErrors);
-        Object.values(errorData.errors)
-          .flat()
-          .forEach((msg) => toast.error(msg));
-      }
-
-      // Xử lý nếu dạng lỗi là error: "Email đã được sử dụng"
-      else if (errorData?.error) {
-        const errorMsg = errorData.error;
-
-        // ✅ Gán lỗi vào field phù hợp, ví dụ "email"
+        Object.values(errorData.errors).flat().forEach((msg) => toast.error(msg));
+      } else if (errorData?.error) {
         form.setFields([
           {
             name: "email",
-            errors: [errorMsg],
+            errors: [errorData.error],
           },
         ]);
-
-        toast.error(errorMsg);
-      }
-
-      // Trường hợp khác
-      else {
+        toast.error(errorData.error);
+      } else {
         toast.error("Đăng ký thất bại!");
       }
     }
@@ -74,12 +57,8 @@ const RegisterForm = () => {
             <Droplet className="text-red-600 mr-2" size={32} />
             <span className="text-2xl font-bold text-red-600">HeartDrop</span>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Đăng ký tài khoản
-          </h2>
-          <p className="text-gray-600">
-            Tham gia cộng đồng hiến máu nhân đạo ngay hôm nay
-          </p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Đăng ký tài khoản</h2>
+          <p className="text-gray-600">Tham gia cộng đồng hiến máu nhân đạo ngay hôm nay</p>
         </div>
 
         <Form
@@ -121,9 +100,7 @@ const RegisterForm = () => {
           <Form.Item
             label="Số điện thoại"
             name="phoneNumber"
-            rules={[
-              { required: true, message: "Vui lòng nhập số điện thoại!" },
-            ]}
+            rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }]}
           >
             <Input placeholder="Nhập số điện thoại" />
           </Form.Item>
@@ -131,13 +108,9 @@ const RegisterForm = () => {
           <Form.Item
             label="Giới tính"
             name="gender"
-            rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
+            rules={[{ required: true, message: "Vui lòng nhập giới tính!" }]}
           >
-            <Select placeholder="Chọn giới tính">
-              <Option value="male">Nam</Option>
-              <Option value="female">Nữ</Option>
-              <Option value="other">Khác</Option>
-            </Select>
+            <Input placeholder="Nhập giới tính (Nam/Nữ/Khác)" />
           </Form.Item>
 
           <Form.Item
@@ -149,35 +122,33 @@ const RegisterForm = () => {
           </Form.Item>
 
           <Form.Item
+            label="Nhóm máu"
+            name="bloodGroup"
+            rules={[{ required: true, message: "Vui lòng nhập nhóm máu!" }]}
+          >
+            <Input placeholder="Nhập nhóm máu (ví dụ: A+, B-, O+...)" />
+          </Form.Item>
+
+          <Form.Item
             label="Ngày sinh"
             name="dateOfBirth"
             rules={[
-              {
-                required: true,
-                message: "Vui lòng chọn ngày sinh!",
-              },
+              { required: true, message: "Vui lòng chọn ngày sinh!" },
               {
                 validator: (_, value) => {
                   if (!value) return Promise.resolve();
-
                   const today = new Date();
-                  const birthDate = value.toDate(); // Chuyển từ dayjs sang Date
+                  const birthDate = value.toDate();
                   const age =
                     today.getFullYear() -
                     birthDate.getFullYear() -
                     (today.getMonth() < birthDate.getMonth() ||
-                    (today.getMonth() === birthDate.getMonth() &&
-                      today.getDate() < birthDate.getDate())
+                    (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
                       ? 1
                       : 0);
-
-                  if (age >= 18) {
-                    return Promise.resolve();
-                  } else {
-                    return Promise.reject(
-                      new Error("Bạn phải đủ 18 tuổi để được hiến máu.")
-                    );
-                  }
+                  return age >= 18
+                    ? Promise.resolve()
+                    : Promise.reject(new Error("Bạn phải đủ 18 tuổi để được hiến máu."));
                 },
               },
             ]}
@@ -202,11 +173,8 @@ const RegisterForm = () => {
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Đã có tài khoản?{" "}
-              <a
-                href="/login"
-                className="font-medium text-red-600 hover:text-red-500"
-              >
+              Đã có tài khoản?{' '}
+              <a href="/login" className="font-medium text-red-600 hover:text-red-500">
                 Đăng nhập
               </a>
             </p>

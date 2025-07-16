@@ -23,6 +23,7 @@ import {
   HeartOutlined,
   EditOutlined,
   UploadOutlined,
+  HomeOutlined as HomeIcon,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import api from "../../configs/axios";
@@ -42,10 +43,10 @@ const InfoItem = ({ label, value, icon }) => (
 );
 
 const ProfilePage = () => {
-  const [user, setUser] = useState(null); // Sửa về null
+  const [user, setUser] = useState(null);
   const [form] = Form.useForm();
-  const [isModalVisible, setIsModalVisible] = useState(false); // Sửa về false
-  const [avatarUrl, setAvatarUrl] = useState(null); // Sửa về null
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -112,17 +113,20 @@ const ProfilePage = () => {
     reader.readAsDataURL(file);
   };
 
-  if (!user) return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "linear-gradient(to right, #f0f2f5, #e0e7ff)"
-    }}>
-      <div style={{fontSize: 20, color: "#888"}}>Đang tải hồ sơ...</div>
-    </div>
-  );
+  if (!user)
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "linear-gradient(to right, #f0f2f5, #e0e7ff)",
+        }}
+      >
+        <div style={{ fontSize: 20, color: "#888" }}>Đang tải hồ sơ...</div>
+      </div>
+    );
 
   return (
     <div
@@ -146,34 +150,63 @@ const ProfilePage = () => {
         }}
         bodyStyle={{ padding: "36px 24px" }}
       >
-        <div style={{ display: "flex", gap: 12, position: "absolute", top: 18, right: 18 }}>
+        {/* Nút điều hướng trên cùng */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            position: "absolute",
+            top: 18,
+            left: 18,
+            right: 18,
+          }}
+        >
           <Button
-            icon={<EditOutlined />}
-            type="primary"
-            style={{
-              borderRadius: "999px",
-              padding: "0 18px",
-              fontWeight: 500,
-              boxShadow: "0 2px 8px rgba(255,0,0,0.08)"
-            }}
-            onClick={showModal}
-          >
-            Chỉnh sửa hồ sơ
-          </Button>
-          <Button
+            icon={<HomeIcon />}
             type="default"
             style={{
               borderRadius: 20,
               fontWeight: 500,
-              background: "#f7fafc"
+              background: "#f7fafc",
             }}
-            onClick={() => navigate("/history")}
+            onClick={() => navigate("/")}
           >
-            Xem lịch sử hiến và nhận máu
+            Trang chủ
           </Button>
+
+          <div style={{ display: "flex", gap: 12 }}>
+            <Button
+              icon={<EditOutlined />}
+              type="primary"
+              style={{
+                borderRadius: "999px",
+                padding: "0 18px",
+                fontWeight: 500,
+                boxShadow: "0 2px 8px rgba(255,0,0,0.08)",
+              }}
+              onClick={showModal}
+            >
+              Chỉnh sửa hồ sơ
+            </Button>
+            <Button
+              type="default"
+              style={{
+                borderRadius: 20,
+                fontWeight: 500,
+                background: "#f7fafc",
+              }}
+              onClick={() => navigate("/history")}
+            >
+              Xem lịch sử hiến và nhận máu
+            </Button>
+          </div>
         </div>
 
-        <Row gutter={[32, 16]} align="middle" style={{marginTop: 24}}>
+        <Row
+          gutter={[32, 16]}
+          align="middle"
+          style={{ marginTop: 60 }}
+        >
           <Col xs={24} md={7} style={{ textAlign: "center", marginBottom: 20 }}>
             <Avatar
               size={120}
@@ -182,11 +215,16 @@ const ProfilePage = () => {
               style={{
                 objectFit: "cover",
                 border: "3px solid #e0e7ff",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.06)"
+                boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
               }}
             />
             <div style={{ marginTop: 12 }}>
-              <Tag color="blue" style={{fontSize: 16, padding: "4px 16px"}}>{user.roleName}</Tag>
+              <Tag
+                color="blue"
+                style={{ fontSize: 16, padding: "4px 16px" }}
+              >
+                {user.roleName}
+              </Tag>
             </div>
           </Col>
 
@@ -200,31 +238,11 @@ const ProfilePage = () => {
 
             <Divider style={{ margin: "18px 0" }} />
 
-            <InfoItem
-              label="Email"
-              value={user.email}
-              icon={<MailOutlined />}
-            />
-            <InfoItem
-              label="Giới tính"
-              value={user.gender}
-              icon={<IdcardOutlined />}
-            />
-            <InfoItem
-              label="Ngày sinh"
-              value={user.dateOfBirth}
-              icon={<IdcardOutlined />}
-            />
-            <InfoItem
-              label="Địa chỉ"
-              value={user.address}
-              icon={<HomeOutlined />}
-            />
-            <InfoItem
-              label="Nhóm máu"
-              value={user.bloodGroup}
-              icon={<HeartOutlined />}
-            />
+            <InfoItem label="Email" value={user.email} icon={<MailOutlined />} />
+            <InfoItem label="Giới tính" value={user.gender} icon={<IdcardOutlined />} />
+            <InfoItem label="Ngày sinh" value={user.dateOfBirth} icon={<IdcardOutlined />} />
+            <InfoItem label="Địa chỉ" value={user.address} icon={<HomeOutlined />} />
+            <InfoItem label="Nhóm máu" value={user.bloodGroup} icon={<HeartOutlined />} />
           </Col>
         </Row>
       </Card>
@@ -238,7 +256,7 @@ const ProfilePage = () => {
         okText="Lưu"
         cancelText="Hủy"
         centered
-        bodyStyle={{paddingTop: 16}}
+        bodyStyle={{ paddingTop: 16 }}
       >
         <Form layout="vertical" form={form}>
           <Form.Item label="Ảnh đại diện">
@@ -262,9 +280,7 @@ const ProfilePage = () => {
           <Form.Item
             label="Email"
             name="email"
-            rules={[
-              { required: true, type: "email", message: "Email không hợp lệ" },
-            ]}
+            rules={[{ required: true, type: "email", message: "Email không hợp lệ" }]}
           >
             <Input />
           </Form.Item>
