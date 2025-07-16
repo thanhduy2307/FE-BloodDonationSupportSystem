@@ -33,19 +33,27 @@ const BloodRequestListAdmin = () => {
     { title: "Số lượng (ml)", dataIndex: "quantity", key: "quantity" },
     { title: "Ngày yêu cầu", dataIndex: "requestDate", key: "requestDate" },
     { title: "Giờ yêu cầu", dataIndex: "requestTime", key: "requestTime" },
-    {
+     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       render: (status) => {
-        const colorMap = {
-          pending: "orange",
-          approved: "green",
-          rejected: "red",
-        };
-        return <Tag color={colorMap[status] || "default"}>{status}</Tag>;
-      },
-    },
+  const statusTextMap = {
+    pending: "Chờ duyệt",
+    approved: "Đã duyệt",
+    rejected: "Từ chối",
+  };
+
+  const normalized = (status || "").toLowerCase().trim();
+
+  return (
+    <Tag color="default">
+      {statusTextMap[normalized] || status || "Không rõ"}
+    </Tag>
+  );
+}
+
+    }
   ];
 
   return (

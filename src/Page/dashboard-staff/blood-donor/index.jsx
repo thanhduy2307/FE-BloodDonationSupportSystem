@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Table, Input, Button, Space, Select } from "antd";
+import { Table, Input, Button, Space, Select, Modal } from "antd";
 import { toast } from "react-toastify";
 import api from "../../../configs/axios";
 
 const { Option } = Select;
 
-// Ánh xạ giữa status tiếng Anh và tiếng Việt
 const statusMapping = {
   pending: "Chờ duyệt",
   approved: "Đã duyệt",
@@ -22,6 +21,8 @@ const BloodDonationListt = () => {
   const [donors, setDonors] = useState([]);
   const [filteredDonors, setFilteredDonors] = useState([]);
   const [searchBloodType, setSearchBloodType] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -50,7 +51,9 @@ const BloodDonationListt = () => {
       await api.put(
         `Admin/donations/${donationId}/status`,
         `"${value}"`,
-        { headers: { "Content-Type": "application/json" } }
+        {
+          headers: { "Content-Type": "application/json" },
+        }
       );
       toast.success("Cập nhật trạng thái thành công");
       fetchData();
@@ -58,6 +61,16 @@ const BloodDonationListt = () => {
       console.error("Lỗi cập nhật trạng thái:", error);
       toast.error("Không thể cập nhật trạng thái");
     }
+  };
+
+  const showModal = (record) => {
+    setSelectedRecord(record);
+    setIsModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    setSelectedRecord(null);
   };
 
   const columns = [
@@ -72,14 +85,10 @@ const BloodDonationListt = () => {
     {
       title: "Thông tin bổ sung",
       key: "extraInfo",
-      render: (text, record) => (
-        <div>
-          <p>Chiều cao: {record.height} cm</p>
-          <p>Cân nặng: {record.weight} kg</p>
-          <p>Có bầu: {record.isPregnant === "yes" ? "Có" : "Không"}</p>
-          <p>Bệnh truyền nhiễm: {record.hasInfectiousDisease === "yes" ? "Có" : "Không"}</p>
-          <p>Đã hiến máu trước đó: {record.hasDonatedBefore === "yes" ? `Có (ngày ${record.lastDonationDate})` : "Chưa"}</p>
-        </div>
+      render: (_, record) => (
+        <Button type="link" onClick={() => showModal(record)}>
+          Xem chi tiết
+        </Button>
       ),
     },
     {
@@ -88,10 +97,13 @@ const BloodDonationListt = () => {
       key: "status",
       render: (text, record) => (
         <Select
-          value={statusMapping[text] || text} // Hiển thị tiếng Việt
+          value={statusMapping[text] || text}
           style={{ width: 150 }}
           onChange={(value) =>
-            handleUpdateStatus(record.donationId, reverseStatusMapping[value])
+            handleUpdateStatus(
+              record.donationId,
+              reverseStatusMapping[value]
+            )
           }
         >
           {Object.values(statusMapping).map((label) => (
@@ -130,6 +142,38 @@ const BloodDonationListt = () => {
           columns={columns}
           pagination={{ pageSize: 10 }}
         />
+
+        <Modal
+          title="Thông tin bổ sung"
+          visible={isModalVisible}
+          onCancel={handleCloseModal}
+          footer={null}
+        >
+          {selectedRecord && (
+            <div>
+              <p>Chiều cao: {selectedRecord.height} cm</p>
+              <p>Cân nặng: {selectedRecord.weight} kg</p>
+              <p>
+                Có mang thai:{" "}
+                {selectedRecord.isPregnant === "yes" ? "Có" : "Không"}
+              </p>
+              <p>
+                Bệnh truyền nhiễm:{" "}
+                {selectedRecord.hasInfectiousDisease === "yes"
+                  ? "Có"
+                  : "Không"}
+              </p>
+              <p>
+                Đã hiến máu trước đó:{" "}
+                {selectedRecord.hasDonatedBefore
+                  ? `Có (ngày ${
+                      selectedRecord.lastDonationDate || "Không rõ"
+                    })`
+                  : "Chưa"}
+              </p>
+            </div>
+          )}
+        </Modal>
       </div>
     </div>
   );

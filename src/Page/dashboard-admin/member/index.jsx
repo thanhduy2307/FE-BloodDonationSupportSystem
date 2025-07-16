@@ -6,18 +6,27 @@ import api from "../../../configs/axios";
 function ManageUser() {
   const [datas, setDatas] = useState([]);
 
-  const convertRoleIdToName = (roleValue) => {
-    if (typeof roleValue === "string") return roleValue;
-    switch (roleValue) {
-      case 1:
-        return "User";
-      case 2:
-        return "Staff";
-      case 3:
-        return "Admin";
-      default:
-        return "Unknown";
+  const roleMap = {
+    User: 1,
+    Staff: 2,
+    Admin: 3,
+  };
+
+  const convertRoleIdToName = (role) => {
+    if (typeof role === "string") return role;
+    switch (role) {
+      case 1: return "User";
+      case 2: return "Staff";
+      case 3: return "Admin";
+      default: return "Unknown";
     }
+  };
+
+  const normalizeStatus = (status) => {
+    if (!status) return "Active";
+    const s = status.toLowerCase();
+    if (s.includes("active")) return "active";
+    return "disabled";
   };
 
   const fetchUser = async () => {
@@ -26,12 +35,13 @@ function ManageUser() {
       const mapped = response.data.map((user) => ({
         ...user,
         role: convertRoleIdToName(user.role ?? user.roleName),
-        status: user.status ?? 1, // 👈 Mặc định là active nếu không có
+        statusRaw: user.status, // Lưu lại status gốc
+        status: normalizeStatus(user.status),
       }));
       setDatas(mapped);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to fetch users");
+      toast.error("Không thể tải danh sách người dùng");
     }
   };
 
@@ -39,34 +49,26 @@ function ManageUser() {
     fetchUser();
   }, []);
 
-  const roleMap = {
-    User: 1,
-    Staff: 2,
-    Admin: 3,
-  };
-
-  const handleChangeRole = async (userId, newRole) => {
+  const handleChangeRole = async (userId, newRoleName) => {
     try {
-      const roleId = roleMap[newRole];
+      const roleId = roleMap[newRoleName];
       await api.put(`Admin/users/${userId}/role`, roleId, {
         headers: { "Content-Type": "application/json" },
       });
-      toast.success("Role updated successfully");
+      toast.success("Cập nhật vai trò thành công");
       fetchUser();
     } catch (error) {
       console.error(error);
-      toast.error("Failed to update role");
+      toast.error("Cập nhật vai trò thất bại");
     }
   };
 
   const handleChangeStatus = async (userId, value) => {
     try {
       const statusValue = value === "active" ? 1 : 2;
-      await api.put(
-        `Admin/users/${userId}/status`,
-       statusValue,
-        { headers: { "Content-Type": "application/json" } }
-      );
+      await api.put(`Admin/users/${userId}/status`, statusValue, {
+        headers: { "Content-Type": "application/json" },
+      });
       toast.success("Cập nhật trạng thái thành công");
       fetchUser();
     } catch (error) {
@@ -84,7 +86,7 @@ function ManageUser() {
       defaultSortOrder: "ascend",
     },
     {
-      title: "Full Name",
+      title: "Họ tên",
       dataIndex: "fullname",
       key: "fullname",
     },
@@ -94,19 +96,19 @@ function ManageUser() {
       key: "email",
     },
     {
-      title: "Phone Number",
+      title: "Số điện thoại",
       dataIndex: "phoneNumber",
       key: "phoneNumber",
       render: (text) => text || "Chưa cập nhật",
     },
     {
-      title: "Blood Group",
+      title: "Nhóm máu",
       dataIndex: "bloodGroup",
       key: "bloodGroup",
       render: (text) => text || "Chưa cập nhật",
     },
     {
-      title: "Role",
+      title: "Vai trò",
       dataIndex: "role",
       key: "role",
       render: (_, record) => (
@@ -122,14 +124,14 @@ function ManageUser() {
       ),
     },
     {
-      title: "Status",
+      title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       render: (_, record) => (
         <Select
-          value={record.status === 1 ? "active" : "disabled"}
+          value={record.status}
           onChange={(value) => handleChangeStatus(record.userId, value)}
-          style={{ width: 120 }}
+          style={{ width: 140 }}
         >
           <Select.Option value="active">Active</Select.Option>
           <Select.Option value="disabled">Disabled</Select.Option>

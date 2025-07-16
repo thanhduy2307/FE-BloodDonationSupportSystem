@@ -70,19 +70,27 @@ const BloodDonationList = () => {
       dataIndex: "donationTime",
       key: "donationTime",
     },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => {
-        const colorMap = {
-          pending: "orange",
-          completed: "green",
-          cancelled: "red",
-        };
-        return <Tag color={colorMap[status] || "default"}>{status}</Tag>;
-      },
-    },
+   {
+  title: "Trạng thái",
+  dataIndex: "status",
+  key: "status",
+  render: (status) => {
+  const statusTextMap = {
+    pending: "Chờ duyệt",
+    completed: "Đã duyệt",
+    cancelled: "Từ chối",
+  };
+
+  const normalized = (status || "").toLowerCase().trim();
+
+  return (
+    <Tag color="default">
+      {statusTextMap[normalized] || status || "Không rõ"}
+    </Tag>
+  );
+}
+}
+
   ];
 
   return (
