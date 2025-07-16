@@ -62,9 +62,9 @@ const handleSearch = () => {
       style={{ width: 140 }}
       onChange={(value) => handleChangeStatus(record.requestId, value)}
     >
-      <Select.Option value="pending">Pending</Select.Option>
-      <Select.Option value="approved">Approved</Select.Option>
-      <Select.Option value="rejected">Rejected</Select.Option>
+      <Select.Option value="pending">Chờ duyệt</Select.Option>
+      <Select.Option value="approved">Đã duyệt</Select.Option>
+      <Select.Option value="rejected">Từ chối</Select.Option>
     </Select>
   ),
 },

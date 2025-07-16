@@ -37,12 +37,7 @@ const Hero = () => {
                 Đăng ký hiến máu
                 <ArrowRight className="ml-2" size={20} />
               </Link>
-              <Link
-                to="/about"
-                className="bg-white border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white text-lg font-semibold py-3 px-8 rounded-full transition transform hover:scale-105 flex items-center justify-center"
-              >
-                Tìm hiểu thêm
-              </Link>
+             
               <Link
                 to="/requestForm"
                 className="bg-white border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white text-lg font-semibold py-3 px-8 rounded-full transition transform hover:scale-105 flex items-center justify-center"

@@ -7,7 +7,7 @@ import api from "../../configs/axios";
 import { toast } from "react-toastify";
 
 const BloodDonationForm = () => {
-  const user = useSelector((state) => state.user);
+ const user = useSelector((state) => state.user);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -26,7 +26,42 @@ const BloodDonationForm = () => {
   useEffect(() => {
     if (!user) {
       navigate("/login");
+      return;
     }
+
+    const fetchData = async () => {
+      try {
+        const [profileRes, donationRes] = await Promise.all([
+          api.get("/User/profile"),
+          api.get("/User/donations"),
+        ]);
+
+        const bloodType = profileRes?.data?.bloodGroup || ""; // ✅ API trả bloodGroup
+
+        const history = donationRes?.data || [];
+        const approvedDonations = history.filter(
+          (d) => d.status === "approved"
+        );
+        const latestDonation = approvedDonations.length
+          ? approvedDonations.sort(
+              (a, b) =>
+                new Date(b.donationDate) - new Date(a.donationDate)
+            )[0]
+          : null;
+
+        setFormData((prev) => ({
+          ...prev,
+          bloodType,
+          hasDonatedBefore: latestDonation ? "yes" : "no",
+          lastDonationDate: latestDonation?.donationDate || "",
+        }));
+      } catch (err) {
+        console.error("❌ Lỗi khi lấy thông tin người dùng:", err);
+        message.error("Không thể tải thông tin hồ sơ");
+      }
+    };
+
+    fetchData();
   }, [user, navigate]);
 
   const handleChange = (e) => {
@@ -42,7 +77,8 @@ const BloodDonationForm = () => {
 
     const time = formData.donationTime;
     if (!time) {
-      return message.error("Vui lòng chọn giờ hiến máu!");
+      toast.error("❌ Vui lòng chọn giờ hiến máu!");
+      return;
     }
 
     const [hour, minute] = time.split(":").map(Number);
@@ -51,20 +87,27 @@ const BloodDonationForm = () => {
     const maxMinutes = 16 * 60 + 30;
 
     if (totalMinutes < minMinutes || totalMinutes > maxMinutes) {
-      return message.error("Giờ hiến máu chỉ được phép từ 07:00 đến 16:30!");
+      toast.error("⏰ Giờ hiến máu chỉ được phép từ 07:00 đến 16:30!");
+      return;
     }
 
     if (
       formData.hasDonatedBefore === "yes" &&
       formData.lastDonationDate &&
-      dayjs(formData.donationDate).diff(dayjs(formData.lastDonationDate), "day") < 84
+      dayjs(formData.donationDate).diff(
+        dayjs(formData.lastDonationDate),
+        "day"
+      ) < 84
     ) {
-      return message.error("Ngày hiến gần nhất phải cách ngày đăng ký ít nhất 12 tuần!");
+      toast.error(
+        `❌ Ngày hiến gần nhất (${formData.lastDonationDate}) chưa đủ 12 tuần!`
+      );
+      return;
     }
 
     try {
       const data = {
-        bloodType: formData.bloodType,
+        bloodType: formData.bloodType, // ✅ đúng key backend yêu cầu
         quantity: Number(formData.quantity),
         donationDate: formData.donationDate,
         donationTime: time.length === 5 ? `${time}:00` : time,
@@ -77,17 +120,16 @@ const BloodDonationForm = () => {
       };
 
       await api.post("/User/donate", data);
-
-      message.success("Đăng ký hiến máu thành công!");
-      toast.success("Đăng ký thành công");
+      toast.success("🎉 Đăng ký thành công!");
+      message.success("✅ Đăng ký hiến máu thành công!");
 
       setFormData({
-        bloodType: "",
+        bloodType: formData.bloodType,
         quantity: 250,
         donationDate: dayjs().format("YYYY-MM-DD"),
         donationTime: "",
-        hasDonatedBefore: "",
-        lastDonationDate: "",
+        hasDonatedBefore: formData.hasDonatedBefore,
+        lastDonationDate: formData.lastDonationDate,
         isPregnant: "",
         hasInfectiousDisease: "",
         height: "",
@@ -95,7 +137,7 @@ const BloodDonationForm = () => {
       });
     } catch (err) {
       console.error("❌ Lỗi gửi đăng ký:", err);
-      message.error("Gửi đăng ký thất bại!");
+      toast.error("🚨 Gửi đăng ký thất bại!");
     }
   };
 
@@ -105,11 +147,11 @@ const BloodDonationForm = () => {
     <div className="min-h-screen bg-gradient-to-br from-red-100 to-pink-200 flex items-center justify-center px-4 pt-24">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-2xl relative">
         <button
-          onClick={() => navigate("/")}
-          className="absolute top-6 left-6 bg-white text-red-600 font-semibold px-4 py-2 rounded shadow hover:bg-red-100 transition"
-        >
-          ← Về trang chủ
-        </button>
+      onClick={() => navigate("/")}
+      className="fixed top-6 left-6 bg-white text-red-600 font-semibold px-4 py-2 rounded shadow hover:bg-red-100 transition z-50"
+    >
+      ← Về trang chủ
+    </button>
         <h2 className="text-3xl font-bold text-red-600 text-center mb-6">
           Phiếu đăng ký hiến máu
         </h2>
@@ -117,28 +159,14 @@ const BloodDonationForm = () => {
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
-          {/* Nhóm máu */}
-          <div>
-            <label className="block text-gray-700 mb-1 font-medium">Nhóm máu</label>
-            <select
-              name="bloodType"
-              value={formData.bloodType}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
-            >
-              <option value="">-- Chọn nhóm máu --</option>
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="AB">AB</option>
-              <option value="O">O</option>
-              <option value="Unknown">Chưa biết</option>
-            </select>
-          </div>
+          {/* Trường ẩn nhóm máu */}
+          <input type="hidden" name="bloodType" value={formData.bloodType} />
 
           {/* Lượng máu */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Lượng máu (ml)</label>
+            <label className="block text-gray-700 mb-1 font-medium">
+              Lượng máu (ml)
+            </label>
             <input
               type="number"
               name="quantity"
@@ -154,7 +182,9 @@ const BloodDonationForm = () => {
 
           {/* Chiều cao */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Chiều cao (cm)</label>
+            <label className="block text-gray-700 mb-1 font-medium">
+              Chiều cao (cm)
+            </label>
             <input
               type="number"
               name="height"
@@ -170,7 +200,9 @@ const BloodDonationForm = () => {
 
           {/* Cân nặng */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Cân nặng (kg)</label>
+            <label className="block text-gray-700 mb-1 font-medium">
+              Cân nặng (kg)
+            </label>
             <input
               type="number"
               name="weight"
@@ -186,7 +218,9 @@ const BloodDonationForm = () => {
 
           {/* Ngày hiến */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Ngày hiến máu</label>
+            <label className="block text-gray-700 mb-1 font-medium">
+              Ngày hiến máu
+            </label>
             <input
               type="date"
               name="donationDate"
@@ -200,7 +234,9 @@ const BloodDonationForm = () => {
 
           {/* Giờ hiến */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Giờ hiến máu</label>
+            <label className="block text-gray-700 mb-1 font-medium">
+              Giờ hiến máu
+            </label>
             <input
               type="time"
               name="donationTime"
@@ -215,7 +251,9 @@ const BloodDonationForm = () => {
 
           {/* Đã từng hiến máu chưa? */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Đã từng hiến máu chưa?</label>
+            <label className="block text-gray-700 mb-1 font-medium">
+              Đã từng hiến máu chưa?
+            </label>
             <select
               name="hasDonatedBefore"
               value={formData.hasDonatedBefore}
@@ -230,24 +268,27 @@ const BloodDonationForm = () => {
           </div>
 
           {/* Ngày hiến gần nhất */}
-          {formData.hasDonatedBefore === "yes" && (
+          {formData.hasDonatedBefore === "yes" && formData.lastDonationDate && (
             <div>
-              <label className="block text-gray-700 mb-1 font-medium">Ngày hiến gần nhất</label>
+              <label className="block text-gray-700 mb-1 font-medium">
+                Ngày hiến gần nhất
+              </label>
               <input
                 type="date"
                 name="lastDonationDate"
                 value={formData.lastDonationDate}
-                onChange={handleChange}
-                required
-                max={dayjs().format("YYYY-MM-DD")}
-                className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+                readOnly
+                disabled
+                className="w-full px-4 py-2 bg-gray-200 border border-red-300 rounded-md text-gray-500 cursor-not-allowed"
               />
             </div>
           )}
 
           {/* Có đang mang thai không? */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Có đang mang thai không?</label>
+            <label className="block text-gray-700 mb-1 font-medium">
+              Có đang mang thai không?
+            </label>
             <select
               name="isPregnant"
               value={formData.isPregnant}
@@ -263,7 +304,9 @@ const BloodDonationForm = () => {
 
           {/* Có bệnh truyền nhiễm không? */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Có bệnh truyền nhiễm không?</label>
+            <label className="block text-gray-700 mb-1 font-medium">
+              Có bệnh truyền nhiễm không?
+            </label>
             <select
               name="hasInfectiousDisease"
               value={formData.hasInfectiousDisease}

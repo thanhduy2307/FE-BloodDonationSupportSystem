@@ -26,8 +26,8 @@ function ManageUser() {
       const mapped = response.data.map((user) => ({
         ...user,
         role: convertRoleIdToName(user.role ?? user.roleName),
+        status: user.status ?? 1, // 👈 Mặc định là active nếu không có
       }));
-      console.log("Fetched users:", mapped);
       setDatas(mapped);
     } catch (error) {
       console.error(error);
@@ -39,45 +39,49 @@ function ManageUser() {
     fetchUser();
   }, []);
 
-  const handleDelete = async (userId) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
+  const roleMap = {
+    User: 1,
+    Staff: 2,
+    Admin: 3,
+  };
+
+  const handleChangeRole = async (userId, newRole) => {
     try {
-      await api.delete(`Admin/users/${userId}`);
-      toast.success("User deleted successfully");
+      const roleId = roleMap[newRole];
+      await api.put(`Admin/users/${userId}/role`, roleId, {
+        headers: { "Content-Type": "application/json" },
+      });
+      toast.success("Role updated successfully");
       fetchUser();
     } catch (error) {
       console.error(error);
-      toast.error("Failed to delete user");
+      toast.error("Failed to update role");
     }
   };
 
-  const roleMap = {
-  User: 1,
-  Staff: 2,
-  Admin: 3,
-};
-
-const handleChangeRole = async (userId, newRole) => {
-  try {
-    const roleId = roleMap[newRole];
-    await api.put(`Admin/users/${userId}/role`, roleId, {
-      headers: { "Content-Type": "application/json" },
-    });
-    toast.success("Role updated successfully");
-    fetchUser();
-  } catch (error) {
-    console.error(error);
-    toast.error("Failed to update role");
-  }
-};
+  const handleChangeStatus = async (userId, value) => {
+    try {
+      const statusValue = value === "active" ? 1 : 2;
+      await api.put(
+        `Admin/users/${userId}/status`,
+       statusValue,
+        { headers: { "Content-Type": "application/json" } }
+      );
+      toast.success("Cập nhật trạng thái thành công");
+      fetchUser();
+    } catch (error) {
+      console.error(error);
+      toast.error("Cập nhật trạng thái thất bại");
+    }
+  };
 
   const columns = [
     {
       title: "ID",
       dataIndex: "userId",
       key: "userId",
-       sorter: (a, b) => a.userId - b.userId,
-  defaultSortOrder: "ascend"
+      sorter: (a, b) => a.userId - b.userId,
+      defaultSortOrder: "ascend",
     },
     {
       title: "Full Name",
@@ -117,23 +121,21 @@ const handleChangeRole = async (userId, newRole) => {
         </Select>
       ),
     },
-    // {
-    //   title: "Action",
-    //   key: "action",
-    //   render: (_, record) => (
-    //     <button
-    //       onClick={() => handleDelete(record.userId)}
-    //       style={{
-    //         color: "red",
-    //         border: "none",
-    //         background: "transparent",
-    //         cursor: "pointer",
-    //       }}
-    //     >
-    //       Delete
-    //     </button>
-    //   ),
-    // },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (_, record) => (
+        <Select
+          value={record.status === 1 ? "active" : "disabled"}
+          onChange={(value) => handleChangeStatus(record.userId, value)}
+          style={{ width: 120 }}
+        >
+          <Select.Option value="active">Active</Select.Option>
+          <Select.Option value="disabled">Disabled</Select.Option>
+        </Select>
+      ),
+    },
   ];
 
   return (
