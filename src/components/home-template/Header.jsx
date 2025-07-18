@@ -1,20 +1,27 @@
-import React, { useState, useEffect } from "react";
-import { Menu, X, Heart, Crop as Drop } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Menu, X, Heart, Crop as Drop, Bell } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/features/userSlice";
-import { Bell } from "lucide-react";
 import dayjs from "dayjs";
 import api from "../../configs/axios";
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showNotiDropdown, setShowNotiDropdown] = useState(false);
+  const [hasNewNoti, setHasNewNoti] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+
+  const dropdownRef = useRef(null);
+  const notiRef = useRef(null);
+
   const location = useLocation();
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [hasNewNoti, setHasNewNoti] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -23,34 +30,65 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    setShowDropdown(false);
-  };
   useEffect(() => {
-    const checkNewNotifications = async () => {
+    const fetchNotifications = async () => {
       try {
         const res = await api.get("/Notification/getByUser");
+        setNotifications(res.data);
+
         const now = dayjs();
-        const recent = res.data.some((n) => {
+        const hasRecent = res.data.some((n) => {
           const date = dayjs(n.notifDate);
-          return now.diff(date, "hour") < 24; // Ví dụ: có thông báo trong 24h
+          return now.diff(date, "hour") < 24 && !n.isRead;
         });
-        setHasNewNoti(recent);
+        setHasNewNoti(hasRecent);
       } catch {
         console.error("Không thể kiểm tra thông báo");
       }
     };
 
-    checkNewNotifications();
+    fetchNotifications();
   }, []);
+
+  useEffect(() => {
+    if (showNotiDropdown) {
+      const markAsRead = async () => {
+        try {
+          await api.post("/Notification/mark-all-as-read");
+          setHasNewNoti(false);
+        } catch (err) {
+          console.error("Lỗi đánh dấu thông báo đã đọc");
+        }
+      };
+      markAsRead();
+    }
+  }, [showNotiDropdown]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+      if (notiRef.current && !notiRef.current.contains(e.target)) {
+        setShowNotiDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    setShowDropdown(false);
+  };
+
   const handleNavigateScroll = (sectionId) => {
     if (location.pathname !== "/") {
       navigate("/");
       setTimeout(() => {
         const el = document.getElementById(sectionId);
         el?.scrollIntoView({ behavior: "smooth" });
-      }, 100); // chờ để đảm bảo DOM đã load xong
+      }, 100);
     } else {
       const el = document.getElementById(sectionId);
       el?.scrollIntoView({ behavior: "smooth" });
@@ -69,70 +107,72 @@ const Header = () => {
           <span className="text-2xl font-bold text-red-600">HeartDrop</span>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
-          <Link
-            to="/"
-            className="text-gray-800 hover:text-red-600 font-medium transition"
-          >
+          <Link to="/" className="text-gray-800 hover:text-red-600 font-medium transition">
             Trang chủ
           </Link>
-          <button
-            onClick={() => handleNavigateScroll("about")}
-            className="text-gray-800 hover:text-red-600 font-medium transition"
-          >
+          <button onClick={() => handleNavigateScroll("about")} className="text-gray-800 hover:text-red-600 font-medium transition">
             Về chúng tôi
           </button>
-          <Link
-            to="/events"
-            className="text-gray-800 hover:text-red-600 font-medium transition"
-          >
+          <Link to="/events" className="text-gray-800 hover:text-red-600 font-medium transition">
             Sự kiện
           </Link>
-          <Link
-            to="/blogs"
-            className="text-gray-800 hover:text-red-600 font-medium transition"
-          >
+          <Link to="/blogs" className="text-gray-800 hover:text-red-600 font-medium transition">
             Blog
           </Link>
-          <button
-            onClick={() => handleNavigateScroll("testimonials")}
-            className="text-gray-800 hover:text-red-600 font-medium transition"
-          >
+          <button onClick={() => handleNavigateScroll("testimonials")} className="text-gray-800 hover:text-red-600 font-medium transition">
             Câu chuyện
           </button>
-          <button
-            onClick={() => handleNavigateScroll("faq")}
-            className="text-gray-800 hover:text-red-600 font-medium transition"
-          >
+          <button onClick={() => handleNavigateScroll("faq")} className="text-gray-800 hover:text-red-600 font-medium transition">
             Hỏi đáp
           </button>
 
           {user ? (
             <div className="relative flex items-center space-x-4">
-              {/* Nút chuông thông báo */}
-              <button
-                onClick={() => navigate("/notificationn")}
-                className="text-gray-700 hover:text-red-500 transition-colors relative"
-              >
-                <Bell className="w-6 h-6" />
-                {/* Badge thông báo (bật khi cần) */}
-                {/* <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
-        {notifications.length}
-      </span> */}
-              </button>
+              {/* Notification dropdown */}
+              <div className="relative" ref={notiRef}>
+                <button onClick={() => setShowNotiDropdown((prev) => !prev)} className="relative text-gray-700 hover:text-red-500 transition-colors">
+                  <Bell className="w-6 h-6" />
+                  {hasNewNoti && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                      !
+                    </span>
+                  )}
+                </button>
 
-              {/* Avatar & Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowDropdown(!showDropdown)}
-                  className="flex items-center space-x-2 focus:outline-none"
-                >
+                {showNotiDropdown && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
+                    <div className="p-4 border-b font-semibold text-red-600">Thông báo</div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-4 text-gray-500 text-sm text-center">Không có thông báo nào.</div>
+                      ) : (
+                        notifications.map((n) => (
+                          <button
+                            key={n.notificationId}
+                            onClick={() => {
+                              if (n.url) navigate(n.url);
+                              setShowNotiDropdown(false);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 border-b last:border-none"
+                          >
+                            <p className="text-sm text-gray-800">{n.message}</p>
+                            <p className="text-xs text-gray-500">
+                              {dayjs(n.notifDate).format("DD/MM/YYYY")}
+                            </p>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Avatar dropdown */}
+              <div className="relative" ref={dropdownRef}>
+                <button onClick={() => setShowDropdown(!showDropdown)} className="flex items-center space-x-2 focus:outline-none">
                   <img
-                    src={
-                      user?.avatar ||
-                      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsVNNgXA9Qlq5GaQtWcqv0eyrFFLBJXWXpnw&s"
-                    }
+                    src={user?.avatar || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsVNNgXA9Qlq5GaQtWcqv0eyrFFLBJXWXpnw&s"}
                     alt={user?.fullName}
                     className="h-10 w-10 rounded-full object-cover border-2 border-red-500 hover:scale-105 transition-transform"
                     onError={(e) => {
@@ -141,8 +181,6 @@ const Header = () => {
                     }}
                   />
                 </button>
-
-                {/* Dropdown Menu */}
                 {showDropdown && (
                   <div className="absolute right-0 mt-2 w-48 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-10 z-50 overflow-hidden">
                     <button
@@ -175,82 +213,30 @@ const Header = () => {
             </div>
           ) : (
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => navigate("/login")}
-                className="text-red-600 hover:text-red-700 font-medium transition"
-              >
+              <button onClick={() => navigate("/login")} className="text-red-600 hover:text-red-700 font-medium transition">
                 Đăng nhập
               </button>
-              <button
-                onClick={() => navigate("/register")}
-                className="text-white bg-red-600 hover:bg-red-700 py-2 px-6 rounded-full font-medium transition transform hover:scale-105"
-              >
+              <button onClick={() => navigate("/register")} className="text-white bg-red-600 hover:bg-red-700 py-2 px-6 rounded-full font-medium transition transform hover:scale-105">
                 Đăng ký
               </button>
             </div>
           )}
         </nav>
 
-        {/* Mobile menu button */}
-        <button
-          className="md:hidden text-gray-800"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
+        <button className="md:hidden text-gray-800" onClick={() => setIsMenuOpen(!isMenuOpen)}>
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
-      {/* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-white shadow-lg">
           <div className="container mx-auto px-4 py-3 flex flex-col space-y-4">
-            <Link
-              to="/"
-              className="text-gray-800 hover:text-red-600 font-medium transition py-2"
-            >
-              Trang chủ
-            </Link>
-            <button
-              onClick={() => {
-                setIsMenuOpen(false);
-                handleNavigateScroll("about");
-              }}
-              className="text-gray-800 hover:text-red-600 font-medium transition py-2"
-            >
-              Về chúng tôi
-            </button>
-            <Link
-              to="/events"
-              className="text-gray-800 hover:text-red-600 font-medium transition py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Sự kiện
-            </Link>
-            <Link
-              to="/blogs"
-              className="text-gray-800 hover:text-red-600 font-medium transition py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Blog
-            </Link>
-            <button
-              onClick={() => {
-                setIsMenuOpen(false);
-                handleNavigateScroll("testimonials");
-              }}
-              className="text-gray-800 hover:text-red-600 font-medium transition py-2"
-            >
-              Câu chuyện
-            </button>
-            <button
-              onClick={() => {
-                setIsMenuOpen(false);
-                handleNavigateScroll("faq");
-              }}
-              className="text-gray-800 hover:text-red-600 font-medium transition py-2"
-            >
-              Hỏi đáp
-            </button>
+            <Link to="/" className="text-gray-800 hover:text-red-600 font-medium transition py-2">Trang chủ</Link>
+            <button onClick={() => { setIsMenuOpen(false); handleNavigateScroll("about"); }} className="text-gray-800 hover:text-red-600 font-medium transition py-2">Về chúng tôi</button>
+            <Link to="/events" className="text-gray-800 hover:text-red-600 font-medium transition py-2" onClick={() => setIsMenuOpen(false)}>Sự kiện</Link>
+            <Link to="/blogs" className="text-gray-800 hover:text-red-600 font-medium transition py-2" onClick={() => setIsMenuOpen(false)}>Blog</Link>
+            <button onClick={() => { setIsMenuOpen(false); handleNavigateScroll("testimonials"); }} className="text-gray-800 hover:text-red-600 font-medium transition py-2">Câu chuyện</button>
+            <button onClick={() => { setIsMenuOpen(false); handleNavigateScroll("faq"); }} className="text-gray-800 hover:text-red-600 font-medium transition py-2">Hỏi đáp</button>
           </div>
         </div>
       )}

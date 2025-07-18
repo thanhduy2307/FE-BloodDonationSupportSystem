@@ -1,65 +1,113 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Bell } from "lucide-react";
 import dayjs from "dayjs";
 import api from "../../configs/axios";
 import { useNavigate } from "react-router-dom";
 
-const NotificationUser = () => {
+const NotificationDropdown = () => {
   const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
+  // Gọi khi component mount
   useEffect(() => {
     fetchNotifications();
+    fetchUnreadCount();
+
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const fetchNotifications = async () => {
     try {
-      // Lấy danh sách thông báo
       const res = await api.get("/Notification/getByUser");
       setNotifications(res.data);
+    } catch (err) {
+      console.error("Lỗi tải thông báo:", err);
+    }
+  };
 
-      // Đánh dấu tất cả là đã đọc
-      await api.post("/Notification/markAsRead");
-    } catch (error) {
-      console.error("Lỗi khi tải thông báo:", error);
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await api.get("/Notification/unread-count");
+      setUnreadCount(res.data); // BE trả về số
+    } catch (err) {
+      console.error("Lỗi lấy số lượng chưa đọc:", err);
+    }
+  };
+
+  const handleOpen = async () => {
+    setIsOpen(!isOpen);
+    if (!isOpen) {
+      try {
+        await api.post("/Notification/mark-all-as-read");
+        fetchNotifications();
+        fetchUnreadCount();
+      } catch (err) {
+        console.error("Lỗi đánh dấu đã đọc:", err);
+      }
+    }
+  };
+
+  const handleClickNotification = async (notificationId) => {
+    try {
+      await api.post(`/Notification/mark-as-read/${notificationId}`);
+      fetchNotifications();
+      fetchUnreadCount();
+      navigate(`/notification/${notificationId}`);
+    } catch (err) {
+      console.error("Lỗi đánh dấu thông báo:", err);
     }
   };
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 px-4 py-6">
-      {/* Nút quay về - sát trái */}
-      <div className="mb-4">
-        <button
-          onClick={() => navigate("/")}
-          className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
-        >
-          ← Quay về trang chủ
-        </button>
-      </div>
+    <div className="relative" ref={dropdownRef}>
+      <button onClick={handleOpen} className="relative">
+        <Bell className="w-6 h-6 text-gray-700" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+            {unreadCount}
+          </span>
+        )}
+      </button>
 
-      {/* Nội dung chính căn giữa */}
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-2xl font-bold text-red-600 mb-4">Thông báo của bạn</h2>
-
-        <div className="bg-white rounded-xl shadow p-6 space-y-4">
-          {notifications.length === 0 ? (
-            <div className="text-center text-gray-500">Không có thông báo nào.</div>
-          ) : (
-            notifications.map((n) => (
-              <div
-                key={n.notificationId}
-                className="border-b pb-3 last:border-b-0 last:pb-0"
-              >
-                <p className="text-sm text-gray-800">{n.message}</p>
-                <p className="text-xs text-gray-500">
-                  Gửi ngày: {dayjs(n.notifDate).format("DD/MM/YYYY")}
-                </p>
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
+          <div className="p-4 border-b font-semibold text-red-600">Thông báo</div>
+          <div className="max-h-64 overflow-y-auto">
+            {notifications.length === 0 ? (
+              <div className="p-4 text-gray-500 text-sm text-center">
+                Không có thông báo nào.
               </div>
-            ))
-          )}
+            ) : (
+              notifications.map((n) => (
+                <div
+                  key={n.notificationId}
+                  className={`px-4 py-2 cursor-pointer hover:bg-gray-50 border-b last:border-none ${
+                    !n.isRead ? "bg-gray-100" : ""
+                  }`}
+                  onClick={() => handleClickNotification(n.notificationId)}
+                >
+                  <p className="text-sm text-gray-800">{n.message}</p>
+                  <p className="text-xs text-gray-500">
+                    {dayjs(n.notifDate).format("DD/MM/YYYY")}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
 
-export default NotificationUser;
+export default NotificationDropdown;
