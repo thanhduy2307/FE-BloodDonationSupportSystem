@@ -23,13 +23,13 @@ function getItem(label, key, icon, children) {
 }
 
 const items = [
-  getItem("User", "member-staff", <UserOutlined />),
-  getItem("Feedback", "feedback-staff", <DesktopOutlined />),
-  getItem("Donor List", "donorList-staff", < DesktopOutlined />),
-  getItem("Event Donate", "eventStaff", < DesktopOutlined />),
-  getItem("Request List", "requestList-staff", < DesktopOutlined />),
-  getItem("Blogs", "manageBlogs", < DesktopOutlined />),
-  getItem("Notification", "notification", < DesktopOutlined />),
+  getItem("Người dùng", "member-staff", <UserOutlined />),
+  getItem("Phản hồi", "feedback-staff", <DesktopOutlined />),
+  getItem("Danh sách đăng kí hiến máu ", "donorList-staff", < DesktopOutlined />),
+  getItem("Sự kiện", "eventStaff", < DesktopOutlined />),
+  getItem("Danh sách đăng kí nhận máu", "requestList-staff", < DesktopOutlined />),
+  getItem("Bài viết", "manageBlogs", < DesktopOutlined />),
+  getItem("Thông báo", "notification", < DesktopOutlined />),
 
 ];
 

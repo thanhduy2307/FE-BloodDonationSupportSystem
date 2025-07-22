@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { Droplet } from "lucide-react";
 import api from "../../configs/axios";
 import "./register.css";
-
+import {   Select } from "antd";
 const RegisterForm = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -30,7 +30,9 @@ const RegisterForm = () => {
           })
         );
         form.setFields(fieldErrors);
-        Object.values(errorData.errors).flat().forEach((msg) => toast.error(msg));
+        Object.values(errorData.errors)
+          .flat()
+          .forEach((msg) => toast.error(msg));
       } else if (errorData?.error) {
         form.setFields([
           {
@@ -57,8 +59,12 @@ const RegisterForm = () => {
             <Droplet className="text-red-600 mr-2" size={32} />
             <span className="text-2xl font-bold text-red-600">HeartDrop</span>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Đăng ký tài khoản</h2>
-          <p className="text-gray-600">Tham gia cộng đồng hiến máu nhân đạo ngay hôm nay</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            Đăng ký tài khoản
+          </h2>
+          <p className="text-gray-600">
+            Tham gia cộng đồng hiến máu nhân đạo ngay hôm nay
+          </p>
         </div>
 
         <Form
@@ -100,7 +106,9 @@ const RegisterForm = () => {
           <Form.Item
             label="Số điện thoại"
             name="phoneNumber"
-            rules={[{ required: true, message: "Vui lòng nhập số điện thoại!" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập số điện thoại!" },
+            ]}
           >
             <Input placeholder="Nhập số điện thoại" />
           </Form.Item>
@@ -108,9 +116,16 @@ const RegisterForm = () => {
           <Form.Item
             label="Giới tính"
             name="gender"
-            rules={[{ required: true, message: "Vui lòng nhập giới tính!" }]}
+            rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
           >
-            <Input placeholder="Nhập giới tính (Nam/Nữ/Khác)" />
+            <Select
+              placeholder="Chọn giới tính"
+              options={[
+                { value: "Nam", label: "Nam" },
+                { value: "Nữ", label: "Nữ" },
+                { value: "Khác", label: "Khác" },
+              ]}
+            />
           </Form.Item>
 
           <Form.Item
@@ -119,14 +134,6 @@ const RegisterForm = () => {
             rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
           >
             <Input placeholder="Nhập địa chỉ" />
-          </Form.Item>
-
-          <Form.Item
-            label="Nhóm máu"
-            name="bloodGroup"
-            rules={[{ required: true, message: "Vui lòng nhập nhóm máu!" }]}
-          >
-            <Input placeholder="Nhập nhóm máu (ví dụ: A+, B-, O+...)" />
           </Form.Item>
 
           <Form.Item
@@ -143,12 +150,15 @@ const RegisterForm = () => {
                     today.getFullYear() -
                     birthDate.getFullYear() -
                     (today.getMonth() < birthDate.getMonth() ||
-                    (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
+                    (today.getMonth() === birthDate.getMonth() &&
+                      today.getDate() < birthDate.getDate())
                       ? 1
                       : 0);
                   return age >= 18
                     ? Promise.resolve()
-                    : Promise.reject(new Error("Bạn phải đủ 18 tuổi để được hiến máu."));
+                    : Promise.reject(
+                        new Error("Bạn phải đủ 18 tuổi để được hiến máu.")
+                      );
                 },
               },
             ]}
@@ -173,8 +183,11 @@ const RegisterForm = () => {
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Đã có tài khoản?{' '}
-              <a href="/login" className="font-medium text-red-600 hover:text-red-500">
+              Đã có tài khoản?{" "}
+              <a
+                href="/login"
+                className="font-medium text-red-600 hover:text-red-500"
+              >
                 Đăng nhập
               </a>
             </p>

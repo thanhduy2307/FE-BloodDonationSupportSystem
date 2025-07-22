@@ -23,11 +23,11 @@ function getItem(label, key, icon, children) {
 }
 
 const items = [
-  getItem("Overview", "overview", <PieChartOutlined />),
-  getItem("User", "user", <UserOutlined />),
-  getItem("Feedback", "feedback", <DesktopOutlined />),
-  getItem("Blood Donor", "bloodDonor", < DesktopOutlined />),
-  getItem("Request Blood", "requestBlood", < DesktopOutlined />),
+  getItem("Tổng quan", "overview", <PieChartOutlined />),
+  getItem("Người dùng", "user", <UserOutlined />),
+  getItem("Phản hồi", "feedback", <DesktopOutlined />),
+  getItem("Danh sách đăng kí hiến máu ", "bloodDonor", < DesktopOutlined />),
+  getItem("Danh sách đăng kí nhận máu", "requestBlood", < DesktopOutlined />),
   
 ];
 
