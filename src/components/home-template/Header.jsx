@@ -55,7 +55,7 @@ const Header = () => {
     if (showNotiDropdown) {
       const markAsRead = async () => {
         try {
-          await api.post("/Notification/mark-all-as-read");
+          await api.put("/Notification/mark-all-as-read");
           setHasNewNoti(false);
         } catch (err) {
           console.error("Lỗi đánh dấu thông báo đã đọc");
@@ -64,7 +64,24 @@ const Header = () => {
       markAsRead();
     }
   }, [showNotiDropdown]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
+  useEffect(() => {
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchUnreadCount = async () => {
+    try {
+      console.log("Gọi unread count...");
+      const res = await api.get("/Notification/unread-count");
+      console.log("Kết quả unread count:", res.data);
+      setUnreadCount(res.data.realCount); // hoặc res.data tùy response
+    } catch (err) {
+      console.error("Lỗi khi gọi unread count:", err);
+    }
+  };
   // Đóng dropdown nếu click ngoài
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -111,22 +128,40 @@ const Header = () => {
 
         <nav className="hidden md:flex items-center space-x-8">
           {/* menu giữ nguyên */}
-          <Link to="/" className="text-gray-800 hover:text-red-600 font-medium transition">
+          <Link
+            to="/"
+            className="text-gray-800 hover:text-red-600 font-medium transition"
+          >
             Trang chủ
           </Link>
-          <button onClick={() => handleNavigateScroll("about")} className="text-gray-800 hover:text-red-600 font-medium transition">
+          <button
+            onClick={() => handleNavigateScroll("about")}
+            className="text-gray-800 hover:text-red-600 font-medium transition"
+          >
             Về chúng tôi
           </button>
-          <Link to="/events" className="text-gray-800 hover:text-red-600 font-medium transition">
+          <Link
+            to="/events"
+            className="text-gray-800 hover:text-red-600 font-medium transition"
+          >
             Sự kiện
           </Link>
-          <Link to="/blogs" className="text-gray-800 hover:text-red-600 font-medium transition">
+          <Link
+            to="/blogs"
+            className="text-gray-800 hover:text-red-600 font-medium transition"
+          >
             Blog
           </Link>
-          <button onClick={() => handleNavigateScroll("testimonials")} className="text-gray-800 hover:text-red-600 font-medium transition">
+          <button
+            onClick={() => handleNavigateScroll("testimonials")}
+            className="text-gray-800 hover:text-red-600 font-medium transition"
+          >
             Câu chuyện
           </button>
-          <button onClick={() => handleNavigateScroll("faq")} className="text-gray-800 hover:text-red-600 font-medium transition">
+          <button
+            onClick={() => handleNavigateScroll("faq")}
+            className="text-gray-800 hover:text-red-600 font-medium transition"
+          >
             Hỏi đáp
           </button>
 
@@ -134,21 +169,26 @@ const Header = () => {
             <div className="relative flex items-center space-x-4">
               {/* Chuông thông báo */}
               <div className="relative" ref={notiRef}>
-                <button onClick={() => setShowNotiDropdown((prev) => !prev)} className="relative text-gray-700 hover:text-red-500 transition-colors">
+                <button
+                  onClick={() => setShowNotiDropdown((prev) => !prev)}
+                  className="relative text-gray-700 hover:text-red-500 transition-colors"
+                >
                   <Bell className="w-6 h-6" />
-                  {hasNewNoti && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
-                      !
-                    </span>
-                  )}
+                  <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[11px] min-w-[1.25rem] h-5 rounded-full flex items-center justify-center px-1">
+                    {unreadCount}
+                  </span>
                 </button>
 
                 {showNotiDropdown && (
                   <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
-                    <div className="p-4 border-b font-semibold text-red-600">Thông báo</div>
+                    <div className="p-4 border-b font-semibold text-red-600">
+                      Thông báo
+                    </div>
                     <div className="max-h-64 overflow-y-auto">
                       {notifications.length === 0 ? (
-                        <div className="p-4 text-gray-500 text-sm text-center">Không có thông báo nào.</div>
+                        <div className="p-4 text-gray-500 text-sm text-center">
+                          Không có thông báo nào.
+                        </div>
                       ) : (
                         notifications.map((n) => (
                           <button
@@ -160,7 +200,9 @@ const Header = () => {
                             className="w-full text-left px-4 py-2 hover:bg-gray-50 border-b last:border-none"
                           >
                             <p className="text-sm text-gray-800">{n.message}</p>
-                            <p className="text-xs text-gray-500">{dayjs(n.notifDate).format("DD/MM/YYYY")}</p>
+                            <p className="text-xs text-gray-500">
+                              {dayjs(n.notifDate).format("DD/MM/YYYY")}
+                            </p>
                           </button>
                         ))
                       )}
@@ -171,9 +213,15 @@ const Header = () => {
 
               {/* Avatar dropdown giữ nguyên */}
               <div className="relative" ref={dropdownRef}>
-                <button onClick={() => setShowDropdown(!showDropdown)} className="flex items-center space-x-2 focus:outline-none">
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="flex items-center space-x-2 focus:outline-none"
+                >
                   <img
-                    src={user?.avatar || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsVNNgXA9Qlq5GaQtWcqv0eyrFFLBJXWXpnw&s"}
+                    src={
+                      user?.avatar ||
+                      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsVNNgXA9Qlq5GaQtWcqv0eyrFFLBJXWXpnw&s"
+                    }
                     alt={user?.fullName}
                     className="h-10 w-10 rounded-full object-cover border-2 border-red-500 hover:scale-105 transition-transform"
                     onError={(e) => {
@@ -184,13 +232,28 @@ const Header = () => {
                 </button>
                 {showDropdown && (
                   <div className="absolute right-0 mt-2 w-48 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-10 z-50 overflow-hidden">
-                    <button onClick={() => { navigate("/profile"); setShowDropdown(false); }} className="block w-full text-left px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 transition-colors">
+                    <button
+                      onClick={() => {
+                        navigate("/profile");
+                        setShowDropdown(false);
+                      }}
+                      className="block w-full text-left px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 transition-colors"
+                    >
                       Trang cá nhân
                     </button>
-                    <button onClick={() => { navigate("/feedback"); setShowDropdown(false); }} className="block w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-red-100 transition-colors">
+                    <button
+                      onClick={() => {
+                        navigate("/feedback");
+                        setShowDropdown(false);
+                      }}
+                      className="block w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-red-100 transition-colors"
+                    >
                       Phản hồi
                     </button>
-                    <button onClick={handleLogout} className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-100 transition-colors">
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-100 transition-colors"
+                    >
                       Đăng xuất
                     </button>
                   </div>
@@ -199,17 +262,26 @@ const Header = () => {
             </div>
           ) : (
             <div className="flex items-center space-x-4">
-              <button onClick={() => navigate("/login")} className="text-red-600 hover:text-red-700 font-medium transition">
+              <button
+                onClick={() => navigate("/login")}
+                className="text-red-600 hover:text-red-700 font-medium transition"
+              >
                 Đăng nhập
               </button>
-              <button onClick={() => navigate("/register")} className="text-white bg-red-600 hover:bg-red-700 py-2 px-6 rounded-full font-medium transition transform hover:scale-105">
+              <button
+                onClick={() => navigate("/register")}
+                className="text-white bg-red-600 hover:bg-red-700 py-2 px-6 rounded-full font-medium transition transform hover:scale-105"
+              >
                 Đăng ký
               </button>
             </div>
           )}
         </nav>
 
-        <button className="md:hidden text-gray-800" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+        <button
+          className="md:hidden text-gray-800"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -217,12 +289,53 @@ const Header = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-white shadow-lg">
           <div className="container mx-auto px-4 py-3 flex flex-col space-y-4">
-            <Link to="/" className="text-gray-800 hover:text-red-600 font-medium transition py-2">Trang chủ</Link>
-            <button onClick={() => { setIsMenuOpen(false); handleNavigateScroll("about"); }} className="text-gray-800 hover:text-red-600 font-medium transition py-2">Về chúng tôi</button>
-            <Link to="/events" className="text-gray-800 hover:text-red-600 font-medium transition py-2" onClick={() => setIsMenuOpen(false)}>Sự kiện</Link>
-            <Link to="/blogs" className="text-gray-800 hover:text-red-600 font-medium transition py-2" onClick={() => setIsMenuOpen(false)}>Blog</Link>
-            <button onClick={() => { setIsMenuOpen(false); handleNavigateScroll("testimonials"); }} className="text-gray-800 hover:text-red-600 font-medium transition py-2">Câu chuyện</button>
-            <button onClick={() => { setIsMenuOpen(false); handleNavigateScroll("faq"); }} className="text-gray-800 hover:text-red-600 font-medium transition py-2">Hỏi đáp</button>
+            <Link
+              to="/"
+              className="text-gray-800 hover:text-red-600 font-medium transition py-2"
+            >
+              Trang chủ
+            </Link>
+            <button
+              onClick={() => {
+                setIsMenuOpen(false);
+                handleNavigateScroll("about");
+              }}
+              className="text-gray-800 hover:text-red-600 font-medium transition py-2"
+            >
+              Về chúng tôi
+            </button>
+            <Link
+              to="/events"
+              className="text-gray-800 hover:text-red-600 font-medium transition py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Sự kiện
+            </Link>
+            <Link
+              to="/blogs"
+              className="text-gray-800 hover:text-red-600 font-medium transition py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Blog
+            </Link>
+            <button
+              onClick={() => {
+                setIsMenuOpen(false);
+                handleNavigateScroll("testimonials");
+              }}
+              className="text-gray-800 hover:text-red-600 font-medium transition py-2"
+            >
+              Câu chuyện
+            </button>
+            <button
+              onClick={() => {
+                setIsMenuOpen(false);
+                handleNavigateScroll("faq");
+              }}
+              className="text-gray-800 hover:text-red-600 font-medium transition py-2"
+            >
+              Hỏi đáp
+            </button>
           </div>
         </div>
       )}
