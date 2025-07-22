@@ -32,6 +32,7 @@ import BloodRequestList from "./Page/dashboard-staff/request-blood";
 import NotificationUser from "./Page/notification";
 
 import { ToastContainer } from 'react-toastify';
+import NotificationDropdown from "./Page/notification";
 
 
 
@@ -152,7 +153,7 @@ function App() {
     },
     {
       path: "notificationn",
-      element: <NotificationUser />,
+      element: <NotificationDropdown />,
     },
     
   ]);

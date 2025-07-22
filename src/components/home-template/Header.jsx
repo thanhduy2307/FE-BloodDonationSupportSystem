@@ -1,20 +1,29 @@
-import React, { useState, useEffect } from "react";
-import { Menu, X, Heart, Crop as Drop } from "lucide-react";
+// ... các import giữ nguyên
+import React, { useState, useEffect, useRef } from "react";
+import { Menu, X, Heart, Crop as Drop, Bell } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/features/userSlice";
-import { Bell } from "lucide-react";
 import dayjs from "dayjs";
 import api from "../../configs/axios";
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showNotiDropdown, setShowNotiDropdown] = useState(false);
+  const [hasNewNoti, setHasNewNoti] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+
+  const dropdownRef = useRef(null);
+  const notiRef = useRef(null);
+
   const location = useLocation();
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [hasNewNoti, setHasNewNoti] = useState(false);
+
+  // Theo dõi scroll
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -23,34 +32,82 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    setShowDropdown(false);
-  };
+  // Lấy thông báo ban đầu + polling mỗi 5s
   useEffect(() => {
-    const checkNewNotifications = async () => {
+    const fetchNotifications = async () => {
       try {
         const res = await api.get("/Notification/getByUser");
-        const now = dayjs();
-        const recent = res.data.some((n) => {
-          const date = dayjs(n.notifDate);
-          return now.diff(date, "hour") < 24; // Ví dụ: có thông báo trong 24h
-        });
-        setHasNewNoti(recent);
+        setNotifications(res.data || []);
+        const hasUnread = res.data.some((n) => !n.isRead);
+        setHasNewNoti(hasUnread);
       } catch {
         console.error("Không thể kiểm tra thông báo");
       }
     };
 
-    checkNewNotifications();
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 5000); // polling mỗi 5s
+    return () => clearInterval(interval);
   }, []);
+
+  // Khi mở dropdown thì đánh dấu đã đọc
+  useEffect(() => {
+    if (showNotiDropdown) {
+      const markAsRead = async () => {
+        try {
+          await api.put("/Notification/mark-all-as-read");
+          setHasNewNoti(false);
+        } catch (err) {
+          console.error("Lỗi đánh dấu thông báo đã đọc");
+        }
+      };
+      markAsRead();
+    }
+  }, [showNotiDropdown]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchUnreadCount = async () => {
+    try {
+      console.log("Gọi unread count...");
+      const res = await api.get("/Notification/unread-count");
+      console.log("Kết quả unread count:", res.data);
+      setUnreadCount(res.data.realCount); // hoặc res.data tùy response
+    } catch (err) {
+      console.error("Lỗi khi gọi unread count:", err);
+    }
+  };
+  // Đóng dropdown nếu click ngoài
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+      if (notiRef.current && !notiRef.current.contains(e.target)) {
+        setShowNotiDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    setShowDropdown(false);
+  };
+
   const handleNavigateScroll = (sectionId) => {
     if (location.pathname !== "/") {
       navigate("/");
       setTimeout(() => {
         const el = document.getElementById(sectionId);
         el?.scrollIntoView({ behavior: "smooth" });
-      }, 100); // chờ để đảm bảo DOM đã load xong
+      }, 100);
     } else {
       const el = document.getElementById(sectionId);
       el?.scrollIntoView({ behavior: "smooth" });
@@ -69,8 +126,8 @@ const Header = () => {
           <span className="text-2xl font-bold text-red-600">HeartDrop</span>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
+          {/* menu giữ nguyên */}
           <Link
             to="/"
             className="text-gray-800 hover:text-red-600 font-medium transition"
@@ -110,20 +167,52 @@ const Header = () => {
 
           {user ? (
             <div className="relative flex items-center space-x-4">
-              {/* Nút chuông thông báo */}
-              <button
-                onClick={() => navigate("/notificationn")}
-                className="text-gray-700 hover:text-red-500 transition-colors relative"
-              >
-                <Bell className="w-6 h-6" />
-                {/* Badge thông báo (bật khi cần) */}
-                {/* <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
-        {notifications.length}
-      </span> */}
-              </button>
+              {/* Chuông thông báo */}
+              <div className="relative" ref={notiRef}>
+                <button
+                  onClick={() => setShowNotiDropdown((prev) => !prev)}
+                  className="relative text-gray-700 hover:text-red-500 transition-colors"
+                >
+                  <Bell className="w-6 h-6" />
+                  <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[11px] min-w-[1.25rem] h-5 rounded-full flex items-center justify-center px-1">
+                    {unreadCount}
+                  </span>
+                </button>
 
-              {/* Avatar & Dropdown */}
-              <div className="relative">
+                {showNotiDropdown && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
+                    <div className="p-4 border-b font-semibold text-red-600">
+                      Thông báo
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-4 text-gray-500 text-sm text-center">
+                          Không có thông báo nào.
+                        </div>
+                      ) : (
+                        notifications.map((n) => (
+                          <button
+                            key={n.notificationId}
+                            onClick={() => {
+                              if (n.url) navigate(n.url);
+                              setShowNotiDropdown(false);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 border-b last:border-none"
+                          >
+                            <p className="text-sm text-gray-800">{n.message}</p>
+                            <p className="text-xs text-gray-500">
+                              {dayjs(n.notifDate).format("DD/MM/YYYY")}
+                            </p>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Avatar dropdown giữ nguyên */}
+              <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
                   className="flex items-center space-x-2 focus:outline-none"
@@ -141,8 +230,6 @@ const Header = () => {
                     }}
                   />
                 </button>
-
-                {/* Dropdown Menu */}
                 {showDropdown && (
                   <div className="absolute right-0 mt-2 w-48 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-10 z-50 overflow-hidden">
                     <button
@@ -191,7 +278,6 @@ const Header = () => {
           )}
         </nav>
 
-        {/* Mobile menu button */}
         <button
           className="md:hidden text-gray-800"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -200,7 +286,6 @@ const Header = () => {
         </button>
       </div>
 
-      {/* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-white shadow-lg">
           <div className="container mx-auto px-4 py-3 flex flex-col space-y-4">
