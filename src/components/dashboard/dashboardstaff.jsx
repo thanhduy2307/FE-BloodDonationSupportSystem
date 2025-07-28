@@ -94,10 +94,7 @@ const DashboardStaff = () => {
         </Header>
 
         <Content style={{ margin: "0 16px", position: "relative" }}>
-          <Breadcrumb
-            style={{ margin: "16px 0" }}
-            items={[{ title: "User" }, { title: "Bill" }]}
-          />
+         
           <div
             style={{
               padding: 24,
@@ -111,9 +108,7 @@ const DashboardStaff = () => {
           </div>
         </Content>
 
-        <Footer style={{ textAlign: "center" }}>
-          Ant Design ©{new Date().getFullYear()} Created by Ant UED
-        </Footer>
+        
       </Layout>
     </Layout>
   );
