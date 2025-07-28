@@ -233,7 +233,7 @@ const ProfilePage = () => {
               {user.fullname}
             </Title>
             <Text type="secondary" style={{ fontSize: "16px" }}>
-              @{user.phoneNumber}
+              Phone:{user.phoneNumber}
             </Text>
 
             <Divider style={{ margin: "18px 0" }} />

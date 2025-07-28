@@ -46,7 +46,8 @@ const BloodDonationForm = () => {
 
         const history = donationRes?.data || [];
         const approvedDonations = history.filter((d) => d.status === "approved");
-        const latestDonation = approvedDonations.length
+        const hasApprovedDonation = approvedDonations.length > 0;
+        const latestDonation = hasApprovedDonation
           ? approvedDonations.sort(
               (a, b) => new Date(b.donationDate) - new Date(a.donationDate)
             )[0]
@@ -55,8 +56,9 @@ const BloodDonationForm = () => {
         setFormData((prev) => ({
           ...prev,
           bloodType,
-          hasDonatedBefore: latestDonation ? "yes" : "no",
+          hasDonatedBefore: hasApprovedDonation ? "yes" : "",
           lastDonationDate: latestDonation?.donationDate || "",
+          hasApprovedDonation: hasApprovedDonation // thêm flag để kiểm tra
         }));
       } catch (err) {
         console.error("❌ Lỗi khi lấy thông tin người dùng:", err);
@@ -235,17 +237,26 @@ const BloodDonationForm = () => {
 
           <div>
             <label className="block text-gray-700 mb-1 font-medium">Đã từng hiến máu chưa?</label>
-            <select
-              name="hasDonatedBefore"
-              value={formData.hasDonatedBefore}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
-            >
-              <option value="">-- Chọn --</option>
-              <option value="no">Chưa</option>
-              <option value="yes">Đã từng</option>
-            </select>
+            {formData.hasApprovedDonation ? (
+              <input
+                type="text"
+                value="Đã từng"
+                disabled
+                className="w-full px-4 py-2 bg-gray-200 border border-red-300 rounded-md text-gray-500 cursor-not-allowed"
+              />
+            ) : (
+              <select
+                name="hasDonatedBefore"
+                value={formData.hasDonatedBefore}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+              >
+                <option value="">-- Chọn --</option>
+                <option value="no">Chưa</option>
+                <option value="yes">Đã từng</option>
+              </select>
+            )}
           </div>
 
           {formData.hasDonatedBefore === "yes" && formData.lastDonationDate && (

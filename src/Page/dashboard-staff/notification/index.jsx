@@ -5,7 +5,6 @@ import {
   Modal,
   Form,
   Input,
-  DatePicker,
   Select,
   message,
 } from "antd";
@@ -71,7 +70,7 @@ const NotificationPage = () => {
   const handleSubmit = async (values) => {
     const payload = {
       ...values,
-      notifDate: values.notifDate.format("YYYY-MM-DD"),
+      notifDate: dayjs().format("YYYY-MM-DD"), // Sử dụng ngày hiện tại
       userId: values.userId || null,
       eventId: values.eventId?.trim?.() || values.eventId || null,
     };
@@ -171,20 +170,6 @@ const NotificationPage = () => {
             rules={[{ required: true, message: "Vui lòng nhập nội dung" }]}
           >
             <Input.TextArea rows={4} />
-          </Form.Item>
-
-          <Form.Item
-            name="notifDate"
-            label="Ngày gửi"
-            rules={[{ required: true, message: "Vui lòng chọn ngày gửi" }]}
-          >
-            <DatePicker
-              format="YYYY-MM-DD"
-              className="w-full"
-              disabledDate={(current) =>
-                current && current < dayjs().startOf("day")
-              }
-            />
           </Form.Item>
         </Form>
       </Modal>
