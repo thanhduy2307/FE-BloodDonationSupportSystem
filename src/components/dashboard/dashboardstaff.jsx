@@ -94,7 +94,6 @@ const DashboardStaff = () => {
         </Header>
 
         <Content style={{ margin: "0 16px", position: "relative" }}>
-         
           <div
             style={{
               padding: 24,

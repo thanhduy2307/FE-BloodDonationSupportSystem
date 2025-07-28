@@ -20,9 +20,14 @@ const NotificationUser = () => {
   const fetchNotifications = async () => {
     try {
       const res = await api.get("/Notification/getByUser");
-      const sorted = res.data.sort(
-        (a, b) => new Date(b.notifDate) - new Date(a.notifDate)
-      );
+      // Sắp xếp theo thời gian mới nhất và ưu tiên tin chưa đọc
+      const sorted = res.data.sort((a, b) => {
+        // Nếu một tin chưa đọc và một tin đã đọc, ưu tiên tin chưa đọc
+        if (!a.isRead && b.isRead) return -1;
+        if (a.isRead && !b.isRead) return 1;
+        // Nếu cùng trạng thái đọc, sắp xếp theo thời gian mới nhất
+        return new Date(b.notifDate) - new Date(a.notifDate);
+      });
       setNotifications(sorted);
       fetchUnreadCount();
     } catch (err) {
