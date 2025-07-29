@@ -9,15 +9,17 @@ const BloodRequestForm = () => {
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
+
   const [formData, setFormData] = useState({
     quantity: 250,
     requestDate: dayjs().format("YYYY-MM-DD"),
     requestTime: "",
   });
 
-  // Gọi API lấy thông tin profile
+  // Gọi API lấy thông tin profile và kiểm tra đơn đang chờ
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileAndRequests = async () => {
       try {
         const res = await api.get("/User/profile");
         if (!res.data.bloodGroup) {
@@ -26,14 +28,23 @@ const BloodRequestForm = () => {
           return;
         }
         setProfile(res.data);
+
+        // Gọi API lấy các đơn nhận máu
+        const requestRes = await api.get("/User/request");
+        const hasPending = requestRes.data.some(
+          (req) => req.status === "Pending"
+        );
+        if (hasPending) {
+          setHasPendingRequest(true);
+        }
       } catch (err) {
-        console.error("❌ Lỗi khi lấy profile:", err);
+        console.error("❌ Lỗi khi tải dữ liệu:", err);
         message.error("Không thể tải thông tin người dùng");
         navigate("/login");
       }
     };
 
-    fetchProfile();
+    fetchProfileAndRequests();
   }, [navigate]);
 
   const handleChange = (e) => {
@@ -49,6 +60,11 @@ const BloodRequestForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (hasPendingRequest) {
+      toast.warn("Bạn đã có một yêu cầu nhận máu đang chờ duyệt.");
+      return;
+    }
 
     const [hour, minute] = formData.requestTime.split(":").map(Number);
     const totalMinutes = hour * 60 + minute;
@@ -75,6 +91,7 @@ const BloodRequestForm = () => {
         requestDate: dayjs().format("YYYY-MM-DD"),
         requestTime: "",
       });
+      setHasPendingRequest(true);
     } catch (err) {
       console.error("❌ Lỗi gửi đăng ký:", err?.response?.data || err);
       message.error("Gửi đăng ký thất bại!");
@@ -95,62 +112,69 @@ const BloodRequestForm = () => {
         <h2 className="text-3xl font-bold text-red-600 text-center mb-6">
           Phiếu đăng ký nhận máu
         </h2>
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
-          <div>
-            <label className="block text-gray-700 mb-1 font-medium">
-              Lượng máu cần (ml)
-            </label>
-            <input
-              type="number"
-              value={formData.quantity}
-              disabled
-              className="w-full px-4 py-2 bg-gray-200 text-gray-600 border border-gray-300 rounded-md"
-            />
-          </div>
 
-          <div>
-            <label className="block text-gray-700 mb-1 font-medium">
-              Ngày cần
-            </label>
-            <input
-              type="date"
-              name="requestDate"
-              value={formData.requestDate}
-              onChange={handleChange}
-              required
-              min={dayjs().format("YYYY-MM-DD")}
-              className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
-            />
+        {hasPendingRequest ? (
+          <div className="text-center text-red-500 font-semibold text-lg py-8">
+            ⚠️ Bạn đã có một yêu cầu nhận máu đang chờ duyệt. Không thể đăng ký thêm!
           </div>
+        ) : (
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
+            <div>
+              <label className="block text-gray-700 mb-1 font-medium">
+                Lượng máu cần (ml)
+              </label>
+              <input
+                type="number"
+                value={formData.quantity}
+                disabled
+                className="w-full px-4 py-2 bg-gray-200 text-gray-600 border border-gray-300 rounded-md"
+              />
+            </div>
 
-          <div>
-            <label className="block text-gray-700 mb-1 font-medium">
-              Giờ cần
-            </label>
-            <input
-              type="time"
-              name="requestTime"
-              value={formData.requestTime.slice(0, 5)}
-              onChange={handleChange}
-              required
-              min="07:00"
-              max="16:30"
-              className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
-            />
-          </div>
+            <div>
+              <label className="block text-gray-700 mb-1 font-medium">
+                Ngày cần
+              </label>
+              <input
+                type="date"
+                name="requestDate"
+                value={formData.requestDate}
+                onChange={handleChange}
+                required
+                min={dayjs().format("YYYY-MM-DD")}
+                className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+              />
+            </div>
 
-          <div className="md:col-span-2">
-            <button
-              type="submit"
-              className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition transform hover:scale-105"
-            >
-              Gửi đăng ký
-            </button>
-          </div>
-        </form>
+            <div>
+              <label className="block text-gray-700 mb-1 font-medium">
+                Giờ cần
+              </label>
+              <input
+                type="time"
+                name="requestTime"
+                value={formData.requestTime.slice(0, 5)}
+                onChange={handleChange}
+                required
+                min="07:00"
+                max="16:30"
+                className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <button
+                type="submit"
+                className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition transform hover:scale-105"
+              >
+                Gửi đăng ký
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
