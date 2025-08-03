@@ -21,8 +21,6 @@ const BloodDonationForm = () => {
     hasInfectiousDisease: "",
     height: "",
     weight: "",
-    hasApprovedDonation: false,
-    hasPendingDonation: false,
   });
 
   useEffect(() => {
@@ -47,18 +45,6 @@ const BloodDonationForm = () => {
         }
 
         const history = donationRes?.data || [];
-
-        const pending = history.find((d) => d.status === "Chờ duyệt");
-        if (pending) {
-          toast.warn("🚫 Bạn đã có một đơn đăng ký đang chờ duyệt. Không thể tiếp tục.");
-          setFormData((prev) => ({
-            ...prev,
-            bloodType,
-            hasPendingDonation: true,
-          }));
-          return;
-        }
-
         const approvedDonations = history.filter((d) => d.status === "approved");
         const hasApprovedDonation = approvedDonations.length > 0;
         const latestDonation = hasApprovedDonation
@@ -72,7 +58,7 @@ const BloodDonationForm = () => {
           bloodType,
           hasDonatedBefore: hasApprovedDonation ? "yes" : "",
           lastDonationDate: latestDonation?.donationDate || "",
-          hasApprovedDonation: hasApprovedDonation,
+          hasApprovedDonation: hasApprovedDonation // thêm flag để kiểm tra
         }));
       } catch (err) {
         console.error("❌ Lỗi khi lấy thông tin người dùng:", err);
@@ -100,7 +86,7 @@ const BloodDonationForm = () => {
       return;
     }
 
-    const [hour, minute] = time.split(":").map(Number);
+    const [hour, minute] = time.split(":" ).map(Number);
     const totalMinutes = hour * 60 + minute;
     const minMinutes = 7 * 60;
     const maxMinutes = 16 * 60 + 30;
@@ -171,167 +157,161 @@ const BloodDonationForm = () => {
           Phiếu đăng ký hiến máu
         </h2>
 
-        {formData.hasPendingDonation ? (
-          <div className="text-center text-red-600 text-lg font-semibold py-12">
-            🚫 Bạn đã có một đơn đăng ký đang chờ duyệt. Không thể gửi thêm!
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
+          <input type="hidden" name="bloodType" value={formData.bloodType} />
+
+          <div>
+            <label className="block text-gray-700 mb-1 font-medium">Lượng máu (ml)</label>
+            <input
+              type="number"
+              name="quantity"
+              value={formData.quantity}
+              onChange={handleChange}
+              min={250}
+              max={500}
+              required
+              className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+              placeholder="Nhập số ml"
+            />
           </div>
-        ) : (
-          <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
-          >
-            <input type="hidden" name="bloodType" value={formData.bloodType} />
 
-            <div>
-              <label className="block text-gray-700 mb-1 font-medium">Lượng máu (ml)</label>
+          <div>
+            <label className="block text-gray-700 mb-1 font-medium">Chiều cao (cm)</label>
+            <input
+              type="number"
+              name="height"
+              value={formData.height}
+              onChange={handleChange}
+              min={100}
+              max={250}
+              required
+              className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+              placeholder="Nhập chiều cao"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-1 font-medium">Cân nặng (kg)</label>
+            <input
+              type="number"
+              name="weight"
+              value={formData.weight}
+              onChange={handleChange}
+              min={30}
+              max={200}
+              required
+              className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+              placeholder="Nhập cân nặng"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-1 font-medium">Ngày hiến máu</label>
+            <input
+              type="date"
+              name="donationDate"
+              value={formData.donationDate}
+              onChange={handleChange}
+              required
+              min={dayjs().format("YYYY-MM-DD")}
+              className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-1 font-medium">Giờ hiến máu</label>
+            <input
+              type="time"
+              name="donationTime"
+              value={formData.donationTime}
+              onChange={handleChange}
+              required
+              min="07:00"
+              max="16:30"
+              className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-1 font-medium">Đã từng hiến máu chưa?</label>
+            {formData.hasApprovedDonation ? (
               <input
-                type="number"
-                name="quantity"
-                value={formData.quantity}
+                type="text"
+                value="Đã từng"
+                disabled
+                className="w-full px-4 py-2 bg-gray-200 border border-red-300 rounded-md text-gray-500 cursor-not-allowed"
+              />
+            ) : (
+              <select
+                name="hasDonatedBefore"
+                value={formData.hasDonatedBefore}
                 onChange={handleChange}
-                min={250}
-                max={500}
                 required
                 className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
-                placeholder="Nhập số ml"
-              />
-            </div>
+              >
+                <option value="">-- Chọn --</option>
+                <option value="no">Chưa</option>
+                <option value="yes">Đã từng</option>
+              </select>
+            )}
+          </div>
 
+          {formData.hasDonatedBefore === "yes" && formData.lastDonationDate && (
             <div>
-              <label className="block text-gray-700 mb-1 font-medium">Chiều cao (cm)</label>
-              <input
-                type="number"
-                name="height"
-                value={formData.height}
-                onChange={handleChange}
-                min={100}
-                max={250}
-                required
-                className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
-                placeholder="Nhập chiều cao"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-1 font-medium">Cân nặng (kg)</label>
-              <input
-                type="number"
-                name="weight"
-                value={formData.weight}
-                onChange={handleChange}
-                min={30}
-                max={200}
-                required
-                className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
-                placeholder="Nhập cân nặng"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-1 font-medium">Ngày hiến máu</label>
+              <label className="block text-gray-700 mb-1 font-medium">Ngày hiến gần nhất</label>
               <input
                 type="date"
-                name="donationDate"
-                value={formData.donationDate}
-                onChange={handleChange}
-                required
-                min={dayjs().format("YYYY-MM-DD")}
-                className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+                name="lastDonationDate"
+                value={formData.lastDonationDate}
+                readOnly
+                disabled
+                className="w-full px-4 py-2 bg-gray-200 border border-red-300 rounded-md text-gray-500 cursor-not-allowed"
               />
             </div>
+          )}
 
-            <div>
-              <label className="block text-gray-700 mb-1 font-medium">Giờ hiến máu</label>
-              <input
-                type="time"
-                name="donationTime"
-                value={formData.donationTime}
-                onChange={handleChange}
-                required
-                min="07:00"
-                max="16:30"
-                className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
-              />
-            </div>
+          <div>
+            <label className="block text-gray-700 mb-1 font-medium">Có đang mang thai không?</label>
+            <select
+              name="isPregnant"
+              value={formData.isPregnant}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+            >
+              <option value="">-- Chọn --</option>
+              <option value="no">Không</option>
+              <option value="yes">Có</option>
+            </select>
+          </div>
 
-            <div>
-              <label className="block text-gray-700 mb-1 font-medium">Đã từng hiến máu chưa?</label>
-              {formData.hasApprovedDonation ? (
-                <input
-                  type="text"
-                  value="Đã từng"
-                  disabled
-                  className="w-full px-4 py-2 bg-gray-200 border border-red-300 rounded-md text-gray-500 cursor-not-allowed"
-                />
-              ) : (
-                <select
-                  name="hasDonatedBefore"
-                  value={formData.hasDonatedBefore}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
-                >
-                  <option value="">-- Chọn --</option>
-                  <option value="no">Chưa</option>
-                  <option value="yes">Đã từng</option>
-                </select>
-              )}
-            </div>
+          <div>
+            <label className="block text-gray-700 mb-1 font-medium">Có bệnh truyền nhiễm không?</label>
+            <select
+              name="hasInfectiousDisease"
+              value={formData.hasInfectiousDisease}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+            >
+              <option value="">-- Chọn --</option>
+              <option value="no">Không</option>
+              <option value="yes">Có</option>
+            </select>
+          </div>
 
-            {formData.hasDonatedBefore === "yes" && formData.lastDonationDate && (
-              <div>
-                <label className="block text-gray-700 mb-1 font-medium">Ngày hiến gần nhất</label>
-                <input
-                  type="date"
-                  name="lastDonationDate"
-                  value={formData.lastDonationDate}
-                  readOnly
-                  disabled
-                  className="w-full px-4 py-2 bg-gray-200 border border-red-300 rounded-md text-gray-500 cursor-not-allowed"
-                />
-              </div>
-            )}
-
-            <div>
-              <label className="block text-gray-700 mb-1 font-medium">Có đang mang thai không?</label>
-              <select
-                name="isPregnant"
-                value={formData.isPregnant}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
-              >
-                <option value="">-- Chọn --</option>
-                <option value="no">Không</option>
-                <option value="yes">Có</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-1 font-medium">Có bệnh truyền nhiễm không?</label>
-              <select
-                name="hasInfectiousDisease"
-                value={formData.hasInfectiousDisease}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 bg-gray-100 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none"
-              >
-                <option value="">-- Chọn --</option>
-                <option value="no">Không</option>
-                <option value="yes">Có</option>
-              </select>
-            </div>
-
-            <div className="md:col-span-2">
-              <button
-                type="submit"
-                className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition transform hover:scale-105"
-              >
-                Gửi đăng ký
-              </button>
-            </div>
-          </form>
-        )}
+          <div className="md:col-span-2">
+            <button
+              type="submit"
+              className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition transform hover:scale-105"
+            >
+              Gửi đăng ký
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

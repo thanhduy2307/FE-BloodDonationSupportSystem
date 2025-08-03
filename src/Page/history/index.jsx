@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import api from "../../configs/axios";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom"; // Thêm dòng này
+import { useNavigate } from "react-router-dom";
 
 const StatusBadge = ({ status }) => {
   const statusClasses = {
@@ -27,7 +27,7 @@ const StatusBadge = ({ status }) => {
         return "Chờ duyệt";
       case "rejected":
         return "Từ chối";
-        case "cancel":
+      case "cancel":
         return "Hủy";
       default:
         return status;
@@ -48,9 +48,7 @@ const FilterPanel = ({ filters, onFilterChange }) => {
   const handleFilterChange = (key, value) => {
     onFilterChange({ ...filters, [key]: value });
   };
-
   const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
-
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
       <div className="flex items-center gap-2 mb-4">
@@ -103,7 +101,7 @@ const FilterPanel = ({ filters, onFilterChange }) => {
   );
 };
 
-const BloodHistoryTable = ({ records, title, onUpdate, onDelete }) => {
+const BloodHistoryTable = ({ records, title, onDelete }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return isNaN(date) ? "Ngày không hợp lệ" : date.toLocaleDateString("vi-VN");
@@ -115,12 +113,8 @@ const BloodHistoryTable = ({ records, title, onUpdate, onDelete }) => {
       {records.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
           <Droplets className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Không có dữ liệu
-          </h3>
-          <p className="text-gray-600">
-            Hãy thử thay đổi bộ lọc hoặc quay lại sau.
-          </p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Không có dữ liệu</h3>
+          <p className="text-gray-600">Hãy thử thay đổi bộ lọc hoặc quay lại sau.</p>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -128,25 +122,12 @@ const BloodHistoryTable = ({ records, title, onUpdate, onDelete }) => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Ngày
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Số lượng
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Nhóm máu
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Ghi chú
-                  </th>
-
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Xóa
-                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Số lượng</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nhóm máu</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ghi chú</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Xóa</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -156,19 +137,10 @@ const BloodHistoryTable = ({ records, title, onUpdate, onDelete }) => {
                       <Calendar className="inline w-4 h-4 text-gray-400 mr-2" />
                       {formatDate(r.date)}
                     </td>
-                    <td className="px-6 py-4">
-                      {r.amount} {r.unit}
-                    </td>
-                    <td className="px-6 py-4 text-red-600">
-                      {r.bloodType || "N/A"}
-                    </td>
-                    <td className="px-6 py-4">
-                      <StatusBadge status={r.status} />
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {r.notes || "-"}
-                    </td>
-
+                    <td className="px-6 py-4">{r.amount} {r.unit}</td>
+                    <td className="px-6 py-4 text-red-600">{r.bloodType || "N/A"}</td>
+                    <td className="px-6 py-4"><StatusBadge status={r.status} /></td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{r.notes || "-"}</td>
                     <td className="px-6 py-4">
                       {["pending", "Chờ duyệt"].includes(r.status) ? (
                         <button
@@ -178,12 +150,7 @@ const BloodHistoryTable = ({ records, title, onUpdate, onDelete }) => {
                           Hủy
                         </button>
                       ) : (
-                        <span
-                          className="text-xs text-gray-400 italic"
-                          title="Chỉ được xóa khi ở trạng thái chờ"
-                        >
-                          Không thể xóa
-                        </span>
+                        <span className="text-xs text-gray-400 italic">Không thể xóa</span>
                       )}
                     </td>
                   </tr>
@@ -196,6 +163,44 @@ const BloodHistoryTable = ({ records, title, onUpdate, onDelete }) => {
     </div>
   );
 };
+
+const DonorTable = ({ donors }) => (
+  <div className="mb-8">
+    <h2 className="text-xl font-bold text-red-600 mb-3">Danh sách người đã hiến máu</h2>
+    {donors.length === 0 ? (
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+        <Droplets className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Không có dữ liệu</h3>
+        <p className="text-gray-600">Chưa có ai hiến máu.</p>
+      </div>
+    ) : (
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Họ tên</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SĐT</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nhóm máu</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tổng lượng máu</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {donors.map((d, i) => (
+              <tr key={i}>
+                <td className="px-6 py-4">{d.fullName}</td>
+                <td className="px-6 py-4">{d.email}</td>
+                <td className="px-6 py-4">{d.phoneNumber}</td>
+                <td className="px-6 py-4">{d.bloodGroup}</td>
+                <td className="px-6 py-4">{d.totalDonatedAmount} ml</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </div>
+);
 
 const Pagination = ({
   currentPage,
@@ -222,22 +227,14 @@ const Pagination = ({
             className="border rounded px-2 py-1 text-sm"
           >
             {[5, 10, 20, 50].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
+              <option key={n} value={n}>{n}</option>
             ))}
           </select>
-          <button
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
+          <button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1}>
             <ChevronLeft className="w-5 h-5 text-gray-500" />
           </button>
           <span className="text-sm">{currentPage}</span>
-          <button
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
+          <button onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages}>
             <ChevronRight className="w-5 h-5 text-gray-500" />
           </button>
         </div>
@@ -249,7 +246,6 @@ const Pagination = ({
 const mapData = (data, type) =>
   data.map((item, index) => {
     const realId = item.id || item.donationId || item.requestId || index;
-
     return {
       id: `${type}-${realId}`,
       date:
@@ -263,7 +259,7 @@ const mapData = (data, type) =>
       amount: item.quantity || 0,
       unit: "ml",
       bloodType: item.bloodGroup,
-      status: item.status || "pending", // ✅ giữ nguyên từ API
+      status: item.status || "pending",
       notes: item.notes || "",
       type,
       raw: {
@@ -273,9 +269,16 @@ const mapData = (data, type) =>
     };
   });
 
-
 const BloodHistoryPage = () => {
   const [records, setRecords] = useState([]);
+  const [donors, setDonors] = useState([]);
+  const [newDonor, setNewDonor] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    bloodGroup: "",
+    totalDonatedAmount: "",
+  });
   const [filters, setFilters] = useState({
     search: "",
     startDate: "",
@@ -284,25 +287,13 @@ const BloodHistoryPage = () => {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-
-  // const [selectedRecord, setSelectedRecord] = useState(null);
-  // const [showUpdateModal, setShowUpdateModal] = useState(false);
-
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [requests, donations] = await Promise.all([
-          api.get("User/requests"),
-          api.get("User/donations"),
-        ]);
-        console.log("✅ donations", donations.data);
-        console.log("✅ requests", requests.data);
-        setRecords([
-          ...mapData(donations.data, "donation"),
-          ...mapData(requests.data, "receive"),
-        ]);
+        const donations = await api.get("User/donations");
+        setRecords(mapData(donations.data, "donation"));
       } catch (error) {
         setRecords([]);
       }
@@ -323,23 +314,14 @@ const BloodHistoryPage = () => {
   };
 
   const donationRecords = useMemo(
-    () => records.filter((r) => r.type === "donation" && filterFn(r)),
-    [records, filters]
-  );
-  const receiveRecords = useMemo(
-    () => records.filter((r) => r.type === "receive" && filterFn(r)),
-    [records, filters]
+    () => records.filter((r) => filterFn(r)),
+    [records, filters, filterFn]
   );
 
   const paginatedDonation = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return donationRecords.slice(start, start + itemsPerPage);
   }, [donationRecords, currentPage, itemsPerPage]);
-
-  const paginatedReceive = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return receiveRecords.slice(start, start + itemsPerPage);
-  }, [receiveRecords, currentPage, itemsPerPage]);
 
   const handleDelete = async (record) => {
     if (record.status !== "pending" && record.status !== "Chờ duyệt") {
@@ -348,16 +330,9 @@ const BloodHistoryPage = () => {
     }
 
     if (!window.confirm("Bạn có chắc chắn muốn xóa ?")) return;
-    console.log("💥 Delete donation:", record);
-    console.log("💥 ID gửi vào:", record.raw.id);
     try {
-      if (record.type === "donation") {
         await api.delete(`User/deleteDonation/${record.raw.id}`);
-        toast.success("Xóa hiến máu thành công!");
-      } else if (record.type === "receive") {
-        await api.delete(`User/deleteRequest/${record.raw.id}`);
-        toast.success("Xóa nhận máu thành công!");
-      }
+      toast.success("Xóa hiến máu thành công!");
       setRecords((prev) => prev.filter((r) => r.id !== record.id));
     } catch (error) {
       alert("Xóa thất bại!");
@@ -367,7 +342,6 @@ const BloodHistoryPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
-        {/* Nút trở về trang chủ */}
         <div className="mb-4">
           <button
             onClick={() => navigate("/")}
@@ -376,104 +350,29 @@ const BloodHistoryPage = () => {
             ← Quay về trang chủ
           </button>
         </div>
+
         <h1 className="text-3xl font-bold text-gray-900 mb-6">
           Lịch sử hiến và nhận máu
         </h1>
+
         <FilterPanel filters={filters} onFilterChange={setFilters} />
+
         <BloodHistoryTable
           records={paginatedDonation}
           title="Lịch sử hiến máu"
-          // onUpdate={handleUpdate}
           onDelete={handleDelete}
         />
-        <BloodHistoryTable
-          records={paginatedReceive}
-          title="Lịch sử nhận máu"
-          // onUpdate={handleUpdate}
-          onDelete={handleDelete}
-        />
+       
+        <DonorTable donors={donors} />
+
         <Pagination
           currentPage={currentPage}
-          totalPages={Math.ceil(
-            (donationRecords.length + receiveRecords.length) / itemsPerPage
-          )}
+          totalPages={Math.ceil(donationRecords.length / itemsPerPage)}
           itemsPerPage={itemsPerPage}
-          totalItems={donationRecords.length + receiveRecords.length}
+          totalItems={donationRecords.length}
           onPageChange={setCurrentPage}
           onItemsPerPageChange={setItemsPerPage}
         />
-        Modal cập nhật
-        {/* {showUpdateModal && selectedRecord && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-bold mb-4">Cập nhật lịch sử</h3>
-              <form
-                onSubmit={e => {
-                  e.preventDefault();
-                  const formData = new FormData(e.target);
-                  const updatedData = {
-                    date: formData.get('date'),
-                    bloodType: formData.get('bloodType'),
-                    amount: formData.get('amount'),
-                  };
-                  handleSaveUpdate(updatedData);
-                }}
-              >
-                <div className="mb-3">
-                  <label className="block mb-1 font-medium">Ngày</label>
-                  <input
-                    name="date"
-                    type="date"
-                    min={new Date().toISOString().split("T")[0]}
-                    defaultValue={selectedRecord.date ? selectedRecord.date.slice(0, 10) : ""}
-                    className="w-full border rounded px-3 py-2"
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="block mb-1 font-medium">Nhóm máu</label>
-                  <select
-                    name="bloodType"
-                    defaultValue={selectedRecord.bloodType}
-                    className="w-full border rounded px-3 py-2"
-                  >
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                  </select>
-                </div>
-                <div className="mb-3">
-                  <label className="block mb-1 font-medium">Số lượng (ml)</label>
-                  <input
-                    name="amount"
-                    type="number"
-                    defaultValue={selectedRecord.amount}
-                    className="w-full border rounded px-3 py-2"
-                  />
-                </div>
-                <div className="flex justify-end gap-2 mt-4">
-                  <button
-                    type="button"
-                    className="px-4 py-2 bg-gray-200 rounded"
-                    onClick={() => setShowUpdateModal(false)}
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded"
-                  >
-                    Lưu
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )} */}
       </div>
     </div>
   );
