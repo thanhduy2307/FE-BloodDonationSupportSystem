@@ -10,6 +10,7 @@ function ManageUser() {
     User: 1,
     Staff: 2,
     Admin: 3,
+    Doctor: 4,
   };
 
   const convertRoleIdToName = (role) => {
@@ -18,6 +19,7 @@ function ManageUser() {
       case 1: return "User";
       case 2: return "Staff";
       case 3: return "Admin";
+       case 4: return "Doctor";
       default: return "Unknown";
     }
   };
@@ -120,6 +122,7 @@ function ManageUser() {
           <Select.Option value="User">User</Select.Option>
           <Select.Option value="Staff">Staff</Select.Option>
           <Select.Option value="Admin">Admin</Select.Option>
+          <Select.Option value="Doctor">Doctor</Select.Option>
         </Select>
       ),
     },

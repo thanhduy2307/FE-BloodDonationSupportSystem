@@ -9,12 +9,14 @@ const statusMapping = {
   pending: "Chờ duyệt",
   approved: "Đã duyệt",
   rejected: "Từ chối",
+  cancel: "Hủy",
 };
 
 const reverseStatusMapping = {
   "Chờ duyệt": "pending",
   "Đã duyệt": "approved",
   "Từ chối": "rejected",
+  "Hủy": "cancel",
 };
 
 const BloodDonationListt = () => {

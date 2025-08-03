@@ -94,7 +94,6 @@ const DashboardStaff = () => {
         </Header>
 
         <Content style={{ margin: "0 16px", position: "relative" }}>
-          
           <div
             style={{
               padding: 24,
@@ -108,9 +107,7 @@ const DashboardStaff = () => {
           </div>
         </Content>
 
-        <Footer style={{ textAlign: "center" }}>
-          Ant Design ©{new Date().getFullYear()} Created by Ant UED
-        </Footer>
+        
       </Layout>
     </Layout>
   );

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Table, Button, Popconfirm, message, Modal, Form, Input } from "antd";
 import api from "../../../configs/axios";
 import { Pencil, Trash2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 const ManageBlogs = () => {
   const [blogs, setBlogs] = useState([]);
@@ -30,7 +31,7 @@ const ManageBlogs = () => {
   const handleDelete = async (id) => {
     try {
       await api.delete(`/Blog/delete/${id}`);
-      message.success("Xoá thành công!");
+      toast.success("Xoá thành công!");
       fetchBlogs();
     } catch {
       message.error("Xoá thất bại!");
@@ -71,10 +72,10 @@ const ManageBlogs = () => {
 
       if (isEditing && currentBlog) {
         await api.put(`/Blog/update/${currentBlog.blogId}`, values);
-        message.success("Cập nhật thành công!");
+        toast.success("Cập nhật thành công!");
       } else {
         await api.post("/Blog/create", values);
-        message.success("Tạo bài viết thành công!");
+        toast.success("Tạo bài viết thành công!");
       }
 
       setModalVisible(false);
