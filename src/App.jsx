@@ -33,6 +33,8 @@ import NotificationUser from "./Page/notification";
 
 import { ToastContainer } from 'react-toastify';
 import NotificationDropdown from "./Page/notification";
+import ApprovedDonorsDashboard from "./Page/dashboard-doctor";
+import BloodStoragePage from "./Page/inventory";
 
 
 
@@ -95,6 +97,10 @@ function App() {
           path: "requestBlood",
           element: <BloodRequestListAdmin/>
         },
+        {
+          path: "inventory",
+          element: <BloodStoragePage/>
+        },
       ],
     },
     {
@@ -154,6 +160,10 @@ function App() {
     {
       path: "notificationn",
       element: <NotificationDropdown />,
+    },
+    {
+      path: "dashboardDoctor",
+      element: <ApprovedDonorsDashboard/>,
     },
     
   ]);

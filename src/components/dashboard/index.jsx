@@ -26,8 +26,9 @@ const items = [
   getItem("Tổng quan", "overview", <PieChartOutlined />),
   getItem("Người dùng", "user", <UserOutlined />),
   getItem("Phản hồi", "feedback", <DesktopOutlined />),
+   getItem("Kho máu", "inventory", <DesktopOutlined />),
   getItem("Danh sách đăng kí hiến máu ", "bloodDonor", < DesktopOutlined />),
-  getItem("Danh sách đăng kí nhận máu", "requestBlood", < DesktopOutlined />),
+  
   
 ];
 

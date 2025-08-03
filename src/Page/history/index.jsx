@@ -27,6 +27,8 @@ const StatusBadge = ({ status }) => {
         return "Chờ duyệt";
       case "rejected":
         return "Từ chối";
+        case "cancel":
+        return "Hủy";
       default:
         return status;
     }

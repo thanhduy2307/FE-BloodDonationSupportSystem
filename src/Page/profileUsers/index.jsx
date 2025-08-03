@@ -303,6 +303,7 @@ const ProfilePage = () => {
 
           <Form.Item label="Nhóm máu" name="bloodGroup">
             <Select>
+              <Option value="Chưa biết">Chưa biết</Option>
               <Option value="A+">A+</Option>
               <Option value="A-">A-</Option>
               <Option value="B+">B+</Option>

@@ -17,35 +17,32 @@ const BloodRequestForm = () => {
     requestTime: "",
   });
 
-  // Gọi API lấy thông tin profile và kiểm tra đơn đang chờ
-  useEffect(() => {
-    const fetchProfileAndRequests = async () => {
-      try {
-        const res = await api.get("/User/profile");
-        if (!res.data.bloodGroup) {
-          toast.error("Vui lòng cập nhật nhóm máu trước khi đăng ký nhận máu.");
-          navigate("/profile");
-          return;
-        }
-        setProfile(res.data);
-
-        // Gọi API lấy các đơn nhận máu
-        const requestRes = await api.get("/User/request");
-        const hasPending = requestRes.data.some(
-          (req) => req.status === "Pending"
-        );
-        if (hasPending) {
-          setHasPendingRequest(true);
-        }
-      } catch (err) {
-        console.error("❌ Lỗi khi tải dữ liệu:", err);
-        message.error("Không thể tải thông tin người dùng");
-        navigate("/login");
+  // Hàm gọi API lấy profile và kiểm tra yêu cầu máu
+  const fetchProfileAndRequests = async () => {
+    try {
+      const res = await api.get("/User/profile");
+      if (!res.data.bloodGroup || res.data.bloodGroup === "Chưa biết") {
+        toast.error("Vui lòng cập nhật nhóm máu trước khi đăng ký nhận máu.");
+        navigate("/profile");
+        return;
       }
-    };
+      setProfile(res.data);
 
+      const requestRes = await api.get("/User/requests");
+      const hasPending = requestRes.data.some(
+        (req) => req.status === "Chờ duyệt" && req.userId === res.data.id
+      );
+      setHasPendingRequest(hasPending);
+    } catch (err) {
+      console.error("❌ Lỗi khi tải dữ liệu:", err);
+      message.error("Không thể tải thông tin người dùng");
+      navigate("/login"); 
+    }
+  };
+
+  useEffect(() => {
     fetchProfileAndRequests();
-  }, [navigate]);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -86,12 +83,16 @@ const BloodRequestForm = () => {
     try {
       await api.post("/User/request", data);
       toast.success("Đăng ký nhận máu thành công!");
+
+      // Reset form
       setFormData({
         quantity: 250,
         requestDate: dayjs().format("YYYY-MM-DD"),
         requestTime: "",
       });
-      setHasPendingRequest(true);
+
+      // Gọi lại API để cập nhật trạng thái mới nhất
+      await fetchProfileAndRequests();
     } catch (err) {
       console.error("❌ Lỗi gửi đăng ký:", err?.response?.data || err);
       message.error("Gửi đăng ký thất bại!");

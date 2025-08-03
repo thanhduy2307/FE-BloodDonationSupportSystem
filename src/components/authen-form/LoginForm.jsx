@@ -31,6 +31,9 @@ const LoginForm = () => {
       } else if (user.role === "Staff") {
         navigate("/dashboard-staff/member-staff");
       }
+       else if (user.role === "Doctor") {
+        navigate("/dashboardDoctor");
+      }
 
       console.log("User role:", user.role);
     } catch (e) {
