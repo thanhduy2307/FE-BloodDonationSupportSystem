@@ -12,7 +12,7 @@ const BloodStoragePage = () => {
   const fetchStorage = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/BloodStorage/list");
+      const res = await api.get("Admin/bloodbank");
       setData(res.data); // Đảm bảo API trả về đúng format
     } catch (err) {
       message.error("Lỗi khi tải kho máu");
@@ -32,23 +32,18 @@ const BloodStoragePage = () => {
       width: 60,
     },
     {
-      title: "Mã người hiến",
-      dataIndex: "donorId",
-      key: "donorId",
-    },
-    {
       title: "Nhóm máu",
-      dataIndex: "bloodType",
-      key: "bloodType",
+      dataIndex: "bloodGroup",
+      key: "bloodGroup",
       render: (type) => <Tag color="red">{type}</Tag>,
     },
     {
       title: "Thể tích (ml)",
-      dataIndex: "volume",
-      key: "volume",
+      dataIndex: "quantityMl",
+      key: "quantityMl ",
     },
     {
-      title: "Ngày nhập kho",
+      title: "Lần cuối nhập kho",
       dataIndex: "donationDate",
       key: "donationDate",
       render: (date) => dayjs(date).format("DD/MM/YYYY"),

@@ -1,24 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Modal, Form, Input, Select, message } from "antd";
 import api from "../../configs/axios";
+import { toast } from "react-toastify";
 
 const { Option } = Select;
 
 const ApprovedDonorsDashboard = () => {
   // States
   const [data, setData] = useState([
-    {
-      donationId: 1,
-      userId: "USER001",
-      fullname: "Nguyễn Văn An",
-      dateOfBirth: "1995-05-15",
-      phoneNumber: "0901234567",
-      address: "123 Lê Lợi, Q.1, TP.HCM",
-      donationDate: "2023-08-01",
-      bloodGroup: "",
-      quantity: 0,
-      status: "approved",
-    },
     // ... copy các data mẫu khác từ code cũ
   ]);
 
@@ -44,6 +33,27 @@ const ApprovedDonorsDashboard = () => {
       notes: record.notes || "",
     });
   };
+  useEffect(() => {
+    
+    const fetchPendingDonations = async () => {
+      setLoading(true);
+
+      try {
+        const res = await api.get("/Doctor/pending-donations");
+        const transformed = res.data.map((item) => ({
+          ...item,
+          id: item.id || item.donationId, // ưu tiên item.id, fallback sang donationId
+        }));
+        setData(transformed);
+      } catch (error) {
+        message.error("Không thể tải danh sách hiến máu");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPendingDonations();
+  }, []);
 
   const handleSaveBasicInfo = async () => {
     try {
@@ -52,19 +62,17 @@ const ApprovedDonorsDashboard = () => {
         ...selectedRecord,
         ...values,
       };
-      
-      // Gọi API cập nhật thông tin cơ bản
-      await api.post(`/Doctor/update-basic/${selectedRecord.donationId}`, values);
-      
+
+      // Gọi API cập nhật thông tin cơ bản khác
+      await api.post(`Doctor/pre-screening/${selectedRecord.id}`, values);
+
       // Cập nhật state local
-      const newData = data.map(item => 
-        item.donationId === selectedRecord.donationId 
-          ? updatedRecord 
-          : item
+      const newData = data.map((item) =>
+        item.id === selectedRecord.id ? updatedRecord : item
       );
       setData(newData);
-      
-      message.success("Đã lưu thông tin cơ bản");
+
+      toast.success("Đã lưu thông tin cơ bản");
       setBasicFormVisible(false);
     } catch (error) {
       message.error("Lưu thất bại");
@@ -72,17 +80,10 @@ const ApprovedDonorsDashboard = () => {
   };
 
   const handleStatusChange = (value, record) => {
-    if (value === "rejected") {
+    if (value === "rejected" || value === "Not eligible") {
+      // Thêm điều kiện Not eligible
       setSelectedRecord(record);
       setRejectModalVisible(true);
-    } else if (value === "completed") {
-      if (!record.bloodGroup || !record.quantity) {
-        message.error("Vui lòng nhập thông tin cơ bản trước");
-        return;
-      }
-      setSelectedRecord(record);
-      setScreeningFormVisible(true);
-      screeningForm.resetFields();
     } else {
       updateStatus(record.donationId, value);
     }
@@ -91,15 +92,14 @@ const ApprovedDonorsDashboard = () => {
   const handleSaveScreening = async () => {
     try {
       const values = await screeningForm.validateFields();
-      
+
       // Gọi API lưu kết quả sàng lọc
-      await api.post(`/Doctor/medical-screening/${selectedRecord.donationId}`, values);
-      
-      message.success("Đã lưu kết quả sàng lọc");
+      await api.post(`Doctor/post-analysis/${selectedRecord.id}`, values);
+
+      toast.success("Đã lưu kết quả xét nghiệm ");
       setScreeningFormVisible(false);
-      
+
       // Cập nhật trạng thái thành completed
-      updateStatus(selectedRecord.donationId, "completed");
     } catch (error) {
       message.error("Lưu thất bại");
     }
@@ -108,53 +108,66 @@ const ApprovedDonorsDashboard = () => {
   const handleReject = async () => {
     try {
       const values = await rejectForm.validateFields();
-      updateStatus(selectedRecord.donationId, "rejected", values.reason);
+      const status =
+        selectedRecord?.status === "Not eligible" ? "Not eligible" : "rejected";
+      updateStatus(selectedRecord.donationId, status, values.reason);
       setRejectModalVisible(false);
       rejectForm.resetFields();
     } catch (error) {
-      message.error("Vui lòng nhập lý do từ chối");
+      message.error("Vui lòng nhập lý do");
     }
   };
 
   const handleImportStock = async () => {
     try {
-      const stockData = {
-        bloodType: selectedRecord.bloodGroup,
-        quantity: selectedRecord.quantity,
-        donationDate: selectedRecord.donationDate,
-        donorId: selectedRecord.userId,
-      };
+      // Gọi trực tiếp API nhập kho
+      await api.post(`/Doctor/donations/${selectedRecord.donationId}/stock`);
 
-      await api.post("/BloodStock/import", stockData);
-      
-      const newData = data.map(item => {
+      const newData = data.map((item) => {
         if (item.donationId === selectedRecord.donationId) {
           return { ...item, isImported: true };
         }
         return item;
       });
       setData(newData);
-      
-      message.success("Nhập kho thành công");
+
+      toast.success("Nhập kho thành công");
       setImportModalVisible(false);
     } catch (error) {
-      message.error("Nhập kho thất bại");
+      console.error("Lỗi nhập kho:", error);
+      message.error("Không thể nhập kho máu");
     }
   };
 
-  const updateStatus = (id, status, reason = "") => {
-    const newData = data.map(item => {
-      if (item.donationId === id) {
-        return { 
-          ...item, 
-          status,
-          ...(reason && { rejectReason: reason })
-        };
-      }
-      return item;
-    });
-    setData(newData);
-    message.success("Đã cập nhật trạng thái");
+  const updateStatus = async (donationId, newStatus, reason = "") => {
+    
+
+    console.log("✅ ID gửi đi:", donationId);
+
+    try {
+      await api.put(`Admin/donations/${donationId}/status`, {
+        donationId,
+        status: newStatus,
+        ...(reason ? { reason } : {}),
+      });
+
+      setData((prevData) =>
+        prevData.map((item) =>
+          item.id === donationId
+            ? {
+                ...item,
+                status: newStatus,
+                ...(reason ? { rejectReason: reason } : {}),
+              }
+            : item
+        )
+      );
+
+      toast.success("Đã cập nhật trạng thái thành công");
+    } catch (err) {
+      console.error("🚨 Lỗi khi cập nhật trạng thái:", err);
+      toast.error("Không thể cập nhật trạng thái");
+    }
   };
 
   // Column Definitions
@@ -163,7 +176,8 @@ const ApprovedDonorsDashboard = () => {
     {
       title: "Ngày sinh",
       dataIndex: "dateOfBirth",
-      render: (dob) => dob ? new Date(dob).toLocaleDateString("vi-VN") : "Không có",
+      render: (dob) =>
+        dob ? new Date(dob).toLocaleDateString("vi-VN") : "Không có",
     },
     { title: "SĐT", dataIndex: "phoneNumber" },
     { title: "Địa chỉ", dataIndex: "address" },
@@ -174,9 +188,51 @@ const ApprovedDonorsDashboard = () => {
     },
     {
       title: "Nhóm máu",
-      dataIndex: "bloodGroup",
-      render: (text) => !text ? <i style={{ color: "gray" }}>Chưa xác định</i> : text,
+      dataIndex: "bloodGroup", // dữ liệu từ API trả về
+      render: (text, record) => {
+        if (!text) {
+          return (
+            <Select
+              placeholder="Chọn nhóm máu"
+              style={{ width: 120 }}
+              onChange={async (value) => {
+                console.log("🩸 Cập nhật bloodGroup cho userId:", record.userId); // 👈 thêm dòng này
+                try {
+                  await api.put(
+                    `/Doctor/update-blood-group/${record.userId}`,
+                    { BloodType: value } // key đúng như backend yêu cầu
+                  );
+                  toast.success("Cập nhật nhóm máu thành công");
+
+                  // cập nhật lại data local với key đúng là bloodGroup
+                  const newData = data.map((item) =>
+                    item.id === record.userId
+                      ? { ...item, bloodGroup: value }
+                      : item
+                  );
+                  setData(newData);
+                } catch (error) {
+                  console.error(error);
+                  message.error("Cập nhật nhóm máu thất bại");
+                }
+              }}
+            >
+              <Select.Option value="A+">A+</Select.Option>
+              <Select.Option value="A-">A-</Select.Option>
+              <Select.Option value="B+">B+</Select.Option>
+              <Select.Option value="B-">B-</Select.Option>
+              <Select.Option value="O+">O+</Select.Option>
+              <Select.Option value="O-">O-</Select.Option>
+              <Select.Option value="AB+">AB+</Select.Option>
+              <Select.Option value="AB-">AB-</Select.Option>
+            </Select>
+          );
+        } else {
+          return text;
+        }
+      },
     },
+
     {
       title: "Số lượng (ml)",
       dataIndex: "quantity",
@@ -207,18 +263,38 @@ const ApprovedDonorsDashboard = () => {
             <Option value="completed">Hoàn thành</Option>
             <Option value="absent">Vắng mặt</Option>
             <Option value="rejected">Từ chối</Option>
+            <Option value="pending">Chờ kết quả</Option>
+            <Option value="Not eligible">Đã hiến-Không đủ điều kiện</Option>
           </Select>
-          {record.status === "completed" && !record.isImported && (
-            <Button
-              type="primary"
-              onClick={() => {
-                setSelectedRecord(record);
-                setImportModalVisible(true);
-              }}
-              size="small"
-            >
-              Nhập kho
-            </Button>
+          {record.status === "pending" && (
+            <>
+              <Button
+                type="primary"
+                onClick={() => {
+                  if (!record.bloodGroup || !record.quantity) {
+                    message.error("Vui lòng nhập thông tin cơ bản trước");
+                    return;
+                  }
+                  setSelectedRecord(record);
+                  setScreeningFormVisible(true);
+                }}
+                size="small"
+              >
+                Phiếu xét nghiệm máu
+              </Button>
+              {!record.isImported && (
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setSelectedRecord(record);
+                    setImportModalVisible(true);
+                  }}
+                  size="small"
+                >
+                  Nhập kho
+                </Button>
+              )}
+            </>
           )}
         </div>
       ),
@@ -227,7 +303,9 @@ const ApprovedDonorsDashboard = () => {
 
   return (
     <>
-      <h2 className="text-xl font-semibold mb-4">Danh sách hiến máu đã duyệt</h2>
+      <h2 className="text-xl font-semibold mb-4">
+        Danh sách hiến máu đã duyệt
+      </h2>
 
       <Table
         rowKey="donationId"
@@ -246,33 +324,88 @@ const ApprovedDonorsDashboard = () => {
         okText="Lưu thông tin"
       >
         <Form form={basicForm} layout="vertical">
+          {/* Nhóm máu giữ nguyên */}
           <Form.Item
-            name="bloodGroup"
             label="Nhóm máu"
+            name="bloodGroup"
             rules={[{ required: true, message: "Vui lòng chọn nhóm máu" }]}
           >
-            <Select placeholder="Chọn nhóm máu">
-              <Option value="A+">A+</Option>
-              <Option value="A-">A-</Option>
-              <Option value="B+">B+</Option>
-              <Option value="B-">B-</Option>
-              <Option value="O+">O+</Option>
-              <Option value="O-">O-</Option>
-              <Option value="AB+">AB+</Option>
-              <Option value="AB-">AB-</Option>
+            <Select
+              placeholder="Chọn nhóm máu"
+              disabled={
+                selectedRecord?.bloodGroup &&
+                selectedRecord.bloodGroup !== "Chưa biết"
+              }
+              onChange={async (value) => {
+                try {
+                  // Gọi API ngay khi chọn
+                  await api.put(
+                    `/Doctor/update-blood-group/${selectedRecord.userId}`,
+                    {
+                      BloodType: value,
+                    }
+                  );
+                  toast.success("Cập nhật nhóm máu thành công");
+                } catch (error) {
+                  message.error("Cập nhật nhóm máu thất bại");
+                }
+              }}
+            >
+              <Select.Option value="A+">A+</Select.Option>
+              <Select.Option value="A-">A-</Select.Option>
+              <Select.Option value="B+">B+</Select.Option>
+              <Select.Option value="B-">B-</Select.Option>
+              <Select.Option value="O+">O+</Select.Option>
+              <Select.Option value="O-">O-</Select.Option>
+              <Select.Option value="AB+">AB+</Select.Option>
+              <Select.Option value="AB-">AB-</Select.Option>
             </Select>
           </Form.Item>
 
+          {/* Huyết áp */}
           <Form.Item
-            name="quantity"
-            label="Số lượng máu hiến (ml)"
-            rules={[{ required: true, message: "Vui lòng nhập số lượng máu" }]}
+            name="bloodPressure"
+            label="Huyết áp"
+            rules={[{ required: true, message: "Vui lòng nhập huyết áp" }]}
           >
-            <Input type="number" min={0} max={500} />
+            <Input placeholder="Ví dụ: 120/80 mmHg" />
           </Form.Item>
 
-          <Form.Item name="notes" label="Ghi chú">
-            <Input.TextArea rows={3} />
+          {/* Nhiệt độ */}
+          <Form.Item
+            name="temperatureC"
+            label="Nhiệt độ cơ thể (°C)"
+            rules={[{ required: true, message: "Vui lòng nhập nhiệt độ" }]}
+          >
+            <Input type="number" step="0.1" />
+          </Form.Item>
+
+          {/* Nhịp tim */}
+          <Form.Item
+            name="heartRateBpm"
+            label="Nhịp tim (bpm)"
+            rules={[{ required: true, message: "Vui lòng nhập nhịp tim" }]}
+          >
+            <Input type="number" min={0} />
+          </Form.Item>
+
+          {/* Tiền sử bệnh lý */}
+          <Form.Item name="medicalHistory" label="Tiền sử bệnh lý">
+            <Input.TextArea
+              rows={3}
+              placeholder="Nhập thông tin tiền sử bệnh lý nếu có"
+            />
+          </Form.Item>
+
+          {/* Trạng thái sức khỏe */}
+          <Form.Item
+            name="currentHealthStatus"
+            label="Trạng thái sức khỏe hiện tại"
+            rules={[
+              { required: true, message: "Vui lòng nhập trạng thái sức khỏe" },
+            ]}
+          >
+            <Input.TextArea rows={2} />
           </Form.Item>
         </Form>
       </Modal>
@@ -321,17 +454,6 @@ const ApprovedDonorsDashboard = () => {
                   <Option value={false}>Không</Option>
                 </Select>
               </Form.Item>
-
-              <Form.Item
-                name="bloodPressure"
-                label="Huyết áp"
-                rules={[{ required: true, message: "Vui lòng nhập huyết áp" }]}
-              >
-                <Input placeholder="VD: 120/80" />
-              </Form.Item>
-            </div>
-
-            <div>
               <Form.Item
                 name="hepatitisB"
                 label="Viêm gan B"
@@ -342,7 +464,6 @@ const ApprovedDonorsDashboard = () => {
                   <Option value={false}>Không</Option>
                 </Select>
               </Form.Item>
-
               <Form.Item
                 name="hepatitisC"
                 label="Viêm gan C"
@@ -352,6 +473,24 @@ const ApprovedDonorsDashboard = () => {
                   <Option value={true}>Có</Option>
                   <Option value={false}>Không</Option>
                 </Select>
+              </Form.Item>
+            </div>
+
+            <div>
+              <Form.Item
+                name="bloodPressure"
+                label="Huyết áp"
+                rules={[{ required: true, message: "Vui lòng nhập huyết áp" }]}
+              >
+                <Input placeholder="VD: 120/80" />
+              </Form.Item>
+
+              <Form.Item
+                name="hemoglobinLevel"
+                label="Nồng độ Hemoglobin (g/dL)"
+                rules={[{ required: true, message: "Không được bỏ trống" }]}
+              >
+                <Input type="number" min={0} />
               </Form.Item>
 
               <Form.Item
@@ -364,14 +503,6 @@ const ApprovedDonorsDashboard = () => {
                   <Option value={false}>Không</Option>
                 </Select>
               </Form.Item>
-
-              <Form.Item
-                name="hemoglobinLevel"
-                label="Nồng độ Hemoglobin (g/dL)"
-                rules={[{ required: true, message: "Không được bỏ trống" }]}
-              >
-                <Input type="number" min={0} />
-              </Form.Item>
             </div>
           </div>
 
@@ -382,8 +513,13 @@ const ApprovedDonorsDashboard = () => {
       </Modal>
 
       {/* Modal từ chối */}
+      {/* Modal từ chối/không đủ điều kiện */}
       <Modal
-        title="Lý do từ chối"
+        title={`${
+          selectedRecord?.status === "Not eligible"
+            ? "Lý do không đủ điều kiện"
+            : "Lý do từ chối"
+        }`}
         open={rejectModalVisible}
         onOk={handleReject}
         onCancel={() => {
@@ -394,8 +530,12 @@ const ApprovedDonorsDashboard = () => {
         <Form form={rejectForm}>
           <Form.Item
             name="reason"
-            label="Lý do từ chối"
-            rules={[{ required: true, message: "Vui lòng nhập lý do từ chối" }]}
+            label={
+              selectedRecord?.status === "Not eligible"
+                ? "Lý do không đủ điều kiện"
+                : "Lý do từ chối"
+            }
+            rules={[{ required: true, message: "Vui lòng nhập lý do" }]}
           >
             <Input.TextArea rows={4} />
           </Form.Item>
@@ -414,11 +554,22 @@ const ApprovedDonorsDashboard = () => {
         <div>
           <h3 className="font-semibold mb-2">Thông tin nhập kho</h3>
           <ul style={{ listStyle: "none", padding: 0 }}>
-            <li><strong>Người hiến:</strong> {selectedRecord?.fullname}</li>
-            <li><strong>Nhóm máu:</strong> {selectedRecord?.bloodGroup}</li>
-            <li><strong>Số lượng:</strong> {selectedRecord?.quantity} ml</li>
-            <li><strong>Ngày hiến:</strong> {selectedRecord?.donationDate && 
-              new Date(selectedRecord.donationDate).toLocaleDateString("vi-VN")}</li>
+            <li>
+              <strong>Người hiến:</strong> {selectedRecord?.fullname}
+            </li>
+            <li>
+              <strong>Nhóm máu:</strong> {selectedRecord?.bloodGroup}
+            </li>
+            <li>
+              <strong>Số lượng:</strong> {selectedRecord?.quantity} ml
+            </li>
+            <li>
+              <strong>Ngày hiến:</strong>{" "}
+              {selectedRecord?.donationDate &&
+                new Date(selectedRecord.donationDate).toLocaleDateString(
+                  "vi-VN"
+                )}
+            </li>
           </ul>
         </div>
       </Modal>
