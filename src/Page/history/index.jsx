@@ -190,7 +190,7 @@ const BloodHistoryTable = ({
                         </button>
                         <button
                           className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                          onClick={() => onViewDetail(r)}
+                          onClick={() => onViewDetail(r.raw.id)}
                         >
                           Chi tiết
                         </button>
@@ -353,27 +353,36 @@ const BloodHistoryPage = () => {
     }
   }, []);
 
-  const handleViewDetail = useCallback((record) => {
-    setDetailModal({ open: true, record });
+  const handleViewDetail = useCallback(async (donationId) => {
+    try {
+      const response = await api.get(`User/getDonate/${donationId}`);
+      setDetailModal({
+        open: true,
+        data: response.data,
+      });
+    } catch (error) {
+      console.error("Error fetching donation details:", error);
+      toast.error("Không thể tải thông tin chi tiết!");
+    }
   }, []);
 
   const handleDelete = useCallback(async (record) => {
-  if (record.status !== "waiting") {
-    toast.error("Chỉ có thể hủy các đăng ký đang chờ duyệt.");
-    return;
-  }
+    if (record.status !== "waiting") {
+      toast.error("Chỉ có thể hủy các đăng ký đang chờ duyệt.");
+      return;
+    }
 
-  if (!window.confirm("Bạn có chắc chắn muốn hủy đăng ký này?")) return;
+    if (!window.confirm("Bạn có chắc chắn muốn hủy đăng ký này?")) return;
 
-  try {
-    await api.delete(`User/deleteDonation/${record.raw.id}`);
-    toast.success("Hủy đăng ký thành công!");
-    setRecords((prev) => prev.filter((r) => r.id !== record.id));
-  } catch (error) {
-    console.error("Error deleting donation:", error);
-    toast.error("Hủy đăng ký thất bại. Vui lòng thử lại sau.");
-  }
-}, []);
+    try {
+      await api.delete(`User/deleteDonation/${record.raw.id}`);
+      toast.success("Hủy đăng ký thành công!");
+      setRecords((prev) => prev.filter((r) => r.id !== record.id));
+    } catch (error) {
+      console.error("Error deleting donation:", error);
+      toast.error("Hủy đăng ký thất bại. Vui lòng thử lại sau.");
+    }
+  }, []);
 
   // Filters
   const filterFn = useCallback(
@@ -400,6 +409,29 @@ const BloodHistoryPage = () => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredRecords.slice(start, start + itemsPerPage);
   }, [filteredRecords, currentPage, itemsPerPage]);
+  const TestResult = ({ value, label }) => {
+    if (value === null || value === undefined) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+          Chưa có kết quả
+        </span>
+      );
+    }
+
+    const isPositive =
+      value === true || value === "Positive" || value === "positive";
+    const colorClass = isPositive
+      ? "bg-red-100 text-red-800"
+      : "bg-green-100 text-green-800";
+
+    return (
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass}`}
+      >
+        {isPositive ? "Dương tính" : "Âm tính"}
+      </span>
+    );
+  };
 
   // Render
   return (
@@ -425,13 +457,13 @@ const BloodHistoryPage = () => {
       )}
 
       {/* Modal Chi tiết */}
-      {detailModal.open && (
+      {detailModal.open && detailModal.data && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-2xl w-full shadow-lg">
+          <div className="bg-white p-6 rounded-lg max-w-2xl w-full shadow-lg max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Thông tin chi tiết</h3>
               <button
-                onClick={() => setDetailModal({ open: false, record: null })}
+                onClick={() => setDetailModal({ open: false, data: null })}
                 className="text-gray-400 hover:text-gray-600"
               >
                 <CloseIcon className="w-5 h-5" />
@@ -440,31 +472,141 @@ const BloodHistoryPage = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="mb-2">
-                  <span className="font-semibold">Ngày đăng ký:</span>{" "}
-                  {new Date(detailModal.record.date).toLocaleDateString(
+                  <span className="font-semibold">Ngày hiến:</span>{" "}
+                  {new Date(detailModal.data.donationDate).toLocaleDateString(
                     "vi-VN"
                   )}
                 </p>
                 <p className="mb-2">
+                  <span className="font-semibold">Thời gian:</span>{" "}
+                  {detailModal.data.donationTime}
+                </p>
+                <p className="mb-2">
                   <span className="font-semibold">Số lượng:</span>{" "}
-                  {detailModal.record.amount} {detailModal.record.unit}
+                  {detailModal.data.quantity} ml
                 </p>
                 <p className="mb-2">
                   <span className="font-semibold">Nhóm máu:</span>{" "}
-                  {detailModal.record.bloodType || "N/A"}
+                  {detailModal.data.bloodGroup}
+                </p>
+                <p className="mb-2">
+                  <span className="font-semibold">Chiều cao:</span>{" "}
+                  {detailModal.data.height} cm
+                </p>
+                <p className="mb-2">
+                  <span className="font-semibold">Cân nặng:</span>{" "}
+                  {detailModal.data.weight} kg
                 </p>
               </div>
               <div>
                 <p className="mb-2">
-                  <span className="font-semibold">Trạng thái:</span>{" "}
-                  <StatusBadge status={detailModal.record.status} />
+                  <span className="font-semibold">Huyết áp:</span>{" "}
+                  {detailModal.data.bloodPressure || "Chưa đo"}
                 </p>
                 <p className="mb-2">
-                  <span className="font-semibold">Ghi chú:</span>{" "}
-                  {detailModal.record.notes || "Không có ghi chú"}
+                  <span className="font-semibold">Nhiệt độ:</span>{" "}
+                  {detailModal.data.temperatureC
+                    ? `${detailModal.data.temperatureC}°C`
+                    : "Chưa đo"}
+                </p>
+                <p className="mb-2">
+                  <span className="font-semibold">Nhịp tim:</span>{" "}
+                  {detailModal.data.heartRateBpm
+                    ? `${detailModal.data.heartRateBpm} BPM`
+                    : "Chưa đo"}
+                </p>
+                <p className="mb-2">
+                  <span className="font-semibold">Tình trạng sức khỏe:</span>{" "}
+                  {detailModal.data.currentHealthStatus || "Không có ghi chú"}
+                </p>
+                <p className="mb-2">
+                  <span className="font-semibold">Tiền sử bệnh:</span>{" "}
+                  {detailModal.data.medicalHistory || "Không có"}
                 </p>
               </div>
             </div>
+{/* Kết quả xét nghiệm */}
+<div className="mt-4 border-t pt-4">
+  <h4 className="font-semibold mb-3">Kết quả xét nghiệm:</h4>
+  <div className="grid grid-cols-2 gap-4">
+    <div className="p-3 bg-gray-50 rounded-lg">
+      <p className="mb-2">
+        <span className="font-semibold">HIV:</span>{" "}
+        <TestResult value={detailModal.data.hivTestResult} />
+      </p>
+      <p className="mb-2">
+        <span className="font-semibold">Viêm gan B:</span>{" "}
+        <TestResult value={detailModal.data.hepatitisB} />
+      </p>
+      <p className="mb-2">
+        <span className="font-semibold">Viêm gan C:</span>{" "}
+        <TestResult value={detailModal.data.hepatitisC} />
+      </p>
+      <p className="mb-2">
+        <span className="font-semibold">Giang mai:</span>{" "}
+        <TestResult value={detailModal.data.syphilis} />
+      </p>
+    </div>
+    <div className="p-3 bg-gray-50 rounded-lg">
+      <p className="mb-2">
+        <span className="font-semibold">Hemoglobin:</span>{" "}
+        {detailModal.data.hemoglobinLevel ? (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            {detailModal.data.hemoglobinLevel} g/dL
+          </span>
+        ) : (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            Chưa có kết quả
+          </span>
+        )}
+      </p>
+      <p className="mb-2">
+        <span className="font-semibold">Huyết áp:</span>{" "}
+        {detailModal.data.bloodPressure ? (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            {detailModal.data.bloodPressure} mmHg
+          </span>
+        ) : (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            Chưa đo
+          </span>
+        )}
+      </p>
+      <p className="mb-2">
+        <span className="font-semibold">Nhiệt độ:</span>{" "}
+        {detailModal.data.temperatureC ? (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            {detailModal.data.temperatureC}°C
+          </span>
+        ) : (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            Chưa đo
+          </span>
+        )}
+      </p>
+      <p className="mb-2">
+        <span className="font-semibold">Nhịp tim:</span>{" "}
+        {detailModal.data.heartRateBpm ? (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            {detailModal.data.heartRateBpm} BPM
+          </span>
+        ) : (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            Chưa đo
+          </span>
+        )}
+      </p>
+    </div>
+  </div>
+</div>
+
+            {/* Ghi chú */}
+            {detailModal.data.notes && (
+              <div className="mt-4 border-t pt-4">
+                <h4 className="font-semibold mb-2">Ghi chú:</h4>
+                <p className="text-gray-700">{detailModal.data.notes}</p>
+              </div>
+            )}
           </div>
         </div>
       )}
