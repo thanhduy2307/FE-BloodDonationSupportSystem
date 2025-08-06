@@ -80,8 +80,7 @@ const ApprovedDonorsDashboard = () => {
   };
 
   const handleStatusChange = (value, record) => {
-    if (value === "rejected" || value === "Not eligible") {
-      // Thêm điều kiện Not eligible
+    if (value === "rejected") {
       setSelectedRecord(record);
       setRejectModalVisible(true);
     } else {
@@ -96,7 +95,7 @@ const ApprovedDonorsDashboard = () => {
       // Gọi API lưu kết quả sàng lọc
       await api.post(`Doctor/post-analysis/${selectedRecord.id}`, values);
 
-      toast.success("Đã lưu kết quả xét nghiệm ");
+      toast.success("Đã lưu kết quả xét nghiệm");
       setScreeningFormVisible(false);
 
       // Cập nhật trạng thái thành completed
@@ -108,13 +107,11 @@ const ApprovedDonorsDashboard = () => {
   const handleReject = async () => {
     try {
       const values = await rejectForm.validateFields();
-      const status =
-        selectedRecord?.status === "Not eligible" ? "Not eligible" : "rejected";
-      updateStatus(selectedRecord.donationId, status, values.reason);
+      updateStatus(selectedRecord.donationId, "rejected", values.reason);
       setRejectModalVisible(false);
       rejectForm.resetFields();
     } catch (error) {
-      message.error("Vui lòng nhập lý do");
+      message.error("Vui lòng nhập lý do từ chối");
     }
   };
 
@@ -513,13 +510,9 @@ const ApprovedDonorsDashboard = () => {
       </Modal>
 
       {/* Modal từ chối */}
-      {/* Modal từ chối/không đủ điều kiện */}
+      {/* Modal từ chối */}
       <Modal
-        title={`${
-          selectedRecord?.status === "Not eligible"
-            ? "Lý do không đủ điều kiện"
-            : "Lý do từ chối"
-        }`}
+        title="Lý do từ chối"
         open={rejectModalVisible}
         onOk={handleReject}
         onCancel={() => {
@@ -530,12 +523,8 @@ const ApprovedDonorsDashboard = () => {
         <Form form={rejectForm}>
           <Form.Item
             name="reason"
-            label={
-              selectedRecord?.status === "Not eligible"
-                ? "Lý do không đủ điều kiện"
-                : "Lý do từ chối"
-            }
-            rules={[{ required: true, message: "Vui lòng nhập lý do" }]}
+            label="Lý do từ chối"
+            rules={[{ required: true, message: "Vui lòng nhập lý do từ chối" }]}
           >
             <Input.TextArea rows={4} />
           </Form.Item>
